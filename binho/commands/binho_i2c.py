@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+
+import errno
+import sys
+import ast
+
+import binho
+from binho import binhoHostAdapter
+from binho.utils import log_silent, log_verbose, binho_error_hander
+from binho.interfaces.i2cDevice import I2CDevice
+from binho.interfaces.i2cBus import I2CBus
+from binho.errors import DeviceNotFoundError
+
+
+def main():
+    from binho.utils import binhoArgumentParser
+
+    # Set up a simple argument parser.
+    parser = binhoArgumentParser(
+        description="Utility for I2C communication via Binho host adapter"
+    )
+    parser.add_argument(
+        "-u",
+        "--pullup",
+        action="store_true",
+        help="Enable 2.2k pullup resistors (3.3V)",
+    )
+    parser.add_argument("-f", "--frequency", default=None, help="Set clock frequency")
+    parser.add_argument(
+        "-a",
+        "--address",
+        nargs=1,
+        type=ast.literal_eval,
+        help="7-bit address for communication over the I2C Bus",
+    )
+    parser.add_argument(
+        "-r",
+        "--read",
+        default=0,
+        help="Number of bytes expecting to receive from the I2C Bus",
+    )
+    parser.add_argument(
+        "-w",
+        "--write",
+        nargs="*",
+        type=ast.literal_eval,
+        default=[],
+        help="Bytes to send over the I2C Bus",
+    )
+    parser.add_argument(
+        "-z", "--scan", action="store_true", help="Scan all possible i2c addresses"
+    )
+    args = parser.parse_args()
+
+    log_function = log_verbose if args.verbose else log_silent
+
+    try:
+        log_function("Trying to find a Binho host adapter...")
+        device = parser.find_specified_device()
+
+        if device.inBootloaderMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DFU mode".format(
+                    device.productName, device.commPort
+                )
+            )
+            sys.exit(errno.ENODEV)
+        else:
+            log_function(
+                "{} found on {}. (Device ID: {})".format(
+                    device.productName, device.commPort, device.deviceID
+                )
+            )
+
+    except DeviceNotFoundError:
+        if args.serial:
+            print(
+                "No Binho host adapter found matching Device ID '{}'.".format(
+                    args.serial
+                ),
+                file=sys.stderr,
+            )
+        else:
+            print("No Binho host adapter found!", file=sys.stderr)
+        sys.exit(errno.ENODEV)
+
+    # if we fail before here, no connection to the device was opened yet.
+    # however, if we fail after this point, we need to make sure we don't
+    # leave the serial port open.
+
+    try:
+
+        device.operationMode = "I2C"
+
+        if args.frequency:
+            log_function("Setting I2C clock frequency to {}Hz".format(args.frequency))
+            device.i2c.frequency = int(args.frequency)
+
+        if args.pullup:
+            log_function(
+                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on external resistors."
+            )
+            device.i2c.useInternalPullUps = True
+        else:
+            log_function(
+                "Internal 2.2kOhm PullUp resistors are disengaged. Add the '-u' flag to engage the internal resistors."
+            )
+            device.i2c.useInternalPullUps = False
+
+        if args.scan:
+            if args.frequency:
+                scan(device, args.pullup, [int(args.frequency)], log_function)
+            else:
+                scan(
+                    device,
+                    args.pullup,
+                    [100000, 400000, 1000000, 3200000],
+                    log_function,
+                )
+
+        if args.write and args.read:
+            transmit(device, args.address[0], args.write, int(args.read), log_function)
+        elif args.write:
+            write(device, args.address[0], args.write, log_function)
+        elif args.read:
+            read(device, args.address[0], int(args.read), log_function)
+        else:
+            if not args.scan:
+                log_function(
+                    "No transaction performed. Please specify data to write with '-w' or a number of bytes to read using '-r'."
+                )
+                log_function("You can type 'binho i2c --help' for more information.")
+
+        # close the connection to the host adapter
+        device.close()
+
+    except Exception:
+        # Catch any exception that was raised and display it
+        binho_error_hander()
+
+        # close the connection to the host adapter
+        device.close()
+
+
+def transmit(device, address, data, receive_length, log_function):
+    """
+    Write data to connected I2C device and then read from it in a single transaction
+    """
+
+    i2c_device = I2CDevice(device.i2c, address)
+
+    log_function("Writing to address %s" % hex(address))
+    received_data, i2c_status = i2c_device.transmit(data, receive_length)
+
+    sentBytes = "W:"
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
+
+    if received_data:
+
+        log_function(
+            "Read {} bytes received from address {}:".format(
+                len(received_data), hex(address)
+            )
+        )
+
+        rcvdBytes = "R"
+        for byte in received_data:
+            rcvdBytes += "\t " + "0x{:02x}".format(byte)
+        log_function(rcvdBytes)
+
+    log_function("I2C transmit success: %s" % i2c_status)
+
+
+def read(device, address, receive_length, log_function):
+    """
+    Read data from connected I2C device
+    """
+
+    i2c_device = I2CDevice(device.i2c, address)
+
+    received_data, i2c_status = i2c_device.read(receive_length)
+
+    if received_data:
+        log_function(
+            "Reading {} bytes from address {}:".format(len(received_data), hex(address))
+        )
+
+        rcvdBytes = "R:"
+        for byte in received_data:
+            rcvdBytes += "\t " + "0x{:02x}".format(byte)
+        log_function(rcvdBytes)
+
+    log_function("I2C read success: %s" % i2c_status)
+
+
+def write(device, address, data, log_function):
+    """
+    Write data to connected I2C device
+    """
+    i2c_device = I2CDevice(device.i2c, address)
+    log_function("Writing {} bytes to address {}:".format(len(data), hex(address)))
+    i2c_status = i2c_device.write(data)
+
+    sentBytes = "W:"
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
+
+    log_function("I2C write success: %s" % i2c_status)
+
+
+def scan(device, pullup, frequencies, log_function):
+    """
+    Scan for connected I2C devices
+        Standard mode: 100kHz
+        Fast mode: 400kHz
+        Fast mode plus: 1MHz
+        high speed mode: 3.2MHz
+    """
+    addr_info = {}
+
+    for clkFreq in frequencies:
+        i2c_bus = I2CBus(device, clock_frequency=clkFreq, enable_pullups=pullup)
+        rw_responses = i2c_bus.scan()
+
+        for address in rw_responses:
+
+            if address in addr_info:
+                addr_info[address].append(clkFreq)
+            else:
+                addr_info[address] = [clkFreq]
+
+    i2c_bus = I2CBus(device, clock_frequency=400000, enable_pullups=pullup)
+
+    # list output
+    print("I2C Bus Scan Report: (Address, Clock Frequency)")
+
+    if len(addr_info) == 0:
+        print("No devices found!")
+        return
+    else:
+        print("Discovered %s I2C devices" % len(addr_info))
+        print()
+
+    for address in addr_info:
+        for clkHz in addr_info[address]:
+            print("%s @ %dkHz" % (hex(address), clkHz / 1000))
+
+        print()
+
+    print()
+
+
+if __name__ == "__main__":
+    main()
