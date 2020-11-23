@@ -65,6 +65,7 @@ setup(
         "tabulate",
         "intelhex",
         "prompt_toolkit<2.1.0",
+        "pyserial"
     ],
     description="Python package for Binho USB host adapter products",
     long_description=read("README.md"),
@@ -83,6 +84,11 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
     ],
-    extras_require={},
+    extras_require={
+        "dev": [
+            "sphinx",
+            "sphinx_rtd_theme",
+        ]
+    },
     **setup_options,
 )
