@@ -1,6 +1,5 @@
 # FIXME: remove dependencies
 # import usb
-import future
 import time
 
 import threading

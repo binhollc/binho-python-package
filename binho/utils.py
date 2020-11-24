@@ -1,8 +1,4 @@
-"""
-    Utilities that help in writing simple scripts for Binho host adapters.
-"""
-
-from __future__ import print_function
+"""Utilities that help in writing simple scripts for Binho host adapters."""
 
 import sys
 import ast

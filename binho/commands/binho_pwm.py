@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-
-from __future__ import print_function
-
 import sys
 from binho.utils import log_silent, log_verbose, binho_error_hander
 from binho.errors import DeviceNotFoundError

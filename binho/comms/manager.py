@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from future import utils as future_utils
-
 # import usb
 # import time
 # import struct

@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-#
-
-from __future__ import print_function
-
 import re
 import sys
 import errno
@@ -176,7 +171,7 @@ def main():
 
     # If we have a file to execute, execute it.
     if args.file:
-        shell.safe_execfile_ipy(args.file, shell_futures=True, raise_exceptions=True)
+        shell.safe_execfile_ipy(args.file, raise_exceptions=True)
 
     # Run the shell itself.
     shell.connect_function = connect_function

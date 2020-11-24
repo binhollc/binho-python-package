@@ -1,5 +1,4 @@
 # import usb
-import future
 import time
 
 import threading

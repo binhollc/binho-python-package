@@ -60,12 +60,11 @@ setup(
     author_email="support@binho.io",
     install_requires=[
         per_version_requirements,
-        "future",
         "tqdm",
         "tabulate",
         "intelhex",
         "prompt_toolkit<2.1.0",
-        "pyserial"
+        "pyserial",
     ],
     description="Python package for Binho USB host adapter products",
     long_description=read("README.md"),
