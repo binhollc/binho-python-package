@@ -160,14 +160,12 @@ class binhoComms(object):
             except BaseException:
                 pass
 
-    # Private functions
-
-    def _sendCommand(self, command):
+    def sendCommand(self, command):
         if self._debug is not None:
             print(command)
         self._txdQueue.put(command, timeout=SERIAL_TIMEOUT)
 
-    def _readResponse(self):
+    def readResponse(self):
 
         result = "[ERROR]"
 
@@ -300,22 +298,22 @@ class binhoComms(object):
 
     def clearBuffer(self, bufferIndex):
 
-        self._sendCommand("BUF" + str(bufferIndex) + " CLEAR")
-        result = self._readResponse()
+        self.sendCommand("BUF" + str(bufferIndex) + " CLEAR")
+        result = self.readResponse()
 
         return result
 
     def addByteToBuffer(self, bufferIndex, value):
 
-        self._sendCommand("BUF" + str(bufferIndex) + " ADD " + str(value))
-        result = self._readResponse()
+        self.sendCommand("BUF" + str(bufferIndex) + " ADD " + str(value))
+        result = self.readResponse()
 
         return result
 
     def readBuffer(self, bufferIndex, numBytes):
 
-        self._sendCommand("BUF" + str(bufferIndex) + " READ " + str(numBytes))
-        result = self._readResponse()
+        self.sendCommand("BUF" + str(bufferIndex) + " READ " + str(numBytes))
+        result = self.readResponse()
 
         return result
 
@@ -326,10 +324,10 @@ class binhoComms(object):
         for x in data:
             bufferData += " " + str(x)
 
-        self._sendCommand(
+        self.sendCommand(
             "BUF" + str(bufferIndex) + " WRITE " + str(startIndex) + bufferData
         )
-        result = self._readResponse()
+        result = self.readResponse()
 
         return result
 
@@ -337,78 +335,78 @@ class binhoComms(object):
 
     def setBaudRateUART(self, uartIndex, baud):
 
-        self._sendCommand("UART" + str(uartIndex) + " BAUD " + str(baud))
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " BAUD " + str(baud))
+        result = self.readResponse()
 
         return result
 
     def getBaudRateUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " BAUD ?")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " BAUD ?")
+        result = self.readResponse()
 
         return result
 
     def setDataBitsUART(self, uartIndex, databits):
 
-        self._sendCommand("UART" + str(uartIndex) + " DATABITS " + str(databits))
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " DATABITS " + str(databits))
+        result = self.readResponse()
 
         return result
 
     def getDataBitsUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " DATABITS ?")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " DATABITS ?")
+        result = self.readResponse()
 
         return result
 
     def setParityUART(self, uartIndex, parity):
 
-        self._sendCommand("UART" + str(uartIndex) + " PARITY " + str(parity))
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " PARITY " + str(parity))
+        result = self.readResponse()
 
         return result
 
     def getParityUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " PARITY ?")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " PARITY ?")
+        result = self.readResponse()
 
         return result
 
     def setStopBitsUART(self, uartIndex, stopbits):
 
-        self._sendCommand("UART" + str(uartIndex) + " STOPBITS " + str(stopbits))
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " STOPBITS " + str(stopbits))
+        result = self.readResponse()
 
         return result
 
     def getStopBitsUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " STOPBITS ?")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " STOPBITS ?")
+        result = self.readResponse()
 
         return result
 
     def setEscapeSequenceUART(self, uartIndex, escape):
 
-        self._sendCommand("UART" + str(uartIndex) + " ESC " + escape)
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " ESC " + escape)
+        result = self.readResponse()
 
         return result
 
     def getEscapeSequenceUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " ESC ?")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " ESC ?")
+        result = self.readResponse()
 
         return result
 
     def beginBridgeUART(self, uartIndex):
 
-        self._sendCommand("UART" + str(uartIndex) + " BEGIN")
-        result = self._readResponse()
+        self.sendCommand("UART" + str(uartIndex) + " BEGIN")
+        result = self.readResponse()
 
         self.manager.startUartBridge()
 
@@ -418,7 +416,7 @@ class binhoComms(object):
 
         self.manager.stopUartBridge()
         self._txdQueue.put(sequence, timeout=SERIAL_TIMEOUT)
-        result = self._readResponse()
+        result = self.readResponse()
 
         return result
 
@@ -436,103 +434,103 @@ class binhoComms(object):
     def beginSWI(self, swiIndex, pin, pullup):
 
         if not pullup:
-            self._sendCommand("SWI" + str(swiIndex) + " BEGIN " + str(pin))
+            self.sendCommand("SWI" + str(swiIndex) + " BEGIN " + str(pin))
         else:
-            self._sendCommand("SWI" + str(swiIndex) + " BEGIN " + str(pin) + " PULL")
+            self.sendCommand("SWI" + str(swiIndex) + " BEGIN " + str(pin) + " PULL")
 
-        result = self._readResponse()
+        result = self.readResponse()
 
         return result
 
     def sendTokenSWI(self, swiIndex, token):
 
-        self._sendCommand("SWI" + str(swiIndex) + " TOKEN " + str(token))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " TOKEN " + str(token))
+        result = self.readResponse()
 
         return result
 
     def sendFlagSWI(self, swiIndex, flag):
 
-        self._sendCommand("SWI" + str(swiIndex) + " FLAG " + str(flag))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " FLAG " + str(flag))
+        result = self.readResponse()
 
         return result
 
     def sendCommandFlagSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " FLAG COMMAND")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " FLAG COMMAND")
+        result = self.readResponse()
 
         return result
 
     def sendTransmitFlagSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " FLAG TRANSMIT")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " FLAG TRANSMIT")
+        result = self.readResponse()
 
         return result
 
     def sendIdleFlagSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " FLAG IDLE")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " FLAG IDLE")
+        result = self.readResponse()
 
         return result
 
     def sendSleepFlagSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " FLAG SLEEP")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " FLAG SLEEP")
+        result = self.readResponse()
 
         return result
 
     def transmitByteSWI(self, swiIndex, data):
 
-        self._sendCommand("SWI" + str(swiIndex) + " TX " + str(data))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " TX " + str(data))
+        result = self.readResponse()
 
         return result
 
     def receiveBytesSWI(self, swiIndex, count):
 
-        self._sendCommand("SWI" + str(swiIndex) + " RX " + str(count))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " RX " + str(count))
+        result = self.readResponse()
 
         return result
 
     def setPacketOpCodeSWI(self, swiIndex, opCode):
 
-        self._sendCommand("SWI" + str(swiIndex) + " PACKET OPCODE " + str(opCode))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET OPCODE " + str(opCode))
+        result = self.readResponse()
 
         return result
 
     def setPacketParam1SWI(self, swiIndex, value):
 
-        self._sendCommand("SWI" + str(swiIndex) + " PACKET PARAM1 " + str(value))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET PARAM1 " + str(value))
+        result = self.readResponse()
 
         return result
 
     def setPacketParam2SWI(self, swiIndex, value):
 
-        self._sendCommand("SWI" + str(swiIndex) + " PACKET PARAM2 " + str(value))
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET PARAM2 " + str(value))
+        result = self.readResponse()
 
         return result
 
     def setPacketDataSWI(self, swiIndex, index, value):
 
-        self._sendCommand(
+        self.sendCommand(
             "SWI" + str(swiIndex) + " PACKET DATA " + str(index) + " " + str(value)
         )
-        result = self._readResponse()
+        result = self.readResponse()
 
         return result
 
     def setPacketDataFromBufferSWI(self, swiIndex, byteCount, bufferName):
 
-        self._sendCommand(
+        self.sendCommand(
             "SWI"
             + str(swiIndex)
             + " PACKET DATA "
@@ -540,21 +538,21 @@ class binhoComms(object):
             + " "
             + str(bufferName)
         )
-        result = self._readResponse()
+        result = self.readResponse()
 
         return result
 
     def sendPacketSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " PACKET SEND")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET SEND")
+        result = self.readResponse()
 
         return result
 
     def clearPacketSWI(self, swiIndex):
 
-        self._sendCommand("SWI" + str(swiIndex) + " PACKET CLEAR")
-        result = self._readResponse()
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET CLEAR")
+        result = self.readResponse()
 
         return result
 
