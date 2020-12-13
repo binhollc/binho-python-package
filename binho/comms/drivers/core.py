@@ -7,8 +7,8 @@ class binhoCoreDriver:
     @property
     def deviceID(self):
 
-        self.usb._sendCommand("+ID")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+ID")
+        result = self.usb.readResponse()
 
         if not result.startswith("-ID"):
             raise RuntimeError(
@@ -20,8 +20,8 @@ class binhoCoreDriver:
     @property
     def firmwareVersion(self):
 
-        self.usb._sendCommand("+FWVER")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+FWVER")
+        result = self.usb.readResponse()
 
         if not result.startswith("-FWVER"):
             raise RuntimeError(
@@ -33,8 +33,8 @@ class binhoCoreDriver:
     @property
     def hardwareVersion(self):
 
-        self.usb._sendCommand("+HWVER")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+HWVER")
+        result = self.usb.readResponse()
 
         if not result.startswith("-HWVER"):
             raise RuntimeError(
@@ -46,8 +46,8 @@ class binhoCoreDriver:
     @property
     def commandVersion(self):
 
-        self.usb._sendCommand("+CMDVER")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+CMDVER")
+        result = self.usb.readResponse()
 
         if not result.startswith("-CMDVER"):
             raise RuntimeError(
@@ -58,8 +58,8 @@ class binhoCoreDriver:
 
     def resetToBtldr(self):
 
-        self.usb._sendCommand("+BTLDR")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+BTLDR")
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -70,8 +70,8 @@ class binhoCoreDriver:
 
     def reset(self):
 
-        self.usb._sendCommand("+RESET")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+RESET")
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -81,8 +81,8 @@ class binhoCoreDriver:
             return True
 
     def ping(self):
-        self.usb._sendCommand("+PING")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+PING")
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -93,8 +93,8 @@ class binhoCoreDriver:
 
     @property
     def operationMode(self):
-        self.usb._sendCommand("+MODE " + str(self.coreIndex) + " ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+MODE " + str(self.coreIndex) + " ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-MODE"):
             raise RuntimeError(
@@ -105,8 +105,8 @@ class binhoCoreDriver:
 
     @operationMode.setter
     def operationMode(self, mode):
-        self.usb._sendCommand("+MODE " + str(self.coreIndex) + " " + mode)
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+MODE " + str(self.coreIndex) + " " + mode)
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -117,8 +117,8 @@ class binhoCoreDriver:
 
     @property
     def numericalBase(self):
-        self.usb._sendCommand("+BASE ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+BASE ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-BASE"):
             raise RuntimeError(
@@ -129,8 +129,8 @@ class binhoCoreDriver:
 
     @numericalBase.setter
     def numericalBase(self, base):
-        self.usb._sendCommand("+BASE " + str(base))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+BASE " + str(base))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -140,8 +140,8 @@ class binhoCoreDriver:
         return True
 
     def setLEDRGB(self, red, green, blue):
-        self.usb._sendCommand("+LED " + str(red) + " " + str(green) + " " + str(blue))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+LED " + str(red) + " " + str(green) + " " + str(blue))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -151,8 +151,8 @@ class binhoCoreDriver:
         return True
 
     def setLEDColor(self, color):
-        self.usb._sendCommand("+LED " + color)
-        result = self.usb._readResponse()
+        self.usb.sendCommand("+LED " + color)
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(

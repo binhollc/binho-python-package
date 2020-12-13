@@ -19,11 +19,11 @@ class binho1WireDriver:
         """
 
         if pullup:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} BEGIN {pin} PULL")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} BEGIN {pin} PULL")
         else:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} BEGIN {pin}")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} BEGIN {pin}")
 
-        if not self.usb._checkDeviceSuccess(self.usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(self.usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Begin received NAK")
 
     def reset(self, oneWireIndex=0):
@@ -36,9 +36,9 @@ class binho1WireDriver:
         :rtype: bool
         """
 
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} RESET")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} RESET")
 
-        return self.usb._checkDeviceSuccess(usb._readResponse())
+        return self.usb._checkDeviceSuccess(usb.readResponse())
 
     def writeByte(self, data, oneWireIndex=0, powered=True):
         """
@@ -58,11 +58,11 @@ class binho1WireDriver:
             raise RuntimeError(f"Data byte must be in range 0-255, not {data}")
 
         if powered:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} WRITE {data} POWER")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} WRITE {data} POWER")
         else:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} WRITE {data}")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} WRITE {data}")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Write received NAK")
 
     def readByte(self, oneWireIndex=0):
@@ -74,8 +74,8 @@ class binho1WireDriver:
         :return: Received byte
         :rtype: int
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} READ")
-        result = self.usb._readResponse()
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} READ")
+        result = self.usb.readResponse()
 
         if result == "-NG":
             raise RuntimeError("Error executing 1-Wire Read received NAK")
@@ -110,7 +110,7 @@ class binho1WireDriver:
         if bytesToRead > 1024:
             raise ValueError("WHR command can only read 1024 bytea at a time!")
 
-        self.usb._sendCommand(
+        self.usb.sendCommand(
             f"1WIRE{oneWireIndex} "
             f"WHR {oneWireCmd} "
             f"{bytesToRead} "
@@ -118,7 +118,7 @@ class binho1WireDriver:
             f'{"".join(f"{b:02x}" for b in bytesToWrite)}'
         )
 
-        result = self.usb._readResponse()
+        result = self.usb.readResponse()
 
         if bytesToRead == 0:
             if not result.startswith("-OK"):
@@ -144,9 +144,9 @@ class binho1WireDriver:
         :return: None
         :rtype: None
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} SELECT")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} SELECT")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Select received NAK")
 
     def skip(self, oneWireIndex=0):
@@ -158,9 +158,9 @@ class binho1WireDriver:
         :return: None
         :rtype: None
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} SKIP")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} SKIP")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Skip received NAK")
 
     def depower(self, oneWireIndex=0):
@@ -172,9 +172,9 @@ class binho1WireDriver:
         :return: None
         :rtype: None
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} DEPOWER")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} DEPOWER")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire depower received NAK")
 
     def getAddress(self, oneWireIndex=0):
@@ -186,8 +186,8 @@ class binho1WireDriver:
         :return: Bytearray of the address
         :rtype: bytearray
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} ADDR ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} ADDR ?")
+        result = self.usb.readResponse()
 
         if result == "-NG":
             raise RuntimeError("Error executing 1-Wire Read received NAK")
@@ -208,11 +208,11 @@ class binho1WireDriver:
         :rtype: None
         """
         if normalSearch:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} SEARCH")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH")
         else:
-            self.usb._sendCommand(f"1WIRE{oneWireIndex} SEARCH COND")
+            self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH COND")
 
-        if not self.usb._checkDeviceSuccess(self.usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(self.usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire search received NAK")
 
     def resetSearch(self, oneWireIndex=0):
@@ -224,9 +224,9 @@ class binho1WireDriver:
         :return: None
         :rtype: None
         """
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} SEARCH RESET")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH RESET")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire search reset received NAK")
 
     def targetSearch(self, target, oneWireIndex=0):
@@ -243,7 +243,7 @@ class binho1WireDriver:
         if not 0 <= target <= 255:
             raise RuntimeError(f"Target byte must be in range 0-255, not {target}")
 
-        self.usb._sendCommand(f"1WIRE{oneWireIndex} SEARCH {target}")
+        self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH {target}")
 
-        if not self.usb._checkDeviceSuccess(usb._readResponse()):
+        if not self.usb._checkDeviceSuccess(usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire target search received NAK")
