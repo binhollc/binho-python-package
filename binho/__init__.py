@@ -5,9 +5,6 @@ from .binhoHostAdapter import binhoHostAdapterSingleton as binhoSingleton
 from .binhoHostAdapter import binhoDevice
 
 
-binhoHostAdapter = binhoHostAdapter  # pyflakes
-
-
 class _binhoHostAdapterSingletonWrapper(object):
 
     """
@@ -36,24 +33,3 @@ class _binhoHostAdapterSingletonWrapper(object):
 
 
 binhoHostAdapterSingleton = _binhoHostAdapterSingletonWrapper()
-
-
-def binho_assets_directory():
-    """ Provide a quick function that helps us get at our assets directory. """
-    import os
-
-    # Find the path to the module, and then find its assets folder.
-    module_path = os.path.dirname(__file__)
-    return os.path.join(module_path, "assets")
-
-
-def find_binho_asset(filename):
-    """ Returns the path to a given Binho asset, if it exists, or None if the Binho asset isn't provided."""
-    import os
-
-    asset_path = os.path.join(binho_assets_directory(), filename)
-
-    if os.path.isfile(asset_path):
-        return asset_path
-    else:
-        return None
