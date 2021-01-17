@@ -348,10 +348,10 @@ class binhoArgumentParser(argparse.ArgumentParser):
                         raise
 
                     # Otherwise, print a message and bail out.
-                    if args.device:
+                    if args.deviceID:
                         print(
                             "No Binho host adapter found matching Device ID '{}'.".format(
-                                args.device
+                                args.deviceID
                             ),
                             file=sys.stderr,
                         )
