@@ -6,8 +6,8 @@ class binhoIODriver:
 
     @property
     def mode(self):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " MODE ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " MODE ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.ioNumber) + " MODE"):
             raise RuntimeError(
@@ -20,8 +20,8 @@ class binhoIODriver:
 
     @mode.setter
     def mode(self, mode):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " MODE " + str(mode))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " MODE " + str(mode))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -32,8 +32,8 @@ class binhoIODriver:
 
     @property
     def pwmFrequency(self):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " PWMFREQ ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " PWMFREQ ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.ioNumber) + " PWMFREQ"):
             raise RuntimeError(
@@ -46,8 +46,8 @@ class binhoIODriver:
 
     @pwmFrequency.setter
     def pwmFrequency(self, freq):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " PWMFREQ " + str(freq))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " PWMFREQ " + str(freq))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -58,8 +58,8 @@ class binhoIODriver:
 
     @property
     def interruptSource(self):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " INT ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " INT ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.ioNumber) + " INT"):
             raise RuntimeError(
@@ -72,8 +72,8 @@ class binhoIODriver:
 
     @interruptSource.setter
     def interruptSource(self, intMode):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " INT " + intMode)
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " INT " + intMode)
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -84,8 +84,8 @@ class binhoIODriver:
 
     @property
     def value(self):
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " VALUE ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " VALUE ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.ioNumber) + " VALUE"):
             raise RuntimeError(
@@ -103,8 +103,8 @@ class binhoIODriver:
     @value.setter
     def value(self, value):
 
-        self.usb._sendCommand("IO" + str(self.ioNumber) + " VALUE " + str(value))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("IO" + str(self.ioNumber) + " VALUE " + str(value))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(

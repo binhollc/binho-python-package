@@ -41,7 +41,8 @@ try:
 except SerialException:
 
     print(
-        "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it.",
+        "The target Binho host adapter was found, but failed to connect because another application already has an open\
+         connection to it.",
         file=sys.stderr,
     )
     print(
@@ -159,7 +160,8 @@ try:
     # you'll find the transfer() function very useful. The following example demonstrates how to interact with a DS24B33
     # 1-Wire EEPROM
 
-    # Read the first 4 bytes saved in the EEPROM (note that we can't just read, we need to send the READ command to the device first
+    # Read the first 4 bytes saved in the EEPROM (note that we can't just read, we need to send the READ command to the
+    # device first
     # that's why the transfer() function is so handy for EEPROMs
     writeData = [0xF0, 0x00, 0x00]
     readCount = 4

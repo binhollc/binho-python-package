@@ -2,18 +2,10 @@
 Utilities for running Binho host adapter code interactively in IPython.
 """
 
-import os
-import time
-import binho
-import multiprocessing
-
-from IPython.lib.deepreload import reload as deepreload
 from IPython.core.magic import (
     Magics,
     magics_class,
     line_magic,
-    cell_magic,
-    line_cell_magic,
 )
 
 

@@ -16,7 +16,8 @@ Occasionally, we might need to pass an argument to specify the address bits that
     p = gf.create_programmer('microchipEEPROM', device='24LC128', slave_address=0b010)
 Or to configure the EEPROM ourselves, by specifying the capacity and the page size, with a few other options:
     p = gf.create_programmer(capacity, page_size, bitmask="AAA", slave_address=0, write_cycle_length=0.005)
-By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different I2C bus object.
+By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different \
+    I2C bus object.
 """
 
 BASE_DEVICE_ADDRESS = 0x50
@@ -1047,7 +1048,8 @@ class EEPROMDevice(binhoProgrammer):
         else:
             raise (
                 ValueError(
-                    "Specified capacity and number of block address bits would result in a block size that would take more than 16 bits to address."
+                    "Specified capacity and number of block address bits would result in a block size that would take \
+                     more than 16 bits to address."
                 )
             )
 
@@ -1202,7 +1204,8 @@ class EEPROMDevice(binhoProgrammer):
 
     def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0):
         """
-        Write bytes sequentially starting at a specified memory address. Will read data back to assure write was successful.
+        Write bytes sequentially starting at a specified memory address. Will read data back to assure write was
+          successful.
         Handles
         Parameters:
             word_address       -- Address of the start of the block to write.

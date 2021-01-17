@@ -2,7 +2,10 @@
 
 from __future__ import print_function
 
+import errno
 import sys
+
+import serial
 from binho.utils import log_silent, log_verbose, binho_error_hander
 from binho.errors import DeviceNotFoundError
 
@@ -53,7 +56,8 @@ def main():
 
     except serial.SerialException:
         print(
-            "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it."
+            "The target Binho host adapter was found, but failed to connect because another application already has an \
+             open connection to it."
         )
         print("Please close the connection in the other application and try again.")
         sys.exit(errno.ENODEV)

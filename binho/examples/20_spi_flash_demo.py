@@ -36,7 +36,8 @@ try:
 except SerialException:
 
     print(
-        "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it.",
+        "The target Binho host adapter was found, but failed to connect because another application already has an open\
+         connection to it.",
         file=sys.stderr,
     )
     print(

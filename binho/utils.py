@@ -11,6 +11,7 @@ import errno
 import argparse
 import linecache
 import requests
+import binhoHostAdapter
 
 import urllib.request
 import json
@@ -319,7 +320,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
                 dest="dfu_stub",
                 metavar="<stub.dfu>",
                 type=str,
-                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically find one.",
+                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically \
+                      find one.",
             )
 
     def find_specified_device(self):
@@ -370,8 +372,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
 
     def get_singleton_for_specified_device(self):
         """
-        Connects to the Binho host adapter specified by the user's command line arguments, but gets a singleton that persists
-        across reconnects.
+        Connects to the Binho host adapter specified by the user's command line arguments, but gets a singleton that
+        persists across reconnects.
         """
 
         # Grab the device itself, and find its deviceID.
@@ -387,7 +389,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
         return log_verbose if self.parse_args().verbose else log_silent
 
     def get_log_functions(self):
-        """ Returns a 2-tuple of a function that can be used for logging data and errors, attempting to repsect -v/-q."""
+        """ Returns a 2-tuple of a function that can be used for logging data and errors, attempting to
+            repsect -v/-q."""
         return self.get_log_function(), log_error
 
     def parse_args(self):

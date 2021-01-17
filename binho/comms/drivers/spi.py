@@ -7,8 +7,8 @@ class binhoSPIDriver:
     @property
     def clockFrequency(self):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " CLK ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " CLK ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " CLK"):
             raise RuntimeError(
@@ -22,8 +22,8 @@ class binhoSPIDriver:
     @clockFrequency.setter
     def clockFrequency(self, clock):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " CLK " + str(clock))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " CLK " + str(clock))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -35,8 +35,8 @@ class binhoSPIDriver:
     @property
     def bitOrder(self):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " ORDER ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " ORDER ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " ORDER"):
             raise RuntimeError(
@@ -50,8 +50,8 @@ class binhoSPIDriver:
     @bitOrder.setter
     def bitOrder(self, order):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " ORDER " + order)
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " ORDER " + order)
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -63,8 +63,8 @@ class binhoSPIDriver:
     @property
     def mode(self):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " MODE ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " MODE ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " MODE"):
             raise RuntimeError(
@@ -78,8 +78,8 @@ class binhoSPIDriver:
     @mode.setter
     def mode(self, mode):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " MODE " + str(mode))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " MODE " + str(mode))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -91,8 +91,8 @@ class binhoSPIDriver:
     @property
     def bitsPerTransfer(self):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " TXBITS ?")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " TXBITS ?")
+        result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " TXBITS"):
             raise RuntimeError(
@@ -106,8 +106,8 @@ class binhoSPIDriver:
     @bitsPerTransfer.setter
     def bitsPerTransfer(self, bits):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " TXBITS " + str(bits))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " TXBITS " + str(bits))
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -118,8 +118,8 @@ class binhoSPIDriver:
 
     def begin(self):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " BEGIN")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " BEGIN")
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             raise RuntimeError(
@@ -130,8 +130,8 @@ class binhoSPIDriver:
 
     def transfer(self, data):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " TXRX " + str(data))
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " TXRX " + str(data))
+        result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " RXD"):
             raise RuntimeError(
@@ -161,7 +161,7 @@ class binhoSPIDriver:
         if not read:
             writeOnlyFlag = "1"
 
-        self.usb._sendCommand(
+        self.usb.sendCommand(
             "SPI"
             + str(self.spiIndex)
             + " WHR "
@@ -172,7 +172,7 @@ class binhoSPIDriver:
             + dataPacket
         )
 
-        result = self.usb._readResponse()
+        result = self.usb.readResponse()
 
         if not read:
             if not result.startswith("-OK"):
@@ -191,8 +191,8 @@ class binhoSPIDriver:
 
     def end(self, suppressError=False):
 
-        self.usb._sendCommand("SPI" + str(self.spiIndex) + " END")
-        result = self.usb._readResponse()
+        self.usb.sendCommand("SPI" + str(self.spiIndex) + " END")
+        result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
             if not suppressError:

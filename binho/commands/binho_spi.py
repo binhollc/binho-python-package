@@ -129,7 +129,8 @@ def main():
                     )
             else:
                 log_function(
-                    "No ChipSelect signal specified, will not be used for this transaction. Use -c to specify IO pin to use for ChipSelect if desired."
+                    "No ChipSelect signal specified, will not be used for this transaction. Use -c to specify IO pin to\
+                     use for ChipSelect if desired."
                 )
 
             transmit(
@@ -144,7 +145,8 @@ def main():
 
         else:
             log_function(
-                "No transaction performed. Please specify data to write with '-w' or a number of bytes to read using '-r'."
+                "No transaction performed. Please specify data to write with '-w' or a number of bytes to read using \
+                 '-r'."
             )
             log_function("You can type 'binho spi --help' for more information.")
 

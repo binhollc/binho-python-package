@@ -36,7 +36,8 @@ def binhoHostAdapter(**board_identifiers):
 
 
 def binhoHostAdapterSingleton(serial=None):
-    """ Returns a binhoHostAdapter object, re-using an existing object if we already have a connection to the given binhoHostAdapter. """
+    """ Returns a binhoHostAdapter object, re-using an existing object if we already have a connection to the given
+        binhoHostAdapter. """
 
     # If we already have a binhoHostAdapter with the given serial,
     if serial in active_connections:

@@ -2,21 +2,17 @@
 
 from __future__ import print_function, absolute_import
 
+import errno
 import os
-import sys
-import time
 import queue
 import select
+import sys
 import threading
-import errno
-
-import binho
-
-from binho import binhoHostAdapter
-from binho.utils import from_eng_notation, binhoArgumentParser
-from binho.util.console import Console
+import time
 
 from binho.interfaces.uart import UART
+from binho.util.console import Console
+from binho.utils import from_eng_notation, binhoArgumentParser
 
 console = None
 input_thread = None
@@ -125,6 +121,9 @@ def main():
     args = parser.parse_args()
     device = parser.find_specified_device()
 
+    # Grab our log functions.
+    log_function, log_error = parser.get_log_functions()
+
     if device.inBootloaderMode:
         print(
             "{} found on {}, but it cannot be used now because it's in DFU mode".format(
@@ -138,9 +137,6 @@ def main():
                 device.productName, device.commPort, device.deviceID
             )
         )
-
-    # Grab our log functions.
-    log_function, log_error = parser.get_log_functions()
 
     # Configure our UART.
     if not hasattr(device, "uart"):

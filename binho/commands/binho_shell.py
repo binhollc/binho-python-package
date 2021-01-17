@@ -67,7 +67,8 @@ def main():
         "--autoreload",
         dest="autoreload",
         action="store_true",
-        help="Attempts to reload python modules automatically as they change; so current objects import new functionality. This may sometimes break your shell.",
+        help="Attempts to reload python modules automatically as they change; so current objects import new \
+              functionality. This may sometimes break your shell.",
     )
     parser.add_argument(
         "-S",
@@ -124,13 +125,14 @@ def main():
     shell.push("binho")
 
     # Create nice aliases for our primary interfaces.
-    i2c = binho.i2c
-    spi = binho.spi
-    dac = binho.dac
-    adc = binho.adc
-    oneWire = binho.oneWire
+    # Unused variables
+    # i2c = binho.i2c
+    # spi = binho.spi
+    # dac = binho.dac
+    # adc = binho.adc
+    # oneWire = binho.oneWire
     # uart = binho.uart
-    gpio = binho.gpio
+    # gpio = binho.gpio
     # shell.push(('i2c', 'spi', 'adc', 'uart', 'gpio',))
     shell.push(("i2c", "spi", "gpio", "dac", "adc", "oneWire"))
 

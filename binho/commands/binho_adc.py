@@ -64,7 +64,8 @@ def main():
 
     except serial.SerialException:
         print(
-            "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it."
+            "The target Binho host adapter was found, but failed to connect because another application already has an\
+             open connection to it."
         )
         print("Please close the connection in the other application and try again.")
         sys.exit(errno.ENODEV)

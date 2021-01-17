@@ -33,7 +33,8 @@ def main():
         "-n",
         "--partnumber",
         default=None,
-        help="Look up device parameters based on EEPROM manufacturer part number. These parameters can be provided individually.",
+        help="Look up device parameters based on EEPROM manufacturer part number. These parameters can be provided \
+              individually.",
     )
 
     parser.add_argument(
@@ -193,7 +194,8 @@ def main():
 
         if args.pullup:
             log_function(
-                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on external resistors."
+                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on \
+                 external resistors."
             )
             device.i2c.useInternalPullUps = True
         else:

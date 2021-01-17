@@ -2,20 +2,14 @@
 
 from __future__ import print_function
 
+import errno
 import os
 import sys
-import errno
-import argparse
-
-from tqdm import tqdm
-
-
-from binho import binhoHostAdapter
-from binho.errors import DeviceNotFoundError
-from binho.utils import from_eng_notation, human_readable_size, binhoArgumentParser
-from binho.programmers.spiFlash import SPIFlash
 
 from binho.comms.manager import CommandFailureError
+from binho.programmers.spiFlash import SPIFlash
+from binho.utils import from_eng_notation, human_readable_size, binhoArgumentParser
+from tqdm import tqdm
 
 
 def print_flash_info(spi_flash, log_function, log_error, args):
@@ -275,6 +269,9 @@ def main():
     args = parser.parse_args()
     device = parser.find_specified_device()
 
+    # Grab our log functions.
+    log_function, log_error = parser.get_log_functions()
+
     if device.inBootloaderMode:
         print(
             "{} found on {}, but it cannot be used now because it's in DFU mode".format(
@@ -293,9 +290,6 @@ def main():
         args.verbose = True
     elif args.filename == "-":
         args.verbose = False
-
-    # Grab our log functions.
-    log_function, log_error = parser.get_log_functions()
 
     try:
         # Figure out the "override" page and flash size for any arguments provided.

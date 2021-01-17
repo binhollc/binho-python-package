@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 
+import errno
 import sys
 import time
 import argparse
@@ -96,7 +97,8 @@ def main():
 
             if newFwVerAvail:
                 log_function(
-                    "Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to update]".format(
+                    "Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to \
+                     update]".format(
                         fwVersion
                     )
                 )

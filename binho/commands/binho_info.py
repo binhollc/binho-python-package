@@ -19,7 +19,8 @@ def print_core_info(device):
         print("Found a {}!".format(device.productName) + " [DFU]")
         print("  Port: {}".format(device.commPort))
         print(
-            "   DFU: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r        is completed or it is power cycled."
+            "   DFU: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r \
+                    is completed or it is power cycled."
         )
 
     else:
@@ -55,7 +56,8 @@ def print_core_info(device):
 
                 if newFwVerAvail:
                     print(
-                        "  Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to update]".format(
+                        "  Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to \
+                           update]".format(
                             fwVersion
                         )
                     )
@@ -103,8 +105,8 @@ def print_apis(device):
                 continue
 
             # Don't print inherited methods.
-            if hasattr(GeneratedCommsClass, method_name):
-                continue
+            #if hasattr(GeneratedCommsClass, method_name):
+            #    continue
 
             printed = True
 
