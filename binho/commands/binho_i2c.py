@@ -100,8 +100,8 @@ def main():
 
         if args.pullup:
             log_function(
-                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on \
-                 external resistors."
+                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on " \
+                 + "external resistors."
             )
             device.i2c.useInternalPullUps = True
         else:
@@ -130,8 +130,8 @@ def main():
         else:
             if not args.scan:
                 log_function(
-                    "No transaction performed. Please specify data to write with '-w' or a number of bytes to read \
-                     using '-r'."
+                    "No transaction performed. Please specify data to write with '-w' or a number of bytes to read " \
+                     + "using '-r'."
                 )
                 log_function("You can type 'binho i2c --help' for more information.")
 

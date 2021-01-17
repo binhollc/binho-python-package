@@ -126,13 +126,13 @@ def main():
 
     # Create nice aliases for our primary interfaces.
     # Unused variables
-    # i2c = binho.i2c
-    # spi = binho.spi
-    # dac = binho.dac
-    # adc = binho.adc
-    # oneWire = binho.oneWire
-    # uart = binho.uart
-    # gpio = binho.gpio
+    i2c = binho.i2c
+    spi = binho.spi
+    dac = binho.dac
+    adc = binho.adc
+    oneWire = binho.oneWire
+    #uart = binho.uart
+    gpio = binho.gpio
     # shell.push(('i2c', 'spi', 'adc', 'uart', 'gpio',))
     shell.push(("i2c", "spi", "gpio", "dac", "adc", "oneWire"))
 

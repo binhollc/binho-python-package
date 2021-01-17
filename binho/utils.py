@@ -11,7 +11,7 @@ import errno
 import argparse
 import linecache
 import requests
-import binhoHostAdapter
+
 
 import urllib.request
 import json
@@ -19,6 +19,7 @@ import json
 from decimal import Decimal
 
 # from . import binhoHostAdapter, _binhoHostAdapterSingletonWrapper
+from . import binhoHostAdapter
 from .errors import DeviceNotFoundError, DeviceInBootloaderError
 
 
@@ -320,8 +321,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
                 dest="dfu_stub",
                 metavar="<stub.dfu>",
                 type=str,
-                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically \
-                      find one.",
+                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically " \
+                      + "find one.",
             )
 
     def find_specified_device(self):
@@ -415,7 +416,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             port = manager.getPortByDeviceID((args.deviceID))
 
             if port:
-                return binhoHostAdapter(deviceID=args.deviceID)
+                return binhoHostAdapter.binhoHostAdapter(deviceID=args.deviceID)
             else:
                 raise DeviceNotFoundError
 
@@ -424,7 +425,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
 
             if args.port not in ports:
                 raise DeviceNotFoundError
-            return binhoHostAdapter(port=args.port)
+            return binhoHostAdapter.binhoHostAdapter(port=args.port)
 
         elif args.index:
             # Find _all_ Binho host adapters
@@ -433,7 +434,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             # ... and then select the one with the provided index.
             if len(ports) <= args.index:
                 raise DeviceNotFoundError
-            return binhoHostAdapter(port=ports[args.index])
+            return binhoHostAdapter.binhoHostAdapter(port=ports[args.index])
 
         # If we have a serial number, look only for a single device. Theoretically,
         # we should never have more than one Binho host adapter with the same
@@ -444,7 +445,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             # ... and then select the one with the provided index.
             if len(ports) < 1:
                 raise DeviceNotFoundError
-            return binhoHostAdapter(port=ports[0])
+            return binhoHostAdapter.binhoHostAdapter(port=ports[0])
 
 
 def binho_assets_directory():
