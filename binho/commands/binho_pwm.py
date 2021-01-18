@@ -132,7 +132,7 @@ def main():
 
         if args.value.isnumeric():
 
-            if int(args.value) >= 0 and int(args.value) <= 1024:
+            if 0 <= int(args.value) <= 1024:
 
                 pin.value = args.value
                 log_function(
@@ -156,7 +156,7 @@ def main():
 
                 convValue = float(dutyCycle) / 100.0 * 1024
 
-                if int(convValue) >= 0 and int(convValue) <= 1024:
+                if 0 <= int(convValue) <= 1024:
 
                     pin.value = int(convValue)
                     log_function(

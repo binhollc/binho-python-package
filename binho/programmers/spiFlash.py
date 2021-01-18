@@ -705,9 +705,9 @@ class SPIFlash(binhoProgrammer):
         # the actual SPI flash.
         self.board = board
 
-        self.csPin = chipSelectPin
+        self.csPin = chip_select_pin
         self.board.spi.mode = mode
-        self.board.spi.frequency = clockFrequency
+        self.board.spi.frequency = clocK_frequency
 
         self.mem_manufacturer = None
         self.mem_capacity = None
@@ -716,8 +716,8 @@ class SPIFlash(binhoProgrammer):
         self._paramTable = {}
 
         self._deviceTopology = {}
-        self._deviceTopology["PAGE_SIZE_BYTES"] = pageSizeBytes
-        self._deviceTopology["TOTAL_SIZE_BYTES"] = pageSizeBytes * pageCount
+        self._deviceTopology["PAGE_SIZE_BYTES"] = page_size
+        self._deviceTopology["TOTAL_SIZE_BYTES"] = page_size * pages
         self._deviceTopology["PAGE_COUNT"] = (
             self._deviceTopology["TOTAL_SIZE_BYTES"]
             / self._deviceTopology["PAGE_SIZE_BYTES"]
@@ -725,9 +725,9 @@ class SPIFlash(binhoProgrammer):
 
         self.jedecID
 
-        # If autocheckSFDP is set to True, we'll try to automatically detect
+        # If autodetect is set to True, we'll try to automatically detect
         # the device's topology.
-        if autocheckSFDP:
+        if autodetect:
 
             if self.supportsSFDP:
 
@@ -758,13 +758,13 @@ class SPIFlash(binhoProgrammer):
                         )
 
                     else:
-                        if not allowFallback:
+                        if not allow_fallback:
                             raise RuntimeError(
                                 "Could not read SFDP on connected device & Fallback is disabled! Giving Up!"
                             )
 
             else:
-                if not allowFallback:
+                if not allow_fallback:
                     raise RuntimeError(
                         "Could not read SFDP on connected device & Fallback is disabled! Giving Up!"
                     )

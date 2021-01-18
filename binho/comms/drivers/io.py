@@ -15,8 +15,8 @@ class binhoIODriver:
                 + str(self.ioNumber)
                 + ' MODE"'
             )
-        else:
-            return result[10:]
+
+        return result[10:]
 
     @mode.setter
     def mode(self, mode):
@@ -27,8 +27,8 @@ class binhoIODriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def pwmFrequency(self):
@@ -41,8 +41,8 @@ class binhoIODriver:
                 + str(self.ioNumber)
                 + ' PWMFREQ"'
             )
-        else:
-            return int(result[13:])
+
+        return int(result[13:])
 
     @pwmFrequency.setter
     def pwmFrequency(self, freq):
@@ -53,8 +53,8 @@ class binhoIODriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def interruptSource(self):
@@ -67,8 +67,8 @@ class binhoIODriver:
                 + str(self.ioNumber)
                 + ' INT"'
             )
-        else:
-            return result[8:]
+
+        return result[8:]
 
     @interruptSource.setter
     def interruptSource(self, intMode):
@@ -79,8 +79,8 @@ class binhoIODriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def value(self):
@@ -93,12 +93,12 @@ class binhoIODriver:
                 + str(self.ioNumber)
                 + ' VALUE"'
             )
+
+        if "%" in result or "V" in result:
+            vals = result.split(" ")
+            return int(vals[2])
         else:
-            if "%" in result or "V" in result:
-                vals = result.split(" ")
-                return int(vals[2])
-            else:
-                return int(result[11:])
+            return int(result[11:])
 
     @value.setter
     def value(self, value):
@@ -110,8 +110,8 @@ class binhoIODriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def interruptFlag(self):

@@ -1,16 +1,6 @@
 # import usb
-import future
-import time
-
-import threading
-import queue
-import signal
-import sys
-import serial
 import os
-import enum
 import collections
-import serial
 
 from ..errors import DeviceNotFoundError
 

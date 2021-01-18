@@ -40,7 +40,6 @@ SI_PREFIXES = {
 
 def log_silent(string, end=None):
     """Silently discards all log data, but provides our logging interface."""
-    pass
 
 
 def log_verbose(string, end="\n"):
@@ -321,7 +320,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
                 dest="dfu_stub",
                 metavar="<stub.dfu>",
                 type=str,
-                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically " \
+                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically "\
                       + "find one.",
             )
 

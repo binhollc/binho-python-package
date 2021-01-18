@@ -16,8 +16,8 @@ class binhoSPIDriver:
                 + str(self.spiIndex)
                 + ' CLK"'
             )
-        else:
-            return int(result[10:])
+
+        return int(result[10:])
 
     @clockFrequency.setter
     def clockFrequency(self, clock):
@@ -29,8 +29,8 @@ class binhoSPIDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def bitOrder(self):
@@ -44,8 +44,8 @@ class binhoSPIDriver:
                 + str(self.spiIndex)
                 + ' ORDER"'
             )
-        else:
-            return result[12:]
+
+        return result[12:]
 
     @bitOrder.setter
     def bitOrder(self, order):
@@ -57,8 +57,8 @@ class binhoSPIDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def mode(self):
@@ -72,8 +72,8 @@ class binhoSPIDriver:
                 + str(self.spiIndex)
                 + ' MODE"'
             )
-        else:
-            return int(result[11:])
+
+        return int(result[11:])
 
     @mode.setter
     def mode(self, mode):
@@ -85,8 +85,8 @@ class binhoSPIDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def bitsPerTransfer(self):
@@ -100,8 +100,8 @@ class binhoSPIDriver:
                 + str(self.spiIndex)
                 + ' TXBITS"'
             )
-        else:
-            return int(result[13:])
+
+        return int(result[13:])
 
     @bitsPerTransfer.setter
     def bitsPerTransfer(self, bits):
@@ -113,8 +113,8 @@ class binhoSPIDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     def begin(self):
 
@@ -125,8 +125,8 @@ class binhoSPIDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     def transfer(self, data):
 
@@ -139,8 +139,8 @@ class binhoSPIDriver:
                 + str(self.spiIndex)
                 + ' RXD"'
             )
-        else:
-            return bytearray.fromhex(result[9:])
+
+        return bytearray.fromhex(result[9:])
 
     def writeToReadFrom(self, write, read, numBytes, data):
 
@@ -179,15 +179,15 @@ class binhoSPIDriver:
                 raise RuntimeError(
                     f'Error Binho responded with {result}, not the expected "-OK"'
                 )
-            else:
-                return bytearray()
+
+            return bytearray()
         else:
             if not result.startswith("-SPI0 RXD "):
                 raise RuntimeError(
                     f'Error Binho responded with {result}, not the expected "-SPI0 RXD ..."'
                 )
-            else:
-                return bytearray.fromhex(result[9:])
+
+            return bytearray.fromhex(result[9:])
 
     def end(self, suppressError=False):
 
@@ -199,5 +199,5 @@ class binhoSPIDriver:
                 raise RuntimeError(
                     f'Error Binho responded with {result}, not the expected "-OK"'
                 )
-        else:
-            return True
+
+        return True

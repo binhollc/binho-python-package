@@ -57,10 +57,10 @@ class binhoShellMagics(Magics):
             References to objects may be kept. By default (without this option),
             we do a 'hard' reset, giving you a new session and removing all
             references to objects from the current session.
-        in : reset input history
-        out : reset output history
-        dhist : reset directory history
-        array : reset only variables that are NumPy arrays
+        in - reset input history
+        out - reset output history
+        dhist - reset directory history
+        array - reset only variables that are NumPy arrays
         """
 
         #

@@ -183,7 +183,6 @@ class GPIOProvider(binhoInterface):
             line      -- A unique identifier for the given pin that has meaning to the subclass.
             direction -- Directions.IN (input) or Directions.OUT (output)
         """
-        pass
 
     def setPinValue(self, line, state):
         """
@@ -193,7 +192,6 @@ class GPIOProvider(binhoInterface):
             line  -- A unique identifier for the given pin that has meaning to the subclass.
             state -- True sets line high, False sets line low
         """
-        pass
 
     def readPinValue(self, line):
         """
@@ -204,7 +202,6 @@ class GPIOProvider(binhoInterface):
         Return:
             bool -- True if line is high, False if line is low
         """
-        pass
 
     def getPinMode(self, line):
         """
@@ -214,7 +211,6 @@ class GPIOProvider(binhoInterface):
         Return:
             bool -- True if line is an output, False if line is an input
         """
-        pass
 
     def getPinIndex(self, line):
         """Returns the 'pin number' for a given GPIO pin.
@@ -222,7 +218,6 @@ class GPIOProvider(binhoInterface):
         in which this isn't a valid semantic concept, any convenient semantic identifier (or None)
         is acceptable.
         """
-        pass
 
     def getPinIdentifier(self, line):
         """Returns the 'pin number' for a given GPIO pin.
@@ -230,7 +225,6 @@ class GPIOProvider(binhoInterface):
         in which this isn't a valid semantic concept, any convenient semantic identifier (or None)
         is acceptable.
         """
-        pass
 
 
 class GPIO(GPIOProvider):

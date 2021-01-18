@@ -1,37 +1,28 @@
 class DeviceNotFoundError(IOError):
     """ Error indicating no Binho host adapter device was found. """
 
-    pass
-
 
 class DeviceInBootloaderError(IOError):
     """ Error indicating a Binho host adapter device was found but it's in bootloader mode. """
-
-    pass
 
 
 class DeviceBusyError(IOError):
     """ Error indicating the Binho host adapter is too busy to service the given request. """
 
-    pass
-
 
 class DeviceMemoryError(MemoryError):
     """ Error indicating that the Binho host adapter has run out of memory. """
 
-    pass
 
 
 class NotFoundError(IOError):
     """ Error indicating that a resource was not found. """
 
-    pass
 
 
 class binhoError(RuntimeError):
     """ Runtime error used when no better description is available. """
 
-    pass
 
 
 class ExternalDeviceError(IOError):

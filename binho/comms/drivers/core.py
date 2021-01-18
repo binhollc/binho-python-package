@@ -14,8 +14,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-ID"'
             )
-        else:
-            return result[4:]
+
+        return result[4:]
 
     @property
     def firmwareVersion(self):
@@ -27,8 +27,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-FWVER"'
             )
-        else:
-            return result[7:]
+
+        return result[7:]
 
     @property
     def hardwareVersion(self):
@@ -40,8 +40,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-HWVER"'
             )
-        else:
-            return result[7:]
+
+        return result[7:]
 
     @property
     def commandVersion(self):
@@ -53,8 +53,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-CMDVER"'
             )
-        else:
-            return result[8:]
+
+        return result[8:]
 
     def resetToBtldr(self):
 
@@ -65,8 +65,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     def reset(self):
 
@@ -77,8 +77,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     def ping(self):
         self.usb.sendCommand("+PING")
@@ -88,8 +88,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-        else:
-            return True
+
+        return True
 
     @property
     def operationMode(self):
@@ -100,8 +100,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-MODE"'
             )
-        else:
-            return result[8:]
+
+        return result[8:]
 
     @operationMode.setter
     def operationMode(self, mode):
@@ -124,8 +124,8 @@ class binhoCoreDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-BASE"'
             )
-        else:
-            return result[6:]
+
+        return result[6:]
 
     @numericalBase.setter
     def numericalBase(self, base):

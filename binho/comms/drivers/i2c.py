@@ -93,7 +93,7 @@ class binhoI2CDriver:
     @addressBits.setter
     def addressBits(self, bits):
 
-        if bits >= 7 and bits <= 8:
+        if 7 <= bits <= 8:
             self.usb.sendCommand("I2C" + str(self.i2cIndex) + " ADDR " + str(bits))
             result = self.usb.readResponse()
 

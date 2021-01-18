@@ -6,11 +6,15 @@ import string
 from weakref import WeakSet
 
 from .comms.device import binhoAPI
+from .accessory import binhoAccessory
 
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO
 from .interfaces.adc import ADC
 from .interfaces.dac import DAC
+from .interfaces.gpio import GPIOProvider
+
+
 
 # from .interfaces.uart import UART
 
@@ -18,9 +22,6 @@ from .interfaces.dac import DAC
 # from .interfaces.sdir import SDIRTransceiver
 
 from . import programmers as ProgrammerModules
-from .programmers.eeprom import EEPROM
-
-from .programmers import *
 
 # from .programmers.m0 import M0Coprocessor
 # from .programmers.firmware import DeviceFirmwareManager
@@ -66,7 +67,7 @@ class binhoDevice(binhoAPI):
         # Create a new list of interfaces and programmers.
         self._interfaces = []
         self._instantiated_programmers = WeakSet()
-        super(binhoDevice, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def available_interfaces(self):
         """ Returns a list of peripheral properties that exist on this board. """
