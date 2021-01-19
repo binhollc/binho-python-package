@@ -11,6 +11,9 @@ import errno
 import argparse
 import linecache
 import requests
+import os
+import psutil
+import shutil
 
 
 import urllib.request
@@ -163,37 +166,107 @@ class register:
 
 
 class binhoDFUManager:
+
+    cachedManifestData = []
+    cachedManifestUrl = ''
+
+    removableDrivesSnapshot = []
+
+    def takeDrivesSnapshot():
+
+        snapshot = psutil.disk_partitions()
+
+        binhoDFUManager.removableDrivesSnapshot = [x for x in snapshot if x.opts == 'rw,removable']
+
+        print(binhoDFUManager.removableDrivesSnapshot)
+
+    def getNewDrives():
+
+        snapshot = psutil.disk_partitions()
+
+        rmDrives = [x for x in snapshot if x.opts == 'rw,removable']
+
+        for drive in rmDrives:
+            binhoDFUManager.getBootloaderInfo(drive)
+
+        return rmDrives
+
+
+    def getBootloaderInfo(drive):
+
+        btldr_info = drive.mountpoint + '\\INFO.TXT'
+        btldr_details = ''
+        productModel = ''
+        boardID = ''
+
+        if os.path.isfile(btldr_info) == True:
+            with open(btldr_info, 'r') as file:
+                btldr_details = file.readline().strip()
+                productModel = file.readline().strip()
+                boardID = file.readline().strip()
+
+                if productModel.startswith('Model: '):
+                    productModel = productModel[7:]
+
+            print(btldr_details)
+            print(productModel)
+            print(boardID)
+
+        else:
+            print("not a binho device")
+
+
+
     def parseVersionString(verStr):
 
         ver = verStr.split(".")
 
         return int(ver[0]), int(ver[1]), int(ver[2])
 
-    def getLatestFirmwareVersion(firmwareUpdateURL, fail_silent=False):
+    def getJsonManifestParameter(manifestURL, paramName, fail_silent=False):
 
         try:
-            with urllib.request.urlopen(firmwareUpdateURL) as url:
-                data = json.loads(url.read().decode())
-                return data["version"]
+
+            if binhoDFUManager.cachedManifestUrl == manifestURL:
+                return binhoDFUManager.cachedManifestData[paramName]
+            else:
+
+                with urllib.request.urlopen(manifestURL) as url:
+                    binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
+                    binhoDFUManager.cachedManifestUrl = manifestURL
+                    return binhoDFUManager.cachedManifestData[paramName]
         except BaseException:
             if fail_silent:
                 return None
             else:
                 raise RuntimeError(
-                    "Unable to connect to Binho server to check the latest firmware version!"
+                    "Unable to connect to Binho server and retrieve the data!"
                 )
+
+    def getLatestFirmwareVersion(manifestURL, fail_silent=False):
+
+        return binhoDFUManager.getJsonManifestParameter(manifestURL, 'version', fail_silent)
+
+    def getLatestFirmwareFilename(manifestURL, fail_silent=False):
+
+        url = binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
+
+        return url.split('/')[6]
+
+    def getLatestFirmwareUrl(manifestURL, fail_silent=False):
+
+        return binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
 
     def downloadFirmwareFile(url, fail_silent=False):
 
         assetsDir = binho_assets_directory()
 
-        print(assetsDir)
-        print(ur)
+        firmwareFilename = url.split('/')[6]
 
         try:
             r = requests.get(url)
 
-            with open("assetsDir/test", "wb") as f:
+            with open(assetsDir+"/" + firmwareFilename, "wb") as f:
                 f.write(r.content)
 
             return True
@@ -203,6 +276,19 @@ class binhoDFUManager:
                 return False
             else:
                 raise RuntimeError("Failed to download firmware file online!")
+
+    def loadFirmwareFile(figFileName, btldr_drive, fail_silent=False):
+
+        assetsDir = binho_assets_directory()
+
+        firmwareFilename = assetsDir + "/" + figFileName
+
+        if os.path.isfile(firmwareFilename) == True:
+            shutil.copy2(firmwareFilename, btldr_drive.mountpoint + '\\fw.uf2')
+        else:
+            return False
+
+        return True
 
 
 class binhoArgumentParser(argparse.ArgumentParser):

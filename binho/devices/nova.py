@@ -25,6 +25,10 @@ class binhoNova(binhoDevice):
     PRODUCT_NAME = "Binho Nova"
     FIRMWARE_UPDATE_URL = "https://cdn.binho.io/fw/nova/latest/latest.json"
 
+    # Expected bootloader info
+    BTLDR_PROD = 'Binho USB Host Adapter'
+    BTLDR_BOARD_ID = 'BIN002'
+
     # The Binho Nova has one LED.
     SUPPORTED_LEDS = 1
 

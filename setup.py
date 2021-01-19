@@ -26,7 +26,7 @@ if os.path.isfile("../VERSION"):
 else:
     setup_options["version_config"] = {
         "version_format": "{tag}.dev+git.{sha}",
-        "starting_version": "2020.10.05",
+        "starting_version": "2020.10.06",
     }
     setup_req.append("even-better-setuptools-git-version")
 
@@ -67,6 +67,7 @@ setup(
         "prompt_toolkit<2.1.0",
         "pyserial"
     ],
+    data_files=[('/binho/assets', [])],
     description="Python package for Binho USB host adapter products",
     long_description=read("README.md"),
     packages=find_packages(),

@@ -286,6 +286,9 @@ class binhoAPI(object):
         """
         return None
 
+    def reset_to_bootloader(self):
+        self.apis.core.resetToBtldr(fail_silent=True)
+
     def close(self):
         self.comms.close()
 

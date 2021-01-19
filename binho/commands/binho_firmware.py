@@ -76,6 +76,7 @@ def main():
 
         # Now check the latest version
         latestVersion = binhoDFUManager.getLatestFirmwareVersion(fwUpdateURL, True)
+        firmwareFileURL = binhoDFUManager.getLatestFirmwareUrl(fwUpdateURL, True)
 
         if latestVersion:
             (
@@ -96,20 +97,36 @@ def main():
                 newFwVerAvail = True
 
             if newFwVerAvail:
-                log_function(
-                    "Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to \
-                     update]".format(
-                        fwVersion
+
+                if args.update:
+
+                    binhoDFUManager.downloadFirmwareFile(firmwareFileURL)
+
+                    figFileName = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
+
+                    binhoDFUManager.takeDrivesSnapshot()
+
+                    device.reset_to_bootloader()
+                    time.sleep(5)
+
+                    newDrives = binhoDFUManager.getNewDrives()
+
+                    binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
+
+                else:
+
+                    log_function(
+                        "Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to " \
+                         "update]".format(
+                            fwVersion
+                        )
                     )
-                )
             else:
                 log_function("Firmware Version: {} [Up To Date]".format(fwVersion))
         else:
             log_function("Firmware Version: {}".format(fwVersion))
 
         device.close()
-
-        binhoDFUManager.downloadFirmwareFile()
 
     except Exception:
         # Catch any exception that was raised and display it

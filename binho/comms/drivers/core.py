@@ -56,12 +56,12 @@ class binhoCoreDriver:
 
         return result[8:]
 
-    def resetToBtldr(self):
+    def resetToBtldr(self, fail_silent=False):
 
         self.usb.sendCommand("+BTLDR")
         result = self.usb.readResponse()
 
-        if not result.startswith("-OK"):
+        if not result.startswith("-OK") and fail_silent == False:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
