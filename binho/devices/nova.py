@@ -2,8 +2,8 @@ import os
 
 from ..device import binhoDevice
 from ..interfaces.gpio import GPIOProvider
-from ..interfaces.gpio import GPIO
 from ..interfaces.dac import DAC
+from ..interfaces.adc import ADC
 
 from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
@@ -24,10 +24,6 @@ class binhoNova(binhoDevice):
     USB_VID_PID = "04D8:ED34"
     PRODUCT_NAME = "Binho Nova"
     FIRMWARE_UPDATE_URL = "https://cdn.binho.io/fw/nova/latest/latest.json"
-
-    # Expected bootloader info
-    BTLDR_PROD = 'Binho USB Host Adapter'
-    BTLDR_BOARD_ID = 'BIN002'
 
     # The Binho Nova has one LED.
     SUPPORTED_LEDS = 1
@@ -55,8 +51,6 @@ class binhoNova(binhoDevice):
         "IO3": 3,
         "IO4": 4,
     }
-
-    gpio = GPIOProvider()
 
     @property
     def operationMode(self):
@@ -104,30 +98,33 @@ class binhoNova(binhoDevice):
         initSuccess = super(binhoNova, self).initialize_apis()
 
         if initSuccess:
+            self.gpio = GPIOProvider(self)
+            self.adc = ADC(self)
+            self.dac = DAC(self)
 
             # Create our simple peripherals.
             self._populate_simple_interfaces()
 
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
-            self._populate_gpio()
+            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
 
-            self._populate_dac()
+            self._populate_dac(self.dac, self.DAC_MAPPINGS)
 
-            self._populate_adc()
+            self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
             # if self.supports_api('i2c'):
             # print('supports_api i2c success')
             self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0])
+            self._add_interface("i2c", [I2CBus(self, "I2C0")])
 
             # if self.supports_api('spi') and self.supports_api('gpio'):
             #    chip_select = self.gpio.get_pin('J1_P37')
             self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0])
+            self._add_interface("spi", [SPIBus(self, 0, "SPI0")])
 
             self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0])
+            self._add_interface("oneWire", [OneWireBus(self, "1WIRE0")])
 
             # if self.supports_api('uart'):
             # self._add_interface('uart', UART(self))

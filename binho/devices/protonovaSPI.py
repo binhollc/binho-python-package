@@ -1,7 +1,9 @@
 import os
 
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIO
+from ..interfaces.gpio import GPIOProvider
+#from ..interfaces.dac import DAC
+#from ..interfaces.adc import ADC
 
 from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
@@ -80,6 +82,9 @@ class binhoProtonovaSPI(binhoDevice):
         initSuccess = super(binhoProtonovaSPI, self).initialize_apis()
 
         if initSuccess:
+            gpio = GPIOProvider(self)
+            #adc = ADC(self)
+            #dac = DAC(self)
 
             # Create our simple peripherals.
             self._populate_simple_interfaces()
@@ -87,10 +92,10 @@ class binhoProtonovaSPI(binhoDevice):
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
             # if self.supports_api("gpio"):
-            self._populate_gpio()
+            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
 
             # if self.supports_api("adc"):
-            # self._populate_adc()
+            # self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
             # if self.supports_api('i2c'):
             # print('supports_api i2c success')
