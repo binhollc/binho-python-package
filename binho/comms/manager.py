@@ -76,7 +76,8 @@ class binhoDeviceManager:
         else:
             return None
 
-    def getUSBVIDPIDByPort(self, comport):
+    @classmethod
+    def getUSBVIDPIDByPort(cls, comport):
 
         for port in comports():
             if comport in port.device:

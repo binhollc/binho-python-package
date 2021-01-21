@@ -86,6 +86,9 @@ class binhoProtonovaSPI(binhoDevice):
             #adc = ADC(self)
             #dac = DAC(self)
 
+            # Set product name
+            self.setProductName(self.PRODUCT_NAME)
+
             # Create our simple peripherals.
             self._populate_simple_interfaces()
 

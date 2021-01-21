@@ -8,7 +8,6 @@ from .errors import DeviceNotFoundError
 
 active_connections = {}
 
-
 def binhoHostAdapter(**board_identifiers):
     """
     Attempts to create a new instance of binhoHostAdapter board (sub)class

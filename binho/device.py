@@ -28,10 +28,6 @@ from . import programmers as ProgrammerModules
 
 # from .debug.lpc43xx import LPC43xxTarget
 
-# Default device identifiers.
-BINHO_VENDOR_ID = 0x1D50
-BINHO_PRODUCT_ID = 0x60E6
-
 # Quirk constant that helps us identify libusb's pipe errors, which bubble
 # up as generic USBErrors with errno 32 on affected platforms.
 # LIBUSB_PIPE_ERROR = 32
@@ -45,15 +41,9 @@ class binhoDevice(binhoAPI):
     Class describing Binho host adapters.
     """
 
-    # Default device identifiers.
-    BOARD_VENDOR_ID = 0x1D50
-    BOARD_PRODUCT_ID = 0x60E6
-
-    """
-    The mappings from GPIO names to port numbers. Paths in names can be delineated
-    with underscores to group gpios. For example, if Jumper 7, Pin 3 is Port 5, Pin 11,
-    you could add an entry that reads "J7_P3": (5, 11).
-    """
+    # The mappings from GPIO names to port numbers. Paths in names can be delineated
+    # with underscores to group gpios. For example, if Jumper 7, Pin 3 is Port 5, Pin 11,
+    # you could add an entry that reads "J7_P3": (5, 11).
     SIMPLE_CLASS_MAPPINGS = {"gpio": ("gpio", GPIO)}
     leds = []
 

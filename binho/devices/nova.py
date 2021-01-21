@@ -1,5 +1,3 @@
-import os
-
 from ..device import binhoDevice
 from ..interfaces.gpio import GPIOProvider
 from ..interfaces.dac import DAC
@@ -9,16 +7,18 @@ from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
 from ..interfaces.oneWireBus import OneWireBus
 
-from ..programmers.spiFlash import SPIFlash
-
 # from ..programmers.firmware import DeviceFirmwareManager
 # from ..interfaces.pattern_generator import PatternGenerator
 # from ..interfaces.sdir import SDIRTransceiver
-from ..interfaces.uart import UART
 
 
 class binhoNova(binhoDevice):
     """ Class representing Binho Nova Multi-Protocol USB Host Adapters. """
+
+    gpio = None
+    adc = None
+    dac = None
+    _operationMode = None
 
     # HANDLED_BOARD_IDS = [2]
     USB_VID_PID = "04D8:ED34"
@@ -96,12 +96,15 @@ class binhoNova(binhoDevice):
         """ Initialize a new Binho Nova connection. """
 
         # Set up the core connection.
-        initSuccess = super(binhoNova, self).initialize_apis()
+        initSuccess = super().initialize_apis()
 
         if initSuccess:
             self.gpio = GPIOProvider(self)
             self.adc = ADC(self)
             self.dac = DAC(self)
+
+            # Set product name
+            self.setProductName(self.PRODUCT_NAME)
 
             # Create our simple peripherals.
             self._populate_simple_interfaces()

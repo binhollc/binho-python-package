@@ -4,22 +4,22 @@
 
 from __future__ import print_function
 
+from decimal import Decimal
+
 import sys
 import ast
 import time
 import errno
 import argparse
 import linecache
-import requests
 import os
-import psutil
-import shutil
-
-
 import urllib.request
 import json
+import shutil
+import psutil
+import requests
 
-from decimal import Decimal
+
 
 # from . import binhoHostAdapter, _binhoHostAdapterSingletonWrapper
 from . import binhoHostAdapter
@@ -172,7 +172,8 @@ class binhoDFUManager:
 
     removableDrivesSnapshot = []
 
-    def switchToDAPLink(device):
+    @classmethod
+    def switchToDAPLink(cls, device):
 
         daplinkUpdateURL = device.DAPLINK_UPDATE_URL
 
@@ -194,7 +195,8 @@ class binhoDFUManager:
 
         return True
 
-    def takeDrivesSnapshot():
+    @classmethod
+    def takeDrivesSnapshot(cls):
 
         snapshot = psutil.disk_partitions()
 
@@ -202,7 +204,8 @@ class binhoDFUManager:
 
         print(binhoDFUManager.removableDrivesSnapshot)
 
-    def getNewDrives():
+    @classmethod
+    def getNewDrives(cls):
 
         snapshot = psutil.disk_partitions()
 
@@ -213,7 +216,7 @@ class binhoDFUManager:
 
         return rmDrives
 
-
+    @staticmethod
     def getBootloaderInfo(drive):
 
         btldr_info = drive.mountpoint + '\\INFO.TXT'
@@ -238,48 +241,52 @@ class binhoDFUManager:
             print("not a binho device")
 
 
-
+    @staticmethod
     def parseVersionString(verStr):
 
         ver = verStr.split(".")
 
         return int(ver[0]), int(ver[1]), int(ver[2])
 
-    def getJsonManifestParameter(manifestURL, paramName, fail_silent=False):
+    @classmethod
+    def getJsonManifestParameter(cls, manifestURL, paramName, fail_silent=False):
 
         try:
 
             if binhoDFUManager.cachedManifestUrl == manifestURL:
                 return binhoDFUManager.cachedManifestData[paramName]
-            else:
 
-                with urllib.request.urlopen(manifestURL) as url:
-                    binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
-                    binhoDFUManager.cachedManifestUrl = manifestURL
-                    return binhoDFUManager.cachedManifestData[paramName]
+            with urllib.request.urlopen(manifestURL) as url:
+                binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
+                binhoDFUManager.cachedManifestUrl = manifestURL
+                return binhoDFUManager.cachedManifestData[paramName]
         except BaseException:
             if fail_silent:
                 return None
-            else:
-                raise RuntimeError(
-                    "Unable to connect to Binho server and retrieve the data!"
-                )
 
-    def getLatestFirmwareVersion(manifestURL, fail_silent=False):
+            raise RuntimeError(
+                "Unable to connect to Binho server and retrieve the data!"
+            )
+
+    @classmethod
+    def getLatestFirmwareVersion(cls, manifestURL, fail_silent=False):
 
         return binhoDFUManager.getJsonManifestParameter(manifestURL, 'version', fail_silent)
 
-    def getLatestFirmwareFilename(manifestURL, fail_silent=False):
+    @classmethod
+    def getLatestFirmwareFilename(cls, manifestURL, fail_silent=False):
 
         url = binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
 
         return url.split('/')[-1]
 
-    def getLatestFirmwareUrl(manifestURL, fail_silent=False):
+    @classmethod
+    def getLatestFirmwareUrl(cls, manifestURL, fail_silent=False):
 
         return binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
 
-    def downloadFirmwareFile(url, fail_silent=False):
+    @classmethod
+    def downloadFirmwareFile(cls, url, fail_silent=False):
 
         assetsDir = binho_assets_directory()
 
@@ -296,10 +303,10 @@ class binhoDFUManager:
 
             if fail_silent:
                 return False
-            else:
-                raise RuntimeError("Failed to download firmware file online!")
+            raise RuntimeError("Failed to download firmware file online!")
 
-    def loadFirmwareFile(figFileName, btldr_drive, fail_silent=False):
+    @classmethod
+    def loadFirmwareFile(cls, figFileName, btldr_drive, fail_silent=False):
 
         assetsDir = binho_assets_directory()
 
@@ -512,7 +519,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
         # Always return our memoized version.
         return self.memoized_args
 
-    def _find_binhoHostAdapter(self, args):
+    @classmethod
+    def _find_binhoHostAdapter(cls, args):
         """ Finds a Binho Host Adapter matching the relevant arguments."""
 
         # If we have an index argument, grab _all_ Binho Host Adapters and
@@ -523,41 +531,38 @@ class binhoArgumentParser(argparse.ArgumentParser):
             port = manager.getPortByDeviceID((args.deviceID))
 
             if port:
-                return binhoHostAdapter.binhoHostAdapter(deviceID=args.deviceID)
-            else:
-                raise DeviceNotFoundError
+                return binhoHostAdapter(deviceID=args.deviceID)
+            raise DeviceNotFoundError
 
-        elif args.port:
+        if args.port:
             ports = manager.listAvailablePorts()
 
             if args.port not in ports:
                 raise DeviceNotFoundError
-            return binhoHostAdapter.binhoHostAdapter(port=args.port)
+            return binhoHostAdapter(port=args.port)
 
-        elif args.index:
+        if args.index:
             # Find _all_ Binho host adapters
             ports = manager.listAvailablePorts()
 
             # ... and then select the one with the provided index.
             if len(ports) <= args.index:
                 raise DeviceNotFoundError
-            return binhoHostAdapter.binhoHostAdapter(port=ports[args.index])
+            return binhoHostAdapter(port=ports[args.index])
 
         # If we have a serial number, look only for a single device. Theoretically,
         # we should never have more than one Binho host adapter with the same
         # serial number.
-        else:
-            ports = manager.listAvailablePorts()
+        ports = manager.listAvailablePorts()
 
-            # ... and then select the one with the provided index.
-            if len(ports) < 1:
-                raise DeviceNotFoundError
-            return binhoHostAdapter.binhoHostAdapter(port=ports[0])
+        # ... and then select the one with the provided index.
+        if len(ports) < 1:
+            raise DeviceNotFoundError
+        return binhoHostAdapter(port=ports[0])
 
 
 def binho_assets_directory():
     """ Provide a quick function that helps us get at our assets directory. """
-    import os
 
     # Find the path to the module, and then find its assets folder.
     module_path = os.path.dirname(__file__)
@@ -566,14 +571,13 @@ def binho_assets_directory():
 
 def find_binho_asset(filename):
     """ Returns the path to a given Binho asset, if it exists, or None if the Binho asset isn't provided."""
-    import os
 
     asset_path = os.path.join(binho_assets_directory(), filename)
 
     if os.path.isfile(asset_path):
         return asset_path
-    else:
-        return None
+
+    return None
 
 
 def binho_error_hander():
