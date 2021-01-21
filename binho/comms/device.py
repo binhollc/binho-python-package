@@ -1,6 +1,7 @@
 # import usb
 import os
 import collections
+import hid
 
 from ..errors import DeviceNotFoundError
 
@@ -62,6 +63,10 @@ class binhoAPI(object):
         self._debug = os.getenv("BINHO_NOVA_DEBUG")
 
         self._inBootloader = False
+        self._inDAPLinkMode = False
+
+        self._hid_serial_number = 'UNKNOWN'
+        self._hid_path = None
 
         # By default, accept any device with the default vendor/product IDs.
         self.identifiers = self.populate_default_identifiers(device_identifiers)
@@ -224,7 +229,11 @@ class binhoAPI(object):
     @property
     def deviceID(self):
         """Reads the board ID number for the device."""
-        return self.apis.core.deviceID
+
+        if not self._inBootloader and not self._inDAPLinkMode:
+            return self.apis.core.deviceID.upper()
+        else:
+            return self._hid_serial_number.upper()
 
     @property
     def commPort(self):
@@ -256,6 +265,10 @@ class binhoAPI(object):
     def inBootloaderMode(self):
         return self._inBootloader
 
+    @property
+    def inDAPLinkMode(self):
+        return self._inDAPLinkMode
+
     def initialize_apis(self):
         """Hook-point for sub-boards to initialize their APIs after
         we have comms up and running and auto-enumeration is complete.
@@ -265,11 +278,33 @@ class binhoAPI(object):
         self.comms.start()
 
         try:
+            # see if it's in DAPLink mode
             self.deviceID
+            self._inDAPLinkMode = False
             self._inBootloader = False
             return True
+
         except BaseException:
-            self._inBootloader = True
+
+            try:
+
+                h = hid.device()
+                h.open(int(self.USB_VID_PID.split(':')[0], 16), int(self.USB_VID_PID.split(':')[1], 16))
+
+                self._hid_serial_number = '0x' + h.get_serial_number_string()
+                # self._hid_path = h.get_indexed_string()
+
+                if h.get_product_string() == 'CMSIS-DAP':
+                    self._inDAPLinkMode = True
+                    self._inBootloader = False
+
+                else:
+                    self._inDAPLinkMode = False
+                    self._inBootloader = True
+
+            except:
+                pass
+
             return False
 
     def addIOPinAPI(self, name, ioPinNumber):

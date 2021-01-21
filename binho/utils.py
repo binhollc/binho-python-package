@@ -172,6 +172,28 @@ class binhoDFUManager:
 
     removableDrivesSnapshot = []
 
+    def switchToDAPLink(device):
+
+        daplinkUpdateURL = device.DAPLINK_UPDATE_URL
+
+        version = binhoDFUManager.getLatestFirmwareVersion(daplinkUpdateURL)
+        url = binhoDFUManager.getLatestFirmwareUrl(daplinkUpdateURL)
+        name = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
+        binhoDFUManager.downloadFirmwareFile(url)
+
+        figFileName = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
+
+        binhoDFUManager.takeDrivesSnapshot()
+
+        device.reset_to_bootloader()
+        time.sleep(5)
+
+        newDrives = binhoDFUManager.getNewDrives()
+
+        binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
+
+        return True
+
     def takeDrivesSnapshot():
 
         snapshot = psutil.disk_partitions()
@@ -251,7 +273,7 @@ class binhoDFUManager:
 
         url = binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
 
-        return url.split('/')[6]
+        return url.split('/')[-1]
 
     def getLatestFirmwareUrl(manifestURL, fail_silent=False):
 
@@ -261,7 +283,7 @@ class binhoDFUManager:
 
         assetsDir = binho_assets_directory()
 
-        firmwareFilename = url.split('/')[6]
+        firmwareFilename = url.split('/')[-1]
 
         try:
             r = requests.get(url)

@@ -54,6 +54,7 @@ setup(
             "binho_eeprom = binho.commands.binho_eeprom:main",
             "binho_firmware = binho.commands.binho_firmware:main",
             "binho_dfu = binho.commands.binho_firmware:main",
+            "binho_daplink = binho.commands.binho_daplink:main"
         ],
     },
     author="Binho LLC",
@@ -65,7 +66,8 @@ setup(
         "tabulate",
         "intelhex",
         "prompt_toolkit<2.1.0",
-        "pyserial"
+        "pyserial",
+        "hidapi"
     ],
     data_files=[('/binho/assets', [])],
     description="Python package for Binho USB host adapter products",
