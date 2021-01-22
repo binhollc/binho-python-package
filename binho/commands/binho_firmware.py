@@ -42,8 +42,8 @@ def main():
     log_function = log_verbose if args.verbose else log_silent
 
     try:
-        if not(args.mode == 'app' or args.mode == 'dap'):
-            print("Invalid 'mode' parameter. Only 'app' and 'dap' are supported!")
+        if not(args.mode == 'app' or args.mode == 'dap' or args.mode == 'btl'):
+            print("Invalid 'mode' parameter. Only 'app', 'dap', and 'btl' are supported!")
             sys.exit(1)
 
         log_function("Trying to find a Binho host adapter...")
@@ -85,6 +85,13 @@ def main():
 
             log_function('Downloading DAPLink Firmware...')
             binhoDFUManager.switchToDAPLink(device)
+            log_function('Completed!')
+
+        elif args.mode == 'btl':
+
+            log_function('Entering Bootloader...')
+            device.reset_to_bootloader()
+            time.sleep(5)
             log_function('Completed!')
 
         else:
