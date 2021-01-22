@@ -16,16 +16,26 @@ def print_core_info(device):
     """ Prints the core information for a device. """
 
     if device.inBootloaderMode:
-        print("Found a {}!".format(device.productName) + " [DFU]")
+        print("Found a {}".format(device.productName) + " [in DFU Mode]")
         print("  Port: {}".format(device.commPort))
+        print("  Device ID: {}".format(device.deviceID))
         print(
-            "   DFU: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r" \
-          + "        is completed or it is power cycled."
+            "  Note: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r" \
+            "        is completed or it is power cycled."
+        )
+
+    elif device.inDAPLinkMode:
+        print("Found a {}".format(device.productName) + " [in DAPLink Mode]")
+        print("  Port: {}".format(device.commPort))
+        print("  Device ID: {}".format(device.deviceID))
+        print(
+            "  Note: This device is in DAPlink Mode! It can be returned to host adapter (normal) mode\n\r" \
+            "        by issuing 'binho daplink -q' command."
         )
 
     else:
         fwVersion = device.firmwareVersion
-        print("Found a {}!".format(device.productName))
+        print("Found a {}".format(device.productName))
         print("  Port: {}".format(device.commPort))
         print("  Device ID: {}".format(device.deviceID))
 
@@ -173,6 +183,14 @@ def main():
             # If desired, print all APIs.
             # if args.print_apis or args.print_all:
             #    print_apis(device)
+
+        elif device.inDAPLinkMode:
+            if args.quiet:
+                print(device.productName + " [DAPLink] (" + device.commPort + ")")
+                device.close()
+                continue
+
+            print_core_info(device)
 
         else:
             # If we're in quiet mode, print only the serial number and abort.
