@@ -116,7 +116,7 @@ class binhoNova(binhoDevice):
 
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
-            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
+            self._populate_gpio(self, self.gpio, self.GPIO_MAPPINGS)
 
             self._populate_dac(self.dac, self.DAC_MAPPINGS)
 

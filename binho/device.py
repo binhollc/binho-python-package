@@ -72,12 +72,12 @@ class binhoDevice(binhoAPI):
             self.leds[i] = LED(self, i)
 
     @staticmethod
-    def _populate_gpio(gpio, mapping):
+    def _populate_gpio(board, gpio, mapping):
         """ Adds GPIO pin definitions to the board's main GPIO object. """
 
         # Handle each GPIO mapping.
         for name, pin in mapping.items():
-            gpio.registerGPIO(name, pin)
+            gpio.registerGPIO(board, name, pin)
 
     @staticmethod
     def _populate_adc(adc, mapping):

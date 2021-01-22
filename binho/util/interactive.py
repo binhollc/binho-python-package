@@ -1,6 +1,7 @@
 """
 Utilities for running Binho host adapter code interactively in IPython.
 """
+from IPython.core.error import StdinNotImplementedError
 
 from IPython.core.magic import (
     Magics,
@@ -104,7 +105,9 @@ class binhoShellMagics(Magics):
         # Call our inner reset...
         if "s" in opts:  # Soft reset
             user_ns = self.shell.user_ns
+            # pylint: disable=no-member
             for i in self.who_ls():
+                # pylint: enable=no-member
                 del user_ns[i]
         elif len(args) == 0:  # Hard reset
             self.shell.reset(new_session=False)

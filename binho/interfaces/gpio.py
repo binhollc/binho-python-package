@@ -31,7 +31,7 @@ class GPIOProvider(binhoInterface):
     # pins
     ALLOW_EXTERNAL_REGISTRATION = True
 
-    def __init__(self, name_mappings=None):
+    def __init__(self, board, name_mappings=None):
         """Sets up the basic fields for a GPIOProvider.
         Parameters:
             name_mappings -- Allows callers to rename the local / fixed GPIO pin names.
@@ -64,9 +64,9 @@ class GPIOProvider(binhoInterface):
                 continue
 
             # Register each fixed GPIO.
-            self.__registerGPIO(name, line)
+            self.__registerGPIO(board, name, line)
 
-    def registerGPIO(self, name, line, used=False):
+    def registerGPIO(self, board, name, line, used=False):
         """
         Registers a GPIO pin for later use. Usually only used in board setup.
         Args:
@@ -83,9 +83,9 @@ class GPIOProvider(binhoInterface):
             )
 
         # Otherwise, delegate to our internal registration method.
-        self.__registerGPIO(name, line, used)
+        self.__registerGPIO(board, name, line, used)
 
-    def __registerGPIO(self, name, line, used=False):
+    def __registerGPIO(self, board, name, line, used=False):
         """
         Registers a GPIO pin for later use. Usually only used in board setup.
         Args:
@@ -97,7 +97,7 @@ class GPIOProvider(binhoInterface):
 
         # Store the full name in our pin mappings.
         self.pin_mappings[name] = line
-        self.board.addIOPinAPI(name, line)
+        board.addIOPinAPI(name, line)
 
         if not used:
             self.markPinAsUnused(name)
@@ -236,11 +236,11 @@ class GPIO(GPIOProvider):
             board -- Binho host adapter whose GPIO lines are to be controlled
         """
 
-        # Set up our basic fields...
-        super(GPIO, self).__init__()
-
-        # ... and store information about the our low-level connection.
+        # store information about the our low-level connection.
         self.board = board
+
+        # Set up our basic fields...
+        super().__init__(self.board)
 
     def setPinMode(self, line, mode, initial_value=False):
         """

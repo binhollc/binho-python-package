@@ -154,7 +154,7 @@ def transmit(device, address, data, receive_length, log_function):
     i2c_device = I2CDevice(device.i2c, address)
 
     log_function("Writing to address %s" % hex(address))
-    received_data, i2c_status = i2c_device.transmit(data, receive_length)
+    received_data, i2c_status = i2c_device.transfer(data, receive_length)
 
     sentBytes = "W:"
     for byte in data:
@@ -244,9 +244,9 @@ def scan(device, pullup, frequencies, log_function):
     if len(addr_info) == 0:
         print("No devices found!")
         return
-    else:
-        print("Discovered %s I2C devices" % len(addr_info))
-        print()
+
+    print("Discovered %s I2C devices" % len(addr_info))
+    print()
 
     for address in addr_info:
         for clkHz in addr_info[address]:

@@ -40,8 +40,8 @@ class binhoI2CDriver:
 
         if "ENABLED" in result:
             return True
-        else:
-            return False
+
+        return False
 
     @usePullups.setter
     def usePullups(self, pull):
@@ -81,14 +81,14 @@ class binhoI2CDriver:
 
         if "8BIT" in result:
             return 8
-        elif "7BIT" in result:
+        if "7BIT" in result:
             return 7
-        else:
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C'
-                + str(self.i2cIndex)
-                + ' CLK"'
-            )
+
+        raise RuntimeError(
+            f'Error Binho responded with {result}, not the expected "-I2C'
+            + str(self.i2cIndex)
+            + ' CLK"'
+        )
 
     @addressBits.setter
     def addressBits(self, bits):
@@ -103,10 +103,10 @@ class binhoI2CDriver:
                 )
 
             return True
-        else:
-            raise AttributeError(
-                f"AddressBits can be only be set to a value of 7 or 8, not " + str(bits)
-            )
+
+        raise AttributeError(
+            f"AddressBits can be only be set to a value of 7 or 8, not " + str(bits)
+        )
 
     def scanAddress(self, address, i2cIndex=0):
 
@@ -115,8 +115,8 @@ class binhoI2CDriver:
 
         if "OK" in result:
             return True
-        else:
-            return False
+
+        return False
 
     def write(self, address, startingRegister, data):
 
@@ -228,15 +228,15 @@ class binhoI2CDriver:
                 )
 
             return bytearray()
-        else:
-            if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD "):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-I2C '
-                    + str(self.i2cIndex)
-                    + ' RXD ..."'
-                )
 
-            return bytearray.fromhex(result[9:])
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD "):
+            raise RuntimeError(
+                f'Error Binho responded with {result}, not the expected "-I2C '
+                + str(self.i2cIndex)
+                + ' RXD ..."'
+            )
+
+        return bytearray.fromhex(result[9:])
 
     def start(self, address):
 
@@ -247,7 +247,6 @@ class binhoI2CDriver:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )
-
         return True
 
     def end(self, repeat=False):

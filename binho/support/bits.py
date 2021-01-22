@@ -71,8 +71,8 @@ class bits:
             else:
                 length = len(value)
             return cls.from_int(int(value, 2), length)
-        else:
-            return cls.from_int(0)
+
+        return cls.from_int(0)
 
     @classmethod
     def from_iter(cls, iterator):
@@ -90,8 +90,7 @@ class bits:
         if isinstance(value, cls):
             if length is None:
                 return value
-            else:
-                return cls.from_int(value._int_, length)
+            return cls.from_int(value._int_, length)
         if isinstance(value, int):
             return cls.from_int(value, length)
         if isinstance(value, str):
@@ -151,15 +150,15 @@ class bits:
         if isinstance(key, int):
             if key < 0:
                 return (self._int_ >> (self._len_ - key)) & 1
-            else:
-                return (self._int_ >> key) & 1
+
+            return (self._int_ >> key) & 1
         if isinstance(key, slice):
             start, stop, step = key.indices(self._len_)
             assert step == 1
             if stop < start:
                 return self.__class__()
-            else:
-                return self.__class__(self._int_ >> start, stop - start)
+
+            return self.__class__(self._int_ >> start, stop - start)
         raise TypeError(
             "bits indices must be integers or slices, not {}".format(
                 key.__class__.__name__

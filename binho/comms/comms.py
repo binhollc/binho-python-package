@@ -197,10 +197,10 @@ class binhoComms(object):
     def checkDeviceSuccess(self, ret_str):
         if ret_str == "-OK":
             return True
-        elif ret_str == "-NG":
+        if ret_str == "-NG":
             return False
-        else:
-            raise binhoException(f"Invalid command response: {ret_str}")
+
+        raise binhoException(f"Invalid command response: {ret_str}")
 
     # Communication Management
 
@@ -260,8 +260,8 @@ class binhoComms(object):
 
         if e:
             return True
-        else:
-            return False
+
+        return False
 
     def close(self):
 
@@ -280,8 +280,8 @@ class binhoComms(object):
 
         if interrupt in self.interrupts:
             return True
-        else:
-            return False
+
+        return False
 
     def interruptClear(self, interrupt):
 

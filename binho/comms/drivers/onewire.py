@@ -38,7 +38,7 @@ class binho1WireDriver:
 
         self.usb.sendCommand(f"1WIRE{oneWireIndex} RESET")
 
-        return self.usb.checkDeviceSuccess(self.self.usb.readResponse())
+        return self.usb.checkDeviceSuccess(self.usb.readResponse())
 
     def writeByte(self, data, oneWireIndex=0, powered=True):
         """
@@ -62,7 +62,7 @@ class binho1WireDriver:
         else:
             self.usb.sendCommand(f"1WIRE{oneWireIndex} WRITE {data}")
 
-        if not self.usb.checkDeviceSuccess(self.self.usb.readResponse()):
+        if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Write received NAK")
 
     def readByte(self, oneWireIndex=0):
@@ -146,7 +146,7 @@ class binho1WireDriver:
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SELECT")
 
-        if not self.usb.checkDeviceSuccess(self.self.usb.readResponse()):
+        if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Select received NAK")
 
     def skip(self, oneWireIndex=0):
@@ -160,7 +160,7 @@ class binho1WireDriver:
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SKIP")
 
-        if not self.usb.checkDeviceSuccess(self.self.usb.readResponse()):
+        if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
             raise RuntimeError("Error executing 1-Wire Skip received NAK")
 
     def depower(self, oneWireIndex=0):

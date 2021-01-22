@@ -95,7 +95,7 @@ class binhoProtonovaSPI(binhoDevice):
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
             # if self.supports_api("gpio"):
-            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
+            self._populate_gpio(self, gpio, self.GPIO_MAPPINGS)
 
             # if self.supports_api("adc"):
             # self._populate_adc(self.adc, self.ADC_MAPPINGS)
@@ -103,15 +103,15 @@ class binhoProtonovaSPI(binhoDevice):
             # if self.supports_api('i2c'):
             # print('supports_api i2c success')
             self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0])
+            self._add_interface("i2c", [I2CBus(self, "I2C0")])
 
             # if self.supports_api('spi') and self.supports_api('gpio'):
             #    chip_select = self.gpio.get_pin('J1_P37')
             self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0])
+            self._add_interface("spi", [SPIBus(self, 0, "SPI0")])
 
             self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0])
+            self._add_interface("oneWire", [OneWireBus(self, "1WIRE0")])
 
             # if self.supports_api('uart'):
             # self._add_interface('uart', UART(self))

@@ -21,9 +21,9 @@ import requests
 
 
 
-# from . import binhoHostAdapter, _binhoHostAdapterSingletonWrapper
+from . import _binhoHostAdapterSingletonWrapper
 from . import binhoHostAdapter
-from .errors import DeviceNotFoundError, DeviceInBootloaderError
+from .errors import DeviceNotFoundError
 
 
 from .comms.manager import binhoDeviceManager
@@ -40,9 +40,10 @@ SI_PREFIXES = {
     "E+12": "T",
 }
 
-
+# pylint: disable=unused-argument
 def log_silent(string, end=None):
     """Silently discards all log data, but provides our logging interface."""
+    # pylint: enable=unused-argument
 
 
 def log_verbose(string, end="\n"):
@@ -91,10 +92,10 @@ def from_eng_notation(string, unit=None, units=None, to_type=None):
         units.append(unit)
 
     # If we have an acceptable unit, strip it off before we process things.
-    for unit in units:
-        string = string.replace(unit, "")
-        string = string.replace(unit.upper(), "")
-        string = string.replace(unit.lower(), "")
+    for unitstr in units:
+        string = string.replace(unitstr, "")
+        string = string.replace(unitstr.upper(), "")
+        string = string.replace(unitstr.lower(), "")
 
     # Strip off any unnecessary whitespace.
     string = string.strip()
@@ -155,7 +156,7 @@ class register:
 
         bitMask = 0
 
-        for i in range((upToIncludingBit - staringfromBit) + 1):
+        for _ in range((upToIncludingBit - staringfromBit) + 1):
             bitMask = (bitMask << 1) + 1
 
         bitMask = bitMask << staringfromBit
@@ -177,10 +178,12 @@ class binhoDFUManager:
 
         fwUpdateURL = device.FIRMWARE_UPDATE_URL
 
+        # pylint: disable=unused-variable
         version = binhoDFUManager.getLatestFirmwareVersion(fwUpdateURL)
         url = binhoDFUManager.getLatestFirmwareUrl(fwUpdateURL)
         name = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
         binhoDFUManager.downloadFirmwareFile(url)
+        # pylint: enable=unused-variable
 
         figFileName = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
 
@@ -202,10 +205,12 @@ class binhoDFUManager:
 
         daplinkUpdateURL = device.DAPLINK_UPDATE_URL
 
+        # pylint: disable=unused-variable
         version = binhoDFUManager.getLatestFirmwareVersion(daplinkUpdateURL)
         url = binhoDFUManager.getLatestFirmwareUrl(daplinkUpdateURL)
         name = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
         binhoDFUManager.downloadFirmwareFile(url)
+        # pylint: enable=unused-variable
 
         figFileName = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
 
@@ -243,15 +248,15 @@ class binhoDFUManager:
     def getBootloaderInfo(drive):
 
         btldr_info = drive.mountpoint + '\\INFO.TXT'
-        btldr_details = ''
+        # btldr_details = ''
         productModel = ''
-        boardID = ''
+        # boardID = ''
 
-        if os.path.isfile(btldr_info) == True:
+        if os.path.isfile(btldr_info):
             with open(btldr_info, 'r') as file:
-                btldr_details = file.readline().strip()
+                # btldr_details = file.readline().strip()
                 productModel = file.readline().strip()
-                boardID = file.readline().strip()
+                # boardID = file.readline().strip()
 
                 if productModel.startswith('Model: '):
                     productModel = productModel[7:]
@@ -282,7 +287,7 @@ class binhoDFUManager:
 
             raise RuntimeError(
                 "Unable to connect to Binho server and retrieve the data!"
-            )
+            ) from BaseException
 
     @classmethod
     def getLatestFirmwareVersion(cls, manifestURL, fail_silent=False):
@@ -319,8 +324,9 @@ class binhoDFUManager:
 
             if fail_silent:
                 return False
-            raise RuntimeError("Failed to download firmware file online!")
+            raise RuntimeError("Failed to download firmware file online!") from BaseException
 
+    # pylint: disable=unused-argument
     @classmethod
     def loadFirmwareFile(cls, figFileName, btldr_drive, fail_silent=False):
 
@@ -328,18 +334,19 @@ class binhoDFUManager:
 
         firmwareFilename = assetsDir + "/" + figFileName
 
-        if os.path.isfile(firmwareFilename) == True:
+        if os.path.isfile(firmwareFilename):
             shutil.copy2(firmwareFilename, btldr_drive.mountpoint + '\\fw.uf2')
         else:
             return False
 
         return True
+    # pylint: enable=unused-argument
 
 
 class binhoArgumentParser(argparse.ArgumentParser):
     """ Convenience-extended argument parser for Binho host adapter. """
 
-    """ Serial number expected from a device in DFU. """
+    # Serial number expected from a device in DFU.
     DFU_STUB_SERIAL = "dfu_flash_stub"
 
     def __init__(self, *args, **kwargs):
@@ -373,7 +380,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             self.raise_device_find_failures = False
 
         # Invoke the core function.
-        super(binhoArgumentParser, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Start off with no memoized arguments.
         self.memoized_args = None
@@ -524,16 +531,18 @@ class binhoArgumentParser(argparse.ArgumentParser):
             repsect -v/-q."""
         return self.get_log_function(), log_error
 
+    # pylint: disable=arguments-differ
     def parse_args(self):
         """ Specialized version of parse_args that memoizes, for Binho host adapters. """
 
         # If we haven't called parse_args yet, let the base class handle the parsing,
         # first.
         if self.memoized_args is None:
-            self.memoized_args = super(binhoArgumentParser, self).parse_args()
+            self.memoized_args = super().parse_args()
 
         # Always return our memoized version.
         return self.memoized_args
+    # pylint: enable=arguments-differ
 
     @classmethod
     def _find_binhoHostAdapter(cls, args):
@@ -597,8 +606,9 @@ def find_binho_asset(filename):
 
 
 def binho_error_hander():
-
+    # pylint: disable=unused-variable
     exc_type, exc_obj, tb = sys.exc_info()
+    # pylint: enable=unused-variable
     f = tb.tb_frame
     lineno = tb.tb_lineno
     filename = f.f_code.co_filename

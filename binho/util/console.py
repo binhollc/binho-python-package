@@ -108,7 +108,7 @@ class NTConsole(ConsoleBase):
             z = msvcrt.getwch()
             if z == unichr(13):
                 return unichr(10)
-            elif z in (unichr(0), unichr(0x0E)):  # functions keys, ignore
+            if z in (unichr(0), unichr(0x0E)):  # functions keys, ignore
                 msvcrt.getwch()
             else:
                 return z
@@ -168,9 +168,9 @@ def Console():
 
     if os.name == "posix":
         return POSIXConsole()
-    elif os.name == "nt":
+    if os.name == "nt":
         return NTConsole()
-    else:
-        raise NotImplementedError(
-            "Console support not implemented for OS '{}'.".format(os.name)
-        )
+
+    raise NotImplementedError(
+        "Console support not implemented for OS '{}'.".format(os.name)
+    )
