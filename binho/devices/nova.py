@@ -99,12 +99,17 @@ class binhoNova(binhoDevice):
         initSuccess = super().initialize_apis()
 
         if initSuccess:
-            self.gpio = GPIOProvider(self)
-            self.adc = ADC(self)
-            self.dac = DAC(self)
 
             # Set product name
             self.setProductName(self.PRODUCT_NAME)
+
+            # If the device is in bootloader or DAPLink mode, we don't want to continue
+            if self.inBootloaderMode or self.inDAPLinkMode:
+                return
+
+            self.gpio = GPIOProvider(self)
+            self.adc = ADC(self)
+            self.dac = DAC(self)
 
             # Create our simple peripherals.
             self._populate_simple_interfaces()

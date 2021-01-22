@@ -44,7 +44,7 @@ def main():
                 )
             )
 
-        if device.inBootloaderMode:
+        elif device.inBootloaderMode:
             print(
                 "{} found on {}, but it cannot be used now because it's in DFU mode".format(
                     device.productName, device.commPort
@@ -78,41 +78,29 @@ def main():
 
         if args.quit:
 
-            log_function('Returning to host adapter mode... This will cause the device to reset.')
+            if device.inDAPLinkMode:
 
-            fwUpdateURL = device.FIRMWARE_UPDATE_URL
-            firmwareFileURL = binhoDFUManager.getLatestFirmwareUrl(fwUpdateURL, True)
+                log_function('Returning to host adapter mode... This will cause the device to reset.')
+                binhoDFUManager.switchToNormal(device)
+                log_function('Completed!')
 
-            binhoDFUManager.downloadFirmwareFile(firmwareFileURL)
+            else:
 
-            figFileName = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
-
-            binhoDFUManager.takeDrivesSnapshot()
-
-            h = hid.device()
-            h.open(0x04D8, 0xED34)  # Binho Nova VendorID/ProductID
-
-            # enable non-blocking mode
-            h.set_nonblocking(1)
-
-            # write some data to the device
-            # print("Write the data")
-            h.write([0x00, 0x80])
-
-            # wait
-            time.sleep(5)
-
-            newDrives = binhoDFUManager.getNewDrives()
-
-            binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
-
-            log_function('Completed!')
+                log_function('{} is not in DAPLink mode.'.format(device.productName))
 
         else:
 
-            log_function('Switching to DAPLink mode... This will cause the device to reset.')
+            if device.inDAPLinkMode:
 
-            device.close()
+                log_function('{} is already in DAPLink mode.'.format(device.productName))
+
+            else:
+
+                log_function('Switching to DAPLink mode... This will cause the device to reset.')
+                binhoDFUManager.switchToDAPLink(device)
+                log_function('Completed!')
+
+        device.close()
 
     except Exception:
         # Catch any exception that was raised and display it

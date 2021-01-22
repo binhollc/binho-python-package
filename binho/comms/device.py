@@ -290,26 +290,32 @@ class binhoAPI():
 
         try:
             # see if it's in DAPLink mode
-            # self.deviceID
+            self.deviceID
             self._inDAPLinkMode = False
             self._inBootloader = False
             return True
 
         except BaseException:
 
-            h = hid.device()
-            h.open(int(self.USB_VID_PID.split(':')[0], 16), int(self.USB_VID_PID.split(':')[1], 16))
+            try:
 
-            self._hid_serial_number = '0x' + h.get_serial_number_string()
-            # self._hid_path = h.get_indexed_string()
+                h = hid.device()
+                h.open(int(self.USB_VID_PID.split(':')[0], 16), int(self.USB_VID_PID.split(':')[1], 16))
 
-            if h.get_product_string() == 'CMSIS-DAP':
-                self._inDAPLinkMode = True
-                self._inBootloader = False
+                self._hid_serial_number = '0x' + h.get_serial_number_string()
 
-            else:
-                self._inDAPLinkMode = False
-                self._inBootloader = True
+                if h.get_product_string() == 'CMSIS-DAP':
+                    self._inDAPLinkMode = True
+                    self._inBootloader = False
+
+                else:
+                    self._inDAPLinkMode = False
+                    self._inBootloader = True
+
+                return True
+
+            except BaseException:
+                pass
 
             return False
 
@@ -331,7 +337,15 @@ class binhoAPI():
         return None
 
     def reset_to_bootloader(self):
-        self.apis.core.resetToBtldr(fail_silent=True)
+
+        if self._inDAPLinkMode:
+            h = hid.device()
+            h.open(int(self.USB_VID_PID.split(':')[0], 16),int(self.USB_VID_PID.split(':')[1], 16),self._hid_serial_number[2:])
+            h.set_nonblocking(1)
+            h.write([0x00, 0x80])
+
+        else:
+            self.apis.core.resetToBtldr(fail_silent=True)
 
     def close(self):
         self.comms.close()

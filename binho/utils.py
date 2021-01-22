@@ -173,6 +173,31 @@ class binhoDFUManager:
     removableDrivesSnapshot = []
 
     @classmethod
+    def switchToNormal(cls, device):
+
+        fwUpdateURL = device.FIRMWARE_UPDATE_URL
+
+        version = binhoDFUManager.getLatestFirmwareVersion(fwUpdateURL)
+        url = binhoDFUManager.getLatestFirmwareUrl(fwUpdateURL)
+        name = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
+        binhoDFUManager.downloadFirmwareFile(url)
+
+        figFileName = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
+
+        binhoDFUManager.takeDrivesSnapshot()
+
+        device.reset_to_bootloader()
+        time.sleep(5)
+
+        newDrives = binhoDFUManager.getNewDrives()
+
+        binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
+
+        return True
+
+
+
+    @classmethod
     def switchToDAPLink(cls, device):
 
         daplinkUpdateURL = device.DAPLINK_UPDATE_URL
@@ -202,8 +227,6 @@ class binhoDFUManager:
 
         binhoDFUManager.removableDrivesSnapshot = [x for x in snapshot if x.opts == 'rw,removable']
 
-        print(binhoDFUManager.removableDrivesSnapshot)
-
     @classmethod
     def getNewDrives(cls):
 
@@ -232,13 +255,6 @@ class binhoDFUManager:
 
                 if productModel.startswith('Model: '):
                     productModel = productModel[7:]
-
-            print(btldr_details)
-            print(productModel)
-            print(boardID)
-
-        else:
-            print("not a binho device")
 
 
     @staticmethod
