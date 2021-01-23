@@ -16,7 +16,7 @@ def main():
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
-        description="utility for reading from Binho host adapter's ADC"
+        description="utility for controller Binho host adapter's GPIO pins"
     )
     parser.add_argument(
         "-m",

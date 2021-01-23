@@ -38,19 +38,12 @@ def main():
         device = parser.find_specified_device()
 
         if device.inDAPLinkMode:
-            print(
+            log_function(
                 "{} found on {} in DAPLink mode".format(
                     device.productName, device.commPort
                 )
             )
 
-        elif device.inBootloaderMode:
-            print(
-                "{} found on {}, but it cannot be used now because it's in DFU mode".format(
-                    device.productName, device.commPort
-                )
-            )
-            sys.exit(errno.ENODEV)
         else:
             log_function(
                 "{} found on {}. (Device ID: {})".format(
@@ -75,6 +68,15 @@ def main():
     # leave the serial port open.
 
     try:
+
+        if device.inBootloaderMode:
+            log_function('{} is in DFU mode, exiting to application mode before continuing...'\
+                         .format(device.productName)
+                         )
+            device.exit_bootloader()
+            time.sleep(5)
+            device = parser.find_specified_device()
+
 
         if args.quit:
 

@@ -168,24 +168,23 @@ class register:
 
 class binhoDFUManager:
 
+    _fw_releases_url = 'releases.json'
+    _fw_latest_url = 'latest/latest.json'
+    _daplink_latest_url ='latest/latest_dap.json'
+
     cachedManifestData = []
     cachedManifestUrl = ''
 
     removableDrivesSnapshot = []
 
+    bootloaderInfo = {
+        'version' : 'unknown',
+        'model': 'unknown',
+        'boardID': 'unknown'
+    }
+
     @classmethod
-    def switchToNormal(cls, device):
-
-        fwUpdateURL = device.FIRMWARE_UPDATE_URL
-
-        # pylint: disable=unused-variable
-        version = binhoDFUManager.getLatestFirmwareVersion(fwUpdateURL)
-        url = binhoDFUManager.getLatestFirmwareUrl(fwUpdateURL)
-        name = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
-        binhoDFUManager.downloadFirmwareFile(url)
-        # pylint: enable=unused-variable
-
-        figFileName = binhoDFUManager.getLatestFirmwareFilename(fwUpdateURL)
+    def switchToBootloader(cls, device):
 
         binhoDFUManager.takeDrivesSnapshot()
 
@@ -194,36 +193,46 @@ class binhoDFUManager:
 
         newDrives = binhoDFUManager.getNewDrives()
 
-        binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
+        binhoDFUManager.getBootloaderInfo(newDrives[0])
 
-        return True
+        return newDrives[0]
 
+
+    @classmethod
+    def switchToNormal(cls, device, release=None):
+
+        fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, release)
+        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
+
+        if fw_image_url:
+
+            binhoDFUManager.downloadFirmwareFile(fw_image_url)
+
+            bootloaderDrive = binhoDFUManager.switchToBootloader(device)
+
+            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
+
+            return True
+
+        return False
 
 
     @classmethod
     def switchToDAPLink(cls, device):
 
-        daplinkUpdateURL = device.DAPLINK_UPDATE_URL
+        fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, daplink=True)
+        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
 
-        # pylint: disable=unused-variable
-        version = binhoDFUManager.getLatestFirmwareVersion(daplinkUpdateURL)
-        url = binhoDFUManager.getLatestFirmwareUrl(daplinkUpdateURL)
-        name = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
-        binhoDFUManager.downloadFirmwareFile(url)
-        # pylint: enable=unused-variable
+        if fw_image_url:
+            binhoDFUManager.downloadFirmwareFile(fw_image_url)
 
-        figFileName = binhoDFUManager.getLatestFirmwareFilename(daplinkUpdateURL)
+            bootloaderDrive = binhoDFUManager.switchToBootloader(device)
 
-        binhoDFUManager.takeDrivesSnapshot()
+            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
 
-        device.reset_to_bootloader()
-        time.sleep(5)
+            return True
 
-        newDrives = binhoDFUManager.getNewDrives()
-
-        binhoDFUManager.loadFirmwareFile(figFileName, newDrives[0])
-
-        return True
+        return False
 
     @classmethod
     def takeDrivesSnapshot(cls):
@@ -248,18 +257,32 @@ class binhoDFUManager:
     def getBootloaderInfo(drive):
 
         btldr_info = drive.mountpoint + '\\INFO.TXT'
-        # btldr_details = ''
-        productModel = ''
-        # boardID = ''
 
         if os.path.isfile(btldr_info):
             with open(btldr_info, 'r') as file:
-                # btldr_details = file.readline().strip()
+                binhoDFUManager.bootloaderInfo['version'] = file.readline().strip()
                 productModel = file.readline().strip()
-                # boardID = file.readline().strip()
+                boardID = file.readline().strip()
 
                 if productModel.startswith('Model: '):
-                    productModel = productModel[7:]
+                    binhoDFUManager.bootloaderInfo['model'] = productModel[7:]
+
+                if boardID.startswith('Board-ID: '):
+                    binhoDFUManager.bootloaderInfo['boardID'] = boardID[10:]
+
+    @staticmethod
+    def getBootloaderVersion(drive):
+
+        btldr_version = 'unknown'
+
+        btldr_info = drive.mountpoint + '\\INFO.TXT'
+        if os.path.isfile(btldr_info):
+            with open(btldr_info, 'r') as file:
+                btldr_version = file.readline().strip()
+                productModel = file.readline().strip()
+                boardID = file.readline().strip()
+
+        return btldr_version
 
 
     @staticmethod
@@ -290,21 +313,82 @@ class binhoDFUManager:
             ) from BaseException
 
     @classmethod
-    def getLatestFirmwareVersion(cls, manifestURL, fail_silent=False):
+    def getLatestFirmwareVersion(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url+ binhoDFUManager._fw_latest_url
 
         return binhoDFUManager.getJsonManifestParameter(manifestURL, 'version', fail_silent)
 
     @classmethod
-    def getLatestFirmwareFilename(cls, manifestURL, fail_silent=False):
+    def getLatestFirmwareFilename(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_latest_url
 
         url = binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
 
         return url.split('/')[-1]
 
     @classmethod
-    def getLatestFirmwareUrl(cls, manifestURL, fail_silent=False):
+    def getLatestFirmwareUrl(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_latest_url
 
         return binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
+
+    @classmethod
+    def getFirmwareImageUrl(cls, base_url, release=None, daplink=False, fail_silent=False):
+
+        if not release:
+
+            manifestURL = base_url + binhoDFUManager._fw_latest_url
+
+            if daplink:
+                manifestURL = base_url + binhoDFUManager._daplink_latest_url
+
+            return binhoDFUManager.getJsonManifestParameter(manifestURL, 'url', fail_silent)
+
+        manifestURL = base_url + binhoDFUManager._fw_releases_url
+
+        with urllib.request.urlopen(manifestURL) as url:
+            data = json.loads(url.read().decode())
+
+            for r in data['releases']:
+                if r['version'] == release:
+                    return r['url']
+
+        return None
+
+    @classmethod
+    def getFirmwareFilename(cls, firmware_image_url):
+
+        return firmware_image_url.split('/')[-1]
+
+
+
+    @classmethod
+    def getAvailableFirmwareReleases(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_releases_url
+        releases = []
+
+        with urllib.request.urlopen(manifestURL) as url:
+            data = json.loads(url.read().decode())
+
+            for r in data['releases']:
+                releases.append(r['version'])
+
+        return releases
+
+    @classmethod
+    def isFirmwareVersionAvailable(cls, base_url, release):
+
+        avail_releases = binhoDFUManager.getAvailableFirmwareReleases(base_url)
+
+        if release in avail_releases:
+            return True
+
+        return False
+
 
     @classmethod
     def downloadFirmwareFile(cls, url, fail_silent=False):

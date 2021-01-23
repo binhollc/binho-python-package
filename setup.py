@@ -52,8 +52,7 @@ setup(
             "binho_gpio = binho.commands.binho_gpio:main",
             "binho_pwm = binho.commands.binho_pwm:main",
             "binho_eeprom = binho.commands.binho_eeprom:main",
-            "binho_firmware = binho.commands.binho_firmware:main",
-            "binho_dfu = binho.commands.binho_firmware:main",
+            "binho_dfu = binho.commands.binho_dfu:main",
             "binho_daplink = binho.commands.binho_daplink:main"
         ],
     },

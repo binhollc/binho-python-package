@@ -66,7 +66,7 @@ def print_core_info(device):
 
                 if newFwVerAvail:
                     print(
-                        "  Firmware Version: {} [A newer version is available! Use 'binho firmware' shell command to " \
+                        "  Firmware Version: {} [A newer version is available! Use 'binho dfu' shell command to " \
                            "update.]".format(
                             fwVersion
                         )

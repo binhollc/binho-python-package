@@ -23,8 +23,8 @@ class binhoNova(binhoDevice):
     # HANDLED_BOARD_IDS = [2]
     USB_VID_PID = "04D8:ED34"
     PRODUCT_NAME = "Binho Nova"
-    FIRMWARE_UPDATE_URL = "https://cdn.binho.io/fw/nova/latest/latest.json"
-    DAPLINK_UPDATE_URL = "https://cdn.binho.io/fw/nova/latest/latest_dap.json"
+    FIRMWARE_UPDATE_URL = "https://cdn.binho.io/fw/nova/"
+
 
     # The Binho Nova has one LED.
     SUPPORTED_LEDS = 1
