@@ -700,6 +700,7 @@ def binho_error_hander():
     line = linecache.getline(filename, lineno, f.f_globals)
 
     print()
+    print("Exception: {}".format(exc_type.__name__))
     print("Exception in {}, on line {}:".format(filename, lineno))
     print('"{}"'.format(line.strip()))
     print("{}".format(exc_obj))

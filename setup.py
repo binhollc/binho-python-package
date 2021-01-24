@@ -53,7 +53,8 @@ setup(
             "binho_pwm = binho.commands.binho_pwm:main",
             "binho_eeprom = binho.commands.binho_eeprom:main",
             "binho_dfu = binho.commands.binho_dfu:main",
-            "binho_daplink = binho.commands.binho_daplink:main"
+            "binho_daplink = binho.commands.binho_daplink:main",
+            "binho_flasher = binho.commands.binho_flasher:main",
         ],
     },
     author="Binho LLC",
