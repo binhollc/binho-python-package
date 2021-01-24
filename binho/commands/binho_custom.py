@@ -47,6 +47,14 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPLink mode".format(
+                    device.productName, device.commPort
+                )
+            )
+            sys.exit(errno.ENODEV)
         else:
             log_function(
                 "{} found on {}. (Device ID: {})".format(
@@ -88,13 +96,11 @@ def main():
 
         log_function("Taking {} samples...".format(args.sample_count))
 
-        # close the connection to the host adapter
-        device.close()
-
     except Exception:
         # Catch any exception that was raised and display it
         binho_error_hander()
 
+    finally:
         # close the connection to the host adapter
         device.close()
 
