@@ -150,7 +150,7 @@ def main():
 
             if args.reset:
                 target.reset()
-                log_function('Target {} reset'.format(target.part_number))
+                print('Target {} reset'.format(target.part_number))
 
     except pyocd.core.exceptions.TransferError:
 
