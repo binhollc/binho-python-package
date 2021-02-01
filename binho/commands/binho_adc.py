@@ -3,8 +3,6 @@
 from __future__ import print_function
 
 import sys
-import time
-import argparse
 import statistics
 import serial
 import errno
@@ -99,7 +97,7 @@ def main():
 
         if args.sample_count == 0:
             raise ValueError("Cannot take 0 samples! Samples must be >= 1.")
-        elif args.sample_count > 1:
+        if args.sample_count > 1:
             log_function("Taking {} samples...".format(args.sample_count))
         else:
             log_function("Taking {} sample...".format(args.sample_count))

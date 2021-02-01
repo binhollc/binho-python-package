@@ -340,7 +340,9 @@ class binhoAPI():
 
         if self._inDAPLinkMode:
             h = hid.device()
-            h.open(int(self.USB_VID_PID.split(':')[0], 16),int(self.USB_VID_PID.split(':')[1], 16),self._hid_serial_number[2:])
+            h.open(int(self.USB_VID_PID.split(':')[0], 16),
+                   int(self.USB_VID_PID.split(':')[1], 16),
+                   self._hid_serial_number[2:])
             h.set_nonblocking(1)
             h.write([0x00, 0x80])
 
@@ -351,7 +353,9 @@ class binhoAPI():
 
         if self._inBootloader:
             h = hid.device()
-            h.open(int(self.USB_VID_PID.split(':')[0], 16), int(self.USB_VID_PID.split(':')[1], 16),self._hid_serial_number[2:])
+            h.open(int(self.USB_VID_PID.split(':')[0], 16),
+                   int(self.USB_VID_PID.split(':')[1], 16),
+                   self._hid_serial_number[2:])
             h.set_nonblocking(1)
             h.write([0x00, 0x48, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00])
 

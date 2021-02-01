@@ -1,19 +1,15 @@
 # FIXME: remove dependencies
-# import usb
-import future
-import time
-
+import os
+import enum
 import threading
 import queue
 import signal
 import sys
 import serial
-import os
-import enum
 
-from ..errors import DeviceNotFoundError
+#from ..errors import DeviceNotFoundError
 
-from .manager import binhoDeviceManager
+#from .manager import binhoDeviceManager
 
 # from .drivers.OneWire import OneWire
 
@@ -30,7 +26,7 @@ class SerialPortManager(threading.Thread):
     stopper = None
     inBridgeMode = False
 
-    def __init__(self, serialPort, txdQueue, rxdQueue, intQueue, stopper):
+    def __init__(self, serialPort, txdQueue, rxdQueue, intQueue, stopper): # pylint: disable=too-many-arguments
         super().__init__()
         self.serialPort = serialPort
         self.txdQueue = txdQueue
@@ -49,7 +45,7 @@ class SerialPortManager(threading.Thread):
         except BaseException:
             self.stopper.set()
 
-        while not self.stopper.is_set():
+        while not self.stopper.is_set(): # pylint: disable=too-many-nested-blocks
 
             try:
                 if self.inBridgeMode:
@@ -77,7 +73,7 @@ class SerialPortManager(threading.Thread):
                         serialCommand = self.txdQueue.get() + "\n"
                         comport.write(serialCommand.encode("utf-8"))
 
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-except
                 self.stopper.set()
                 self.exception = e
                 # print('Comm Error!')
@@ -139,7 +135,7 @@ class oneWireCmd(enum.Enum):
     SKIP = "SKIP"
 
 
-class binhoComms(object):
+class binhoComms(): # pylint: disable=too-many-public-methods
     def __init__(self, serialPort):
 
         self.serialPort = serialPort
@@ -194,7 +190,8 @@ class binhoComms(object):
             print(result)
         return result
 
-    def checkDeviceSuccess(self, ret_str):
+    @classmethod
+    def checkDeviceSuccess(cls, ret_str):
         if ret_str == "-OK":
             return True
         if ret_str == "-NG":

@@ -1,7 +1,9 @@
+import time
+
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.programmer import binhoProgrammer
-import time
-from math import log2, ceil, floor
+
+from math import floor
 from intelhex import IntelHex
 
 """
@@ -1182,7 +1184,7 @@ class EEPROMDevice(binhoProgrammer):
 
         blankData = []
 
-        for i in range(self.capacity):
+        for _ in range(self.capacity):
             blankData.append(blankValue)
 
         return self.write(blankData)

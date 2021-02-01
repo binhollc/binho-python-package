@@ -1,23 +1,17 @@
 #!/usr/bin/env python
 #
-
 from __future__ import print_function
 
 import re
 import sys
 import errno
-import inspect
-import argparse
 
-from binho import binhoHostAdapter
+from IPython.terminal.interactiveshell import TerminalInteractiveShell
+
 from binho.utils import binhoArgumentParser
 from binho.util.interactive import binhoShellMagics
 
-import IPython
-from IPython.terminal.interactiveshell import TerminalInteractiveShell
-
-
-def main():
+def main(): # pylint: disable=too-many-statements
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
@@ -125,7 +119,7 @@ def main():
     shell.push("binho")
 
     # Create nice aliases for our primary interfaces.
-    # Unused variables
+    # pylint: disable=unused-variable
     i2c = binho.i2c
     spi = binho.spi
     dac = binho.dac
@@ -135,6 +129,7 @@ def main():
     gpio = binho.gpio
     # shell.push(('i2c', 'spi', 'adc', 'uart', 'gpio',))
     shell.push(("i2c", "spi", "gpio", "dac", "adc", "oneWire"))
+    # pylint: enable=unused-variable
 
     # Make the autoreload extension available.
     shell.extension_manager.load_extension("autoreload")
@@ -186,7 +181,6 @@ def main():
 
     # close the connection to the device
     binho.close()
-
 
 if __name__ == "__main__":
     main()

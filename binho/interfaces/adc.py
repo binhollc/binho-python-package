@@ -16,6 +16,8 @@ class ADC(binhoInterface):
                 "Specified an unavailable ADC! (Valid values are 0 and 1)."
             )
 
+        super().__init__(device)
+
         self.device = device
         self.api = self.device.apis.io
 
@@ -69,5 +71,5 @@ class ADC(binhoInterface):
 
         if len(self.PIN_MAPPINGS) > 0:
             return next(iter(self.PIN_MAPPINGS))
-        else:
-            raise ValueError("No pins are registered to the ADC!")
+
+        raise ValueError("No pins are registered to the ADC!")

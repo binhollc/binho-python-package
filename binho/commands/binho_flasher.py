@@ -4,17 +4,16 @@ from __future__ import print_function
 
 import errno
 import sys
-import time
-import argparse
-import statistics
-import hid
+import logging
+from pyocd.core.helpers import ConnectHelper
+from pyocd.flash.file_programmer import FileProgrammer
+from pyocd.flash.eraser import FlashEraser
 
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoDFUManager
+from binho.utils import log_silent, log_verbose, binho_error_hander
 from binho.errors import DeviceNotFoundError
+from binho.utils import binhoArgumentParser
 
-
-def main():
-    from binho.utils import binhoArgumentParser
+def main(): # pylint: disable=too-many-branches, too-many-statements
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
@@ -56,8 +55,7 @@ def main():
     log_function('Checking for pyOCD...')
 
     try:
-
-        import pyocd
+        import pyocd # pylint: disable=import-outside-toplevel
 
     except ModuleNotFoundError:
 
@@ -119,13 +117,6 @@ def main():
         if args.target:
             target_override = args.target
 
-
-
-        from pyocd.core.helpers import ConnectHelper
-        from pyocd.flash.file_programmer import FileProgrammer
-        from pyocd.flash.eraser import FlashEraser
-        import logging
-
         if args.verbose:
             logging.basicConfig(level=logging.INFO)
         else:
@@ -154,10 +145,10 @@ def main():
 
     except pyocd.core.exceptions.TransferError:
 
-        print("Problem communicating with the target MCU. Please make sure SWDIO, SWCLK, and GND are properly connected"\
-              " and the MCU is powered up.")
+        print("Problem communicating with the target MCU. Please make sure SWDIO, SWCLK, and GND are properly " \
+              " connected and the MCU is powered up.")
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
 
         # Catch any exception that was raised and display it
         binho_error_hander()
@@ -166,7 +157,6 @@ def main():
 
         # close the connection to the host adapter
         device.close()
-
 
 if __name__ == "__main__":
     main()

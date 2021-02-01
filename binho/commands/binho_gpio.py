@@ -139,7 +139,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 
