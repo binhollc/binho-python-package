@@ -18,7 +18,7 @@ class I2CBus(binhoInterface):
         buffer_size=1024,
         clock_frequency=400000,
         enable_pullups=False,
-    ):
+    ): # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new I2C bus.
         Args:
@@ -26,6 +26,8 @@ class I2CBus(binhoInterface):
             name -- The display name for the given I2C bus.
             buffer_size -- The size of the I2C receive buffer on the Binho host adapter.
         """
+
+        super().__init__(board)
 
         # Store a reference to the parent board, and our API.
         self.board = board
@@ -135,7 +137,7 @@ class I2CBus(binhoInterface):
 
         writeSuccess = True
         try:
-            result = self.api.writeToReadFrom(hex(address), True, 0, len(data), data)
+            self.api.writeToReadFrom(hex(address), True, 0, len(data), data)
         except BaseException:
             writeSuccess = False
 

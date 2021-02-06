@@ -5,20 +5,16 @@ from __future__ import print_function
 import os
 import errno
 import sys
-import ast
 import time
 
-import binho
 from intelhex import IntelHex
-from binho import binhoHostAdapter
-from binho.utils import log_silent, log_verbose, binho_error_hander
-from binho.interfaces.i2cDevice import I2CDevice
-from binho.interfaces.i2cBus import I2CBus
+import binho # pylint: disable=unused-import
+from binho import binhoHostAdapter # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
-def main():
-    from binho.utils import binhoArgumentParser
+def main(): # pylint: disable=too-many-locals
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(description="Utility for working with I2C EEPROMs")
@@ -136,10 +132,10 @@ def main():
 
     try:
 
-        t0 = time.time()
+        t0 = time.time()  # pylint: disable=unused-variable
 
-        ih = IntelHex()
-        programmer = []
+        ih = IntelHex()   # pylint: disable=unused-variable
+        programmer = []   # pylint: disable=unused-variable
         device.operationMode = "I2C"
 
         if args.partnumber:
@@ -251,7 +247,7 @@ def main():
 
         if args.read:
 
-            filename, file_extension = os.path.splitext(args.read)
+            filename, file_extension = os.path.splitext(args.read) # pylint: disable=unused-variable
 
             fileFormat = "bin"
             if file_extension == ".hex":
@@ -306,7 +302,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

@@ -61,7 +61,7 @@ class binhoCoreDriver:
         self.usb.sendCommand("+BTLDR")
         result = self.usb.readResponse()
 
-        if not result.startswith("-OK") and fail_silent == False:
+        if not result.startswith("-OK") and not fail_silent:
             raise RuntimeError(
                 f'Error Binho responded with {result}, not the expected "-OK"'
             )

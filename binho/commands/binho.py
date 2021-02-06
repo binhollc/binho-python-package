@@ -108,7 +108,7 @@ def find_subcommand(name, allow_partial_matches=True, print_errors=True):
     if allow_partial_matches:
         matches = [
             subcommand
-            for subcommand in subcommands.keys()
+            for subcommand in subcommands
             if subcommand.startswith(name)
         ]
 
@@ -117,7 +117,7 @@ def find_subcommand(name, allow_partial_matches=True, print_errors=True):
             return subcommands[matches[0]]
 
         # Otherwise, print the error.
-        elif matches and print_errors:
+        if matches and print_errors:
             matches = "\n\t".join(matches)
             print(
                 "Subcommand short-name '{}' is ambiguous; it could refer to:\n\t{}\n".format(
@@ -159,7 +159,7 @@ def print_usage(argv):
 
     # If we don't have argument name information, assume this was called
     # "binho"
-    name = os.path.basename(argv[0]) if len(argv) else "binho"
+    name = os.path.basename(argv[0]) if argv else "binho"
 
     print("usage: {} <subcommand>\n".format(name))
     print("Top-level utility for working with Binho host adapter devices.\n")

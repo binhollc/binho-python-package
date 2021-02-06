@@ -11,6 +11,7 @@ class SPIDevice(binhoInterface):
             chip_select -- The GPIOPin object that acts as the chip select for the given device.
             spi_mode    -- The SPI mode to use for the given transaction.
         """
+        super().__init__(spi_bus)
 
         # Store our interface...
         self._bus = spi_bus

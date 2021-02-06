@@ -18,7 +18,7 @@ class SPIBus(binhoInterface):
         name="spi bus",
         buffer_size=1024,
         clock_frequency=2000000,
-    ):
+    ): # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new SPI bus.
         FIXME: There's no reason we shouldn't just take the frequency desired
@@ -40,6 +40,7 @@ class SPIBus(binhoInterface):
             serial_clock_rate   -- The number of prescaler-output clocks per bit
                  on the bus, minus one.
         """
+        super().__init__(board)
 
         # Store a reference to the parent board.
         self.api = board.apis.spi
@@ -128,7 +129,7 @@ class SPIBus(binhoInterface):
         spi_mode=0,
         invert_chip_select=False,
         frequency=None,
-    ):
+    ): # pylint: disable=too-many-arguments, too-many-locals
         """
         Sends (and typically receives) data over the SPI bus.
         Args:

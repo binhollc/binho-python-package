@@ -6,16 +6,15 @@ import errno
 import sys
 import ast
 
-import binho
-from binho import binhoHostAdapter
-from binho.utils import log_silent, log_verbose, binho_error_hander
+import binho # pylint: disable=unused-import
+from binho import binhoHostAdapter # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.interfaces.i2cBus import I2CBus
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
@@ -112,13 +111,12 @@ def main():
 
         if args.scan:
             if args.frequency:
-                scan(device, args.pullup, [int(args.frequency)], log_function)
+                scan(device, args.pullup, [int(args.frequency)])
             else:
                 scan(
                     device,
                     args.pullup,
-                    [100000, 400000, 1000000, 3200000],
-                    log_function,
+                    [100000, 400000, 1000000, 3200000]
                 )
 
         if args.write and args.read:
@@ -138,7 +136,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 
@@ -215,7 +213,7 @@ def write(device, address, data, log_function):
     log_function("I2C write success: %s" % i2c_status)
 
 
-def scan(device, pullup, frequencies, log_function):
+def scan(device, pullup, frequencies):
     """
     Scan for connected I2C devices
         Standard mode: 100kHz

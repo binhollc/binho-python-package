@@ -20,16 +20,16 @@ termination_request = None
 last_keycodes = bytearray()
 
 
-def input_handler(console, input_queue, termination_request):
+def input_handler(console_arg, input_queue_arg, termination_request_arg):
     """ Thread body that gathers input from the user and enqueues it for processing. """
 
     def should_check_for_data():
         if os.name == "posix":
             return select.select([sys.stdin], [], [], 0) != ([], [], [])
-        else:
-            return True
 
-    while not termination_request.is_set():
+        return True
+
+    while not termination_request_arg.is_set():
 
         # If we don't have data waiting, skip this iteration.
         # This prevents us from entering a blocking read and sticking there
@@ -38,11 +38,11 @@ def input_handler(console, input_queue, termination_request):
             time.sleep(0.01)
             continue
 
-        key = console.getkey()
-        input_queue.put(key)
+        key = console_arg.getkey()
+        input_queue_arg.put(key)
 
 
-def exit(code):
+def exit_uart(code):
     termination_request.set()
     input_thread.join()
     console.cleanup()
@@ -52,7 +52,7 @@ def exit(code):
 def handle_special_functions(keycode):
     """ Handles any special functions associated with the relevant key. """
 
-    global last_keycodes
+    global last_keycodes # pylint: disable=global-statement
 
     # Keep track of the last four keycodes.
     # Add any new keycodes to our list, deleting any existing keys that would
@@ -63,13 +63,13 @@ def handle_special_functions(keycode):
 
     # If the user's entered CTRL+A, CTRL+C, exit.
     if last_keycodes.endswith(b"\x01\x03"):
-        exit(0)
+        exit_uart(0)
 
 
 def main():
     """ Core command. """
 
-    global input_thread, termination_request, console
+    global input_thread, termination_request, console # pylint: disable=global-statement
 
     parity_modes = {
         "none": UART.PARITY_NONE,

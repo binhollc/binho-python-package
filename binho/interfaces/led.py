@@ -9,6 +9,7 @@ class LED(binhoInterface):
         device -- The Binho Host Adapter device object that owns the given LED.
         led_number -- The one-indexed LED number.
         """
+        super().__init__(device)
 
         # Store a reference to the parent device.
         self.device = device

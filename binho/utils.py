@@ -170,7 +170,7 @@ class binhoDFUManager:
 
     _fw_releases_url = 'releases.json'
     _fw_latest_url = 'latest/latest.json'
-    _daplink_latest_url ='latest/latest_dap.json'
+    _daplink_latest_url = 'latest/latest_dap.json'
 
     cachedManifestData = []
     cachedManifestUrl = ''
@@ -278,9 +278,11 @@ class binhoDFUManager:
         btldr_info = drive.mountpoint + '\\INFO.TXT'
         if os.path.isfile(btldr_info):
             with open(btldr_info, 'r') as file:
+                # pylint: disable=unused-variable
                 btldr_version = file.readline().strip()
                 productModel = file.readline().strip()
                 boardID = file.readline().strip()
+                # pylint: enable=unused-variable
 
         return btldr_version
 
@@ -366,7 +368,7 @@ class binhoDFUManager:
 
 
     @classmethod
-    def getAvailableFirmwareReleases(cls, base_url, fail_silent=False):
+    def getAvailableFirmwareReleases(cls, base_url):
 
         manifestURL = base_url + binhoDFUManager._fw_releases_url
         releases = []

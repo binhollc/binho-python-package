@@ -6,13 +6,13 @@ import errno
 import os
 import sys
 
+from tqdm import tqdm
 from binho.comms.manager import CommandFailureError
 from binho.programmers.spiFlash import SPIFlash
 from binho.utils import from_eng_notation, human_readable_size, binhoArgumentParser
-from tqdm import tqdm
 
 
-def print_flash_info(spi_flash, log_function, log_error, args):
+def print_flash_info(spi_flash, log_function, log_error, args): # pylint: disable=unused-argument
     """ Function that prints the relevant flash chip's information to the console. """
 
     capacity = spi_flash.maximum_address + 1
@@ -295,7 +295,7 @@ def main():
         # Figure out the "override" page and flash size for any arguments provided.
         # If autodetection is enabled and works, these aren't used.
         maximum_address = args.flash_size - 1
-        num_pages = (args.flash_size + (args.page_size - 1)) // args.page_size
+        # num_pages = (args.flash_size + (args.page_size - 1)) // args.page_size
 
         # Create a SPI flash object.
         spi_flash = device.create_programmer(

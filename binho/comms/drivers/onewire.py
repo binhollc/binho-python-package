@@ -125,15 +125,15 @@ class binho1WireDriver:
                 raise RuntimeError(
                     f'Error Binho responded with {result}, not the expected "-OK"'
                 )
-            else:
-                return bytearray()
-        else:
-            if not result.startswith("-1WIRE0 RXD "):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."'
-                )
-            else:
-                return bytearray.fromhex(result[12:])
+
+            return bytearray()
+
+        if not result.startswith("-1WIRE0 RXD "):
+            raise RuntimeError(
+                f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."'
+            )
+
+        return bytearray.fromhex(result[12:])
 
     def select(self, oneWireIndex=0):
         """

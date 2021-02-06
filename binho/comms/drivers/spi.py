@@ -2,7 +2,7 @@ class binhoSPIDriver:
     def __init__(self, usb, spiIndex=0):
 
         self.usb = usb
-        self.spiIndex = 0
+        self.spiIndex = spiIndex
 
     @property
     def clockFrequency(self):
@@ -181,13 +181,13 @@ class binhoSPIDriver:
                 )
 
             return bytearray()
-        else:
-            if not result.startswith("-SPI0 RXD "):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-SPI0 RXD ..."'
-                )
 
-            return bytearray.fromhex(result[9:])
+        if not result.startswith("-SPI0 RXD "):
+            raise RuntimeError(
+                f'Error Binho responded with {result}, not the expected "-SPI0 RXD ..."'
+            )
+
+        return bytearray.fromhex(result[9:])
 
     def end(self, suppressError=False):
 

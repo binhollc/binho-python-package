@@ -1,5 +1,3 @@
-import os
-
 from ..device import binhoDevice
 from ..interfaces.gpio import GPIOProvider
 #from ..interfaces.dac import DAC
@@ -9,12 +7,11 @@ from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
 from ..interfaces.oneWireBus import OneWireBus
 
-from ..programmers.spiFlash import SPIFlash
-
-# from ..programmers.firmware import DeviceFirmwareManager
-# from ..interfaces.pattern_generator import PatternGenerator
-# from ..interfaces.sdir import SDIRTransceiver
-from ..interfaces.uart import UART
+#from ..programmers.spiFlash import SPIFlash
+#from ..programmers.firmware import DeviceFirmwareManager
+#from ..interfaces.pattern_generator import PatternGenerator
+#from ..interfaces.sdir import SDIRTransceiver
+#from ..interfaces.uart import UART
 
 
 class binhoProtonovaSPI(binhoDevice):

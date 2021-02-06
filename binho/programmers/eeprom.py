@@ -1,11 +1,12 @@
 import time
 
-from binho.interfaces.i2cDevice import I2CDevice
-from binho.programmer import binhoProgrammer
-
 from math import floor
 from intelhex import IntelHex
 
+from binho.interfaces.i2cDevice import I2CDevice
+from binho.programmer import binhoProgrammer
+
+# pylint: disable=pointless-string-statement
 """
 This programmer can configure itself using Microchip part numbers to identify the device we wish to address.
 In most cases, we will want to create the programmer like this:
@@ -21,6 +22,7 @@ Or to configure the EEPROM ourselves, by specifying the capacity and the page si
 By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different \
     I2C bus object.
 """
+# pylint: enable=pointless-string-statement
 
 BASE_DEVICE_ADDRESS = 0x50
 
@@ -964,11 +966,11 @@ def setbits(word, bits, value):
     """Map each bit of a value over a list of bit locations in a word"""
     # Make sure that value is expressible with bits given
     assert 1 << len(bits) > value
-    for i in range(0, len(bits)):
+    for i, bit in enumerate(bits):
         if value & 1 << i:
-            word |= 1 << bits[i]
+            word |= 1 << bit
         else:
-            word &= ~(1 << bits[i])
+            word &= ~(1 << bit)
     return word
 
 
@@ -985,7 +987,7 @@ class EEPROMDevice(binhoProgrammer):
         bitmask="AAA",
         slave_address=0,
         write_cycle_length=0.005,
-    ):
+    ): # pylint: disable=too-many-arguments
         """
         Creates a new Microchip I2C EEPROM Device.
         EEPROMDevice is directly instantiable, but typically you would instantiate it via the EEPROM() helper
@@ -1016,7 +1018,7 @@ class EEPROMDevice(binhoProgrammer):
         slave_address_bits = []
         for i in range(0, 3):
             bit = bitmask[2 - i]
-            if bit == "0" or bit == "1":  # Bit is of fixed value
+            if bit in ('0', '1'):  # Bit is of fixed value
                 mask |= 1 << i
                 base_address |= int(bit) * 1 << i
             elif bit == "A":  # Bit is part of pin selectable slave address
@@ -1060,10 +1062,10 @@ class EEPROMDevice(binhoProgrammer):
         if self.address_bits == 8:
             l = address & 0xFF
             return bytes([l])
-        else:
-            h = (address >> 8) & 0xFF
-            l = address & 0xFF
-            return bytes([h, l])
+
+        h = (address >> 8) & 0xFF
+        l = address & 0xFF
+        return bytes([h, l])
 
     def device_for_address(self, address):
         """Returns the appropriate device for handling writes to this address"""
@@ -1092,19 +1094,19 @@ class EEPROMDevice(binhoProgrammer):
             verifyResult = False
         else:
 
-            for i in range(len(readData)):
+            for i, data in enumerate(readData):
 
-                if not readData[i] == verifyData[i]:
+                if not data == verifyData[i]:
                     verifyResult = False
                     break
 
         return verifyResult
 
-    def verifyFile(self, file, format="bin"):
+    def verifyFile(self, file, fileformat="bin"):
 
         try:
             ih = IntelHex()
-            ih.loadfile(file, format)
+            ih.loadfile(file, fileformat)
             bytesToVerify = ih.tobinarray()
 
             return self.verify(bytesToVerify)
@@ -1115,7 +1117,7 @@ class EEPROMDevice(binhoProgrammer):
 
         return self.readBytes(0, self.capacity - 1)
 
-    def readToFile(self, file, format="bin"):
+    def readToFile(self, file, fileformat="bin"):
 
         result = False
 
@@ -1124,8 +1126,8 @@ class EEPROMDevice(binhoProgrammer):
         ih = IntelHex()
         ih.frombytes(readData)
 
-        if format == "bin" or format == "hex":
-            ih.tofile(file, format=format)
+        if fileformat in ("bin", "hex"):
+            ih.tofile(file, format=fileformat)
             result = True
         else:
             raise RuntimeError(
@@ -1174,7 +1176,8 @@ class EEPROMDevice(binhoProgrammer):
             # Either to the end of the block, or to the end address
             while addr <= max_addr:
                 bytes_to_read = (max_addr - addr) + 1
-                read_data, status = device.read(min(bytes_to_read, buff_size))
+                read_data, status = device.read(min(bytes_to_read, buff_size)) \
+                # pylint: disable=unused-variable
                 buff = buff + bytes(read_data)
                 addr = addr + len(read_data)
 
@@ -1193,11 +1196,11 @@ class EEPROMDevice(binhoProgrammer):
 
         return self.writeBytes(0, data)
 
-    def writeFromFile(self, file, format="bin"):
+    def writeFromFile(self, file, fileformat="bin"):
 
         try:
             ih = IntelHex()
-            ih.loadfile(file, format)
+            ih.loadfile(file, fileformat)
             bytesToWrite = ih.tobinarray()
 
             return self.write(bytesToWrite)

@@ -5,16 +5,12 @@ from __future__ import print_function
 import errno
 import sys
 import time
-import argparse
-import statistics
-import hid
 
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoDFUManager
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoDFUManager, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
@@ -104,7 +100,7 @@ def main():
 
         device.close()
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

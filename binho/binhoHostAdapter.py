@@ -1,5 +1,5 @@
 from .device import binhoDevice
-from .devices import nova
+from .devices import nova # pylint: disable=unused-import
 
 # Ensure that we have access to all Binho host adapter devices. Normally, we'd avoid
 # importing an entire namespace, but in this case, this allows us to ensure

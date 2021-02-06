@@ -5,17 +5,15 @@ from __future__ import print_function
 import errno
 import sys
 import ast
-import binascii
 
-import binho
-from binho import binhoHostAdapter
-from binho.utils import log_silent, log_verbose, binho_error_hander
+import binho # pylint: disable=unused-import
+from binho import binhoHostAdapter # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.interfaces.spiBus import SPIBus
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
@@ -153,7 +151,7 @@ def main():
             # close the connection to the host adapter
             device.close()
 
-    except Exception:
+    except Exception: # pylint: disable=broad-except
 
         # Catch any exception that was raised and display it
         binho_error_hander()
@@ -164,7 +162,8 @@ def main():
         device.close()
 
 
-def transmit(device, data, receive_length, csPin, invCS, mode, log_function):
+def transmit(device, data, receive_length, csPin, invCS, mode, log_function): \
+    # pylint: disable=too-many-arguments
     spi_bus = SPIBus(device)
     result = spi_bus.transfer(
         data, receive_length, chip_select=csPin, spi_mode=mode, invert_chip_select=invCS

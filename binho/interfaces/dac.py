@@ -10,8 +10,10 @@ class DAC(binhoInterface):
 
     def __init__(self, device, max_voltage=3.3, significant_bits=10, dac_num=0):
 
+        super().__init__(device)
+
         # Sanity check:
-        if dac_num != 0 and dac_num != 1:
+        if dac_num not in (0, 1):
             raise ValueError(
                 "Specified an unavailable DAC! (Valid values are 0 and 1)."
             )
@@ -77,5 +79,5 @@ class DAC(binhoInterface):
 
         if len(self.PIN_MAPPINGS) > 0:
             return next(iter(self.PIN_MAPPINGS))
-        else:
-            raise ValueError("No pins are registered to the DAC!")
+
+        raise ValueError("No pins are registered to the DAC!")

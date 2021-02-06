@@ -97,8 +97,8 @@ class binhoIODriver:
         if "%" in result or "V" in result:
             vals = result.split(" ")
             return int(vals[2])
-        else:
-            return int(result[11:])
+
+        return int(result[11:])
 
     @value.setter
     def value(self, value):

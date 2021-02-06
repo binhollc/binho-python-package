@@ -9,7 +9,7 @@ class OneWireDevice(binhoInterface):
         Parameters:
             onewire_bus     -- The 1Wire bus to which the given device is attached.
         """
-
+        super().__init__(onewire_bus)
         # Store our interface...
         self._bus = onewire_bus
 

@@ -1,8 +1,5 @@
 from ..interface import binhoInterface
 
-from warnings import warn
-
-
 class UART(binhoInterface):
     """
     TODO: description
@@ -20,11 +17,12 @@ class UART(binhoInterface):
 
     def __init__(
         self, board, baud=115200, data_bits=8, stop_bits=1, parity=None, uart_number=0
-    ):
+    ): # pylint: disable=too-many-arguments, unused-argument
         """
         Args:
             board -- Binho host adapter whose UART lines are to be controlled
         """
+        super().__init__(board)
 
         self.api = board.apis.uart
 

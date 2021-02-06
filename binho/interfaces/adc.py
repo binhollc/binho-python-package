@@ -10,13 +10,13 @@ class ADC(binhoInterface):
 
     def __init__(self, device, max_voltage=3.3, significant_bits=12, adc_num=0):
 
+        super().__init__(device)
+
         # Sanity check:
-        if adc_num != 0 and adc_num != 1:
+        if adc_num not in (0, 1):
             raise ValueError(
                 "Specified an unavailable ADC! (Valid values are 0 and 1)."
             )
-
-        super().__init__(device)
 
         self.device = device
         self.api = self.device.apis.io

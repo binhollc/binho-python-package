@@ -48,7 +48,7 @@ class binhoI2CDriver:
 
         if pull or pull == 1:
             val = 1
-        elif pull == False or pull == 0:
+        elif pull in (False, 0):
             val = 0
         else:
             raise AttributeError(
@@ -187,7 +187,8 @@ class binhoI2CDriver:
 
         return bytearray.fromhex(result[10:])
 
-    def writeToReadFrom(self, address, stop, numReadBytes, numWriteBytes, data):
+    def writeToReadFrom(self, address, stop, numReadBytes, numWriteBytes, data): \
+        # pylint: disable=too-many-arguments
 
         dataPacket = ""
         endStop = "1"

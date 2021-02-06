@@ -153,20 +153,12 @@ class SPIFlash(binhoProgrammer):
 
     @property
     def supportsSFDP(self):
-
         rxData = self.board.spi.transfer([0x5A], 9, chip_select=self.csPin)
+        isSupported = bool(rxData[5] == 0x53 and rxData[6] == 0x46 and rxData[7] == 0x44 and rxData[8] == 0x50)
 
-        if (
-            rxData[5] == 0x53
-            and rxData[6] == 0x46
-            and rxData[7] == 0x44
-            and rxData[8] == 0x50
-        ):
-            result = True
-        else:
-            result = False
-
-        return result
+        if isSupported:
+            return True
+        return False
 
     def readSFPDParameterTable(self, baseAddress, length):
 
@@ -692,7 +684,7 @@ class SPIFlash(binhoProgrammer):
         clocK_frequency=2000000,
         mode=0,
         force_page_size=None,
-    ):
+    ): # pylint: disable=too-many-arguments, too-many-locals
         """Set up a new SPI flash connection.
         Args:
             board -- The Binho Host Adapter that will be programming our flash chip.
@@ -723,7 +715,8 @@ class SPIFlash(binhoProgrammer):
             / self._deviceTopology["PAGE_SIZE_BYTES"]
         )
 
-        self.jedecID
+        # FIXME: is this needed? not in a try..catch, causing a pylint pointless-statement error
+        self.jedecID # pylint: disable=pointless-statement
 
         # If autodetect is set to True, we'll try to automatically detect
         # the device's topology.

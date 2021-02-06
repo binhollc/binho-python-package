@@ -54,8 +54,8 @@ class bits:
             length = operator.index(length)
             value &= ~(-1 << length)
         inst = object.__new__(cls)
-        inst._len_ = length
-        inst._int_ = value
+        inst._len_ = length # pylint: disable=protected-access
+        inst._int_ = value  # pylint: disable=protected-access
         return inst
 
     @classmethod

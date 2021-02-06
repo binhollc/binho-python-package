@@ -14,7 +14,6 @@ from .drivers.io import binhoIODriver
 from .drivers.onewire import binho1WireDriver
 
 # pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-public-methods
 class binhoAPI():
 
     HANDLED_BOARD_IDS = []
@@ -290,7 +289,7 @@ class binhoAPI():
 
         try:
             # see if it's in DAPLink mode
-            self.deviceID
+            self.deviceID # pylint: disable=pointless-statement
             self._inDAPLinkMode = False
             self._inBootloader = False
             return True
@@ -319,11 +318,9 @@ class binhoAPI():
 
             return False
 
-    # pylint: disable=unused-argument
-    def addIOPinAPI(self, name, ioPinNumber):
-
+    def addIOPinAPI(self, name, ioPinNumber): # pylint: disable=unused-argument
         self.apis.io[ioPinNumber] = binhoIODriver(self.comms, ioPinNumber)
-    # pylint: enable=unused-argument
+
     def supports_api(self, class_name):
         """ Returns true iff the board supports the given API class. """
         return class_name in self.apis
@@ -371,4 +368,3 @@ def _to_hex_string(byte_array):
     return "".join(hex_generator)
 
 # pylint: enable=too-many-instance-attributes
-# pylint: enable=too-many-public-methods
