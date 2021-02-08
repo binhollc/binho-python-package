@@ -1111,7 +1111,7 @@ class EEPROMDevice(binhoProgrammer):
 
             return self.verify(bytesToVerify)
         except BaseException:
-            raise RuntimeError("Failed to write from File")
+            raise RuntimeError("Failed to write from File") from BaseException
 
     def read(self):
 
@@ -1205,9 +1205,10 @@ class EEPROMDevice(binhoProgrammer):
 
             return self.write(bytesToWrite)
         except BaseException:
-            raise RuntimeError("Failed to write from File")
+            raise RuntimeError("Failed to write from File") from BaseException
 
-    def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0):
+    def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0): \
+        # pylint: disable=unused-argument
         """
         Write bytes sequentially starting at a specified memory address. Will read data back to assure write was
           successful.

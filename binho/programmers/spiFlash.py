@@ -684,7 +684,7 @@ class SPIFlash(binhoProgrammer):
         clocK_frequency=2000000,
         mode=0,
         force_page_size=None,
-    ): # pylint: disable=too-many-arguments, too-many-locals
+    ): # pylint: disable=too-many-arguments, too-many-locals, unused-argument
         """Set up a new SPI flash connection.
         Args:
             board -- The Binho Host Adapter that will be programming our flash chip.
@@ -726,7 +726,7 @@ class SPIFlash(binhoProgrammer):
 
                 numberOfParameterHeaders = self.getNumberOfSFPDHeaders()
 
-                for i in range(numberOfParameterHeaders):
+                for _ in range(numberOfParameterHeaders):
 
                     paramHeader = self.readSFPDParameterHeader(0x08)
 

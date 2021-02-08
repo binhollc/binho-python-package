@@ -76,7 +76,7 @@ class binhoProtonovaSPI(binhoDevice):
         """ Initialize a new Binho Protonova connection. """
 
         # Set up the core connection.
-        initSuccess = super(binhoProtonovaSPI, self).initialize_apis()
+        initSuccess = super().initialize_apis()
 
         if initSuccess:
             gpio = GPIOProvider(self)

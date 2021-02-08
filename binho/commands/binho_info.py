@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import textwrap
 import argparse
-import inspect
 import errno
 import sys
 

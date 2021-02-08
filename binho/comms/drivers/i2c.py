@@ -52,7 +52,7 @@ class binhoI2CDriver:
             val = 0
         else:
             raise AttributeError(
-                f"usePullups can be only be set to a value of True (1) or False (0), not "
+                "usePullups can be only be set to a value of True (1) or False (0), not "
                 + str(pull)
             )
 
@@ -105,7 +105,7 @@ class binhoI2CDriver:
             return True
 
         raise AttributeError(
-            f"AddressBits can be only be set to a value of 7 or 8, not " + str(bits)
+            "AddressBits can be only be set to a value of 7 or 8, not " + str(bits)
         )
 
     def scanAddress(self, address, i2cIndex=0):
