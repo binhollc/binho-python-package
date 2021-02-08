@@ -142,3 +142,10 @@ We're looking forward to adding support for various common UART use-cases. Addit
 be adding in support for Atmel SWI if we find enough folks interested in that protocol. Our
 development roadmap is highly determined by customer requests and feedback, so please feel
 free to reach out if there's a particular feature you'd like to see added into this library.
+
+## Attribution
+The architecture and functionality of this library was inspired by the work done by the original
+authors and the the numerous contributors to the [GreatFET library](https://github.com/greatscottgadgets/greatfet)
+
+A special thanks to [@ME-Mark-O](https://github.com/ME-Mark-O) and [@mlibtery1](https://github.com/mliberty1) for
+their feedback, suggestions, and contributions.
