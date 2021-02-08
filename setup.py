@@ -41,7 +41,6 @@ setup(
             "binho = binho.commands.binho:main",
             "binho_shell = binho.commands.binho_shell:main",
             "binho_info = binho.commands.binho_info:main",
-            "binho_uart = binho.commands.binho_uart:main",
             "binho_i2c = binho.commands.binho_i2c:main",
             "binho_spi = binho.commands.binho_spi:main",
             "binho_spiflash = binho.commands.binho_spiflash:main",
