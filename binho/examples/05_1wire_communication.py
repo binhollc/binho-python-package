@@ -168,7 +168,7 @@ try:
     rxData, status = binho.oneWire.transfer(writeData, readCount, command="SKIP")
 
     if status:
-        rcvdBytes = "Read from EEPROM - Response: {} byte(s):\t".format(len(rxData))
+        rcvdBytes = "Read from EEPROM - Resp: {} byte(s):\t".format(len(rxData))
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
@@ -184,7 +184,7 @@ try:
     )
 
     if status:
-        rcvdBytes = "Write To Scratchpad - Response: {} byte(s):\t".format(len(rxData))
+        rcvdBytes = "Write To Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
@@ -197,7 +197,7 @@ try:
     rxData, status = binho.oneWire.transfer(eepromCommand, 7, command="SKIP")
 
     if status:
-        rcvdBytes = "Read From Scratchpad - Response: {} byte(s):\t".format(len(rxData))
+        rcvdBytes = "Read From Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
@@ -216,7 +216,7 @@ try:
     )
 
     if status:
-        rcvdBytes = "Copy Scratchpad - Response: {} byte(s):\t".format(len(rxData))
+        rcvdBytes = "Copy Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
@@ -230,7 +230,7 @@ try:
     rxData, status = binho.oneWire.transfer(writeData, readCount, command="SKIP")
 
     if status:
-        rcvdBytes = "Read from EEPROM - Response: {} byte(s):\t".format(len(rxData))
+        rcvdBytes = "Read from EEPROM - Resp: {} byte(s):\t".format(len(rxData))
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
