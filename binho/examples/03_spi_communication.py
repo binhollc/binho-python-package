@@ -119,11 +119,11 @@ try:
     binho.spi.frequency = 6000000
 
     # Next set the bit order. The default is MSbit first, but some devices want LSbit first.
-    # binho.spi.bitOrder = 'MSBFIRST'
+    # binho.spi.bitOrder = "MSB"
     binho.spi.bitOrder = "LSB"
 
     # The last setting defines the bits per transfer, which can be set to either 8 or 16
-    # binho.spi.bitsPerTransfer = 16
+    # binho.spi.bitsPerTransfer = 8
     binho.spi.bitsPerTransfer = 16
 
     # Lets review the configuration before sending data
