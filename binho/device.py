@@ -12,7 +12,7 @@ from .accessory import binhoAccessory
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO
 
-
+from .programmers import *
 # from .interfaces.uart import UART
 
 # from .interfaces.pattern_generator import PatternGenerator

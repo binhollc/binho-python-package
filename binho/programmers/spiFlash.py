@@ -1,5 +1,5 @@
 from ..programmer import binhoProgrammer
-from ..utils import register
+from ..util.register import register
 
 # from .firmware import DeviceFirmwareManager
 
