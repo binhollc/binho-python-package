@@ -715,9 +715,6 @@ class SPIFlash(binhoProgrammer):
             / self._deviceTopology["PAGE_SIZE_BYTES"]
         )
 
-        # FIXME: is this needed? not in a try..catch, causing a pylint pointless-statement error
-        self.jedecID # pylint: disable=pointless-statement
-
         # If autodetect is set to True, we'll try to automatically detect
         # the device's topology.
         if autodetect:

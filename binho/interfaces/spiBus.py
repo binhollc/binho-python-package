@@ -21,24 +21,14 @@ class SPIBus(binhoInterface):
     ): # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new SPI bus.
-        FIXME: There's no reason we shouldn't just take the frequency desired
-            and compute it for the user. This API should change soon.
-        SPI freq is set using either the freq_preset parameter or the
-        combination of serial_clock_rate and clock_prescale_rate parameters.
-        When using serial_clock_rate & clock_prescale_rate parameters, the
-        resulting frequency will be:
-            PCLK / (clock_prescale_rate * [serial_clock_rate+1]).
+
         Args:
             board               -- The Binho host adapter whose SPI bus we want to control.
             name                -- The display name for the given SPI bus.
             chip_select_gpio    -- The GPIOPin object that will represent the bus's default chip select
             buffer_size         -- The size of the SPI receive buffer on the Binho host adapter.
-            freq_preset         -- Set clock_prescale_rate and serial_clock_rate using
-                one of the frequency presets defined by SPIBus.FREQ
-            clock_prescale_rate -- This even value between 2 and 254, by which
-                PCLK is divided to yield the prescaler output clock.
-            serial_clock_rate   -- The number of prescaler-output clocks per bit
-                 on the bus, minus one.
+            clock_frequency     -- The frequency of the clock for the SPI bus.
+
         """
         super().__init__(board)
 
