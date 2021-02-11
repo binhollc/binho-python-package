@@ -108,7 +108,7 @@ print()
 # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
 # This function accepts a number of parameters, not all shown or demo'd here
 spiFlash = binho.create_programmer(
-    "spiFlash", chipSelectPin=csPin, autocheckSFDP=True, mode=0
+    "spiFlash", chip_select_pin=csPin, autodetect=True, mode=0
 )
 
 # Let's see how much we can learn about the device without any prior knowledge
@@ -136,18 +136,20 @@ if deviceSupportForSFDP:
             spiFlash.capacityBytes, spiFlash.pageSizeBytes, spiFlash.pageCount
         )
     )
-#    for param, value in spiFlash.parameterTable.items():
-#        print("{}: {}".format(param, value))
+# See the 21_spi_flash_sfdp.py example to explore the full capability of SFDP
+
+# For sake of clarity, this example uses hard-coded values rather than applying
+# any of the device specific details learned from the SFDP.
 
 
 # Let's read a byte
-
 address = 0x000000
 rxByte = spiFlash.readByte(address)
 print("Read a Byte @ address {} = {}".format(address, rxByte))
 
 # Let's read a page
-rxBytes = spiFlash.readBytes(address, 256)
+page_size = 256
+rxBytes = spiFlash.readBytes(address, page_size)
 print("length: {}".format(len(rxBytes)))
 
 # Let's read 1KB
@@ -159,8 +161,9 @@ rxBytes = spiFlash.readBytes(address, 3000)
 print("length: {}".format(len(rxBytes)))
 
 # Let's read all the data
+max_bytes = 16384 * 1024
 rxBytes = spiFlash.readBytes(
-    address,
+    address, max_bytes
 )
 print("length: {}".format(len(rxBytes)))
 
