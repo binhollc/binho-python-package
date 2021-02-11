@@ -5,6 +5,7 @@ from __future__ import print_function
 import errno
 import sys
 import ast
+import time
 
 import binho # pylint: disable=unused-import
 from binho import binhoHostAdapter # pylint: disable=unused-import
@@ -59,6 +60,16 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
+                )
+            )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
         else:
             log_function(
                 "{} found on {}. (Device ID: {})".format(
@@ -83,6 +94,8 @@ def main():
     # leave the serial port open.
 
     try:
+
+
 
         device.oneWire.begin(args.iopin, args.pullup)
 
