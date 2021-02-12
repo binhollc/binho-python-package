@@ -152,10 +152,10 @@ def main(): # pylint: disable=too-many-locals
             # programmer = device.create_programmer('eeprom', device='24FC512')
             log_function(
                 "Using predefined parameters for EEPROM part number {}".format(
-                    args.partnumber
+                    args.partnumber.upper()
                 )
             )
-            programmer = device.create_programmer("eeprom", device=args.partnumber)
+            programmer = device.create_programmer("eeprom", device=args.partnumber.upper())
 
         elif (
             args.frequency
@@ -200,8 +200,8 @@ def main(): # pylint: disable=too-many-locals
 
         if args.pullup:
             log_function(
-                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on \
-                 external resistors."
+                "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on "
+                 "external resistors."
             )
             device.i2c.useInternalPullUps = True
         else:
