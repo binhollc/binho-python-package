@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
-
 from __future__ import print_function
 
 import errno
 import sys
 
-import binho
-from binho import binhoHostAdapter
-from binho.utils import log_silent, log_verbose, binho_error_hander
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Utility for experimenting with Binho host adapters on-board DAC"
-    )
+    parser = binhoArgumentParser(description="Utility for experimenting with Binho host adapters on-board DAC")
     parser.add_argument(
         "-f",
         "--format",
@@ -49,20 +45,23 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
-        else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
                 )
             )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -88,7 +87,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

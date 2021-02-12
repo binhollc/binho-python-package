@@ -17,6 +17,7 @@ class I2CDevice(binhoInterface):
             address - The address for the given I2C device on the bus.
             name -- The display name for the given I2C device.
         """
+        super().__init__(bus)
 
         # Note: this will have to change if we decide to support 10-bit I2C
         # addresses.

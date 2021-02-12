@@ -7,6 +7,11 @@
 import os
 import sys
 import codecs
+import msvcrt
+import ctypes
+import termios
+import fcntl
+import atexit
 
 # Python 2/3 compatible method for using raw_input, and unicode-aware chr.
 try:
@@ -16,7 +21,7 @@ except NameError:
     unichr = chr
 
 
-class ConsoleBase(object):
+class ConsoleBase:
     """OS abstraction for console (input/output codec, no echo)"""
 
     def __init__(self):
@@ -32,7 +37,8 @@ class ConsoleBase(object):
     def cleanup(self):
         """Restore default console settings"""
 
-    def getkey(self):
+    @classmethod
+    def getkey(cls):
         """Read a single key from the console"""
         return None
 
@@ -66,7 +72,7 @@ class ConsoleBase(object):
 
 
 class NTConsole(ConsoleBase):
-    class Out(object):
+    class Out:
         """file-like wrapper that uses os.write"""
 
         def __init__(self, fd):
@@ -79,16 +85,13 @@ class NTConsole(ConsoleBase):
             os.write(self.fd, s)
 
     def __init__(self):
-        import ctypes
 
-        super(NTConsole, self).__init__()
+        super().__init__()
         self._saved_ocp = ctypes.windll.kernel32.GetConsoleOutputCP()
         self._saved_icp = ctypes.windll.kernel32.GetConsoleCP()
         ctypes.windll.kernel32.SetConsoleOutputCP(65001)
         ctypes.windll.kernel32.SetConsoleCP(65001)
-        self.output = codecs.getwriter("UTF-8")(
-            self.Out(sys.stdout.fileno()), "replace"
-        )
+        self.output = codecs.getwriter("UTF-8")(self.Out(sys.stdout.fileno()), "replace")
         # the change of the code page is not propagated to Python, manually fix
         # it
         sys.stderr = codecs.getwriter("UTF-8")(self.Out(sys.stderr.fileno()), "replace")
@@ -96,25 +99,22 @@ class NTConsole(ConsoleBase):
         self.output.encoding = "UTF-8"  # needed for input
 
     def __del__(self):
-        import ctypes
 
         ctypes.windll.kernel32.SetConsoleOutputCP(self._saved_ocp)
         ctypes.windll.kernel32.SetConsoleCP(self._saved_icp)
 
     def getkey(self):
-        import msvcrt
 
         while True:
             z = msvcrt.getwch()
             if z == unichr(13):
                 return unichr(10)
-            elif z in (unichr(0), unichr(0x0E)):  # functions keys, ignore
+            if z in (unichr(0), unichr(0x0E)):  # functions keys, ignore
                 msvcrt.getwch()
             else:
                 return z
 
     def cancel(self):
-        import ctypes
 
         # CancelIo, CancelSynchronousIo do not seem to work when using
         # getwch, so instead, send a key to the window with the console
@@ -124,16 +124,13 @@ class NTConsole(ConsoleBase):
 
 class POSIXConsole(ConsoleBase):
     def __init__(self):
-        import atexit
-        import termios
 
-        super(POSIXConsole, self).__init__()
+        super().__init__()
         self.fd = sys.stdin.fileno()
         self.old = termios.tcgetattr(self.fd)
         atexit.register(self.cleanup)
 
     def setup(self):
-        import termios
 
         new = termios.tcgetattr(self.fd)
         new[3] = new[3] & ~termios.ICANON & ~termios.ECHO & ~termios.ISIG
@@ -152,13 +149,9 @@ class POSIXConsole(ConsoleBase):
         return c
 
     def cancel(self):
-        import termios
-        import fcntl
-
         fcntl.ioctl(self.fd, termios.TIOCSTI, b"\0")
 
     def cleanup(self):
-        import termios
 
         termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old)
 
@@ -168,9 +161,7 @@ def Console():
 
     if os.name == "posix":
         return POSIXConsole()
-    elif os.name == "nt":
+    if os.name == "nt":
         return NTConsole()
-    else:
-        raise NotImplementedError(
-            "Console support not implemented for OS '{}'.".format(os.name)
-        )
+
+    raise NotImplementedError("Console support not implemented for OS '{}'.".format(os.name))

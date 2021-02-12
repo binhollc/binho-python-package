@@ -1,923 +1,142 @@
-from binho.interfaces.i2cDevice import I2CDevice
-from binho.programmer import binhoProgrammer
 import time
-from math import log2, ceil, floor
+
+from math import floor
 from intelhex import IntelHex
 
-"""
-This programmer can configure itself using Microchip part numbers to identify the device we wish to address.
-In most cases, we will want to create the programmer like this:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128')
-Then read some bytes:
-     read_bytes = p.read_bytes(0x000, 0x3FFF)
-or maybe write some bytes:
-    p.write_bytes(0x000, b'\xde\xad\xbe\xef')
-Occasionally, we might need to pass an argument to specify the address bits that have been set on the EEPROM:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128', slave_address=0b010)
-Or to configure the EEPROM ourselves, by specifying the capacity and the page size, with a few other options:
-    p = gf.create_programmer(capacity, page_size, bitmask="AAA", slave_address=0, write_cycle_length=0.005)
-By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different I2C bus object.
-"""
+from binho.interfaces.i2cDevice import I2CDevice
+from binho.programmer import binhoProgrammer
 
 BASE_DEVICE_ADDRESS = 0x50
 
 EEPROM_MODELS = {
-    "24AA00": {
-        "page_size": 1,
-        "max_clock": 400000,
-        "write_cycle": 0.004,
-        "capacity": 16,
-        "bitmask": "xxx",
-    },
-    "24AA01": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "xxx",
-    },
-    "24AA014": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24AA014H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24AA01H": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "xxx",
-    },
-    "24AA02": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24AA024": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA024H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA025": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA025E48": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA025E64": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA025UID": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24AA02E48": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24AA02E64": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24AA02H": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24AA02UID": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24AA04": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24AA044": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAB",
-    },
-    "24AA04H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24AA08": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "xBB",
-    },
-    "24AA08H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "xBB",
-    },
-    "24AA1025": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "BAA",
-    },
-    "24AA1026": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "AAB",
-    },
-    "24AA128": {
-        "page_size": 64,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 16384,
-        "bitmask": "AAA",
-    },
-    "24AA16": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24AA16H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24AA256": {
-        "page_size": 64,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 32768,
-        "bitmask": "AAA",
-    },
-    "24AA256UID": {
-        "page_size": 64,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 32768,
-        "bitmask": "AAA",
-    },
-    "24AA32A": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24AA32AF": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24AA512": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 65536,
-        "bitmask": "AAA",
-    },
-    "24AA64": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24AA64F": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24AA65": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24C00": {
-        "page_size": 1,
-        "max_clock": 400000,
-        "write_cycle": 0.004,
-        "capacity": 16,
-        "bitmask": "xxx",
-    },
-    "24C01C": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.001,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24C02C": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.001,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24C65": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24CW1280": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 16384,
-        "bitmask": "AAA",
-    },
-    "24CW16": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "AAA",
-    },
-    "24CW160": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "AAA",
-    },
-    "24CW32": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24CW320": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24CW64": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24CW640": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24FC01": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "xxx",
-    },
-    "24FC02": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24FC04": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24FC04H": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24FC08": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "xBB",
-    },
-    "24FC1025": {
-        "page_size": 128,
-        "max_clock": 1000000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "BAA",
-    },
-    "24FC1026": {
-        "page_size": 128,
-        "max_clock": 1000000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "AAB",
-    },
-    "24FC128": {
-        "page_size": 64,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 16384,
-        "bitmask": "AAA",
-    },
-    "24FC16": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24FC16H": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24FC256": {
-        "page_size": 64,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 32768,
-        "bitmask": "AAA",
-    },
-    "24FC512": {
-        "page_size": 128,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 65536,
-        "bitmask": "AAA",
-    },
-    "24FC64": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24FC64F": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24LC00": {
-        "page_size": 1,
-        "max_clock": 400000,
-        "write_cycle": 0.004,
-        "capacity": 16,
-        "bitmask": "xxx",
-    },
-    "24LC014": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24LC014H": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24LC01B": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "xxx",
-    },
-    "24LC01BH": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "xxx",
-    },
-    "24LC024": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24LC024H": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24LC025": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24LC02B": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24LC02BH": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "xxx",
-    },
-    "24LC04B": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24LC04BH": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "xxB",
-    },
-    "24LC08B": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "xBB",
-    },
-    "24LC08BH": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "xBB",
-    },
-    "24LC1025": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "BAA",
-    },
-    "24LC1026": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.003,
-        "capacity": 131072,
-        "bitmask": "AAB",
-    },
-    "24LC128": {
-        "page_size": 64,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 16384,
-        "bitmask": "AAA",
-    },
-    "24LC16B": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24LC16BH": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "24LC21A": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.01,
-        "capacity": 128,
-        "bitmask": "000",
-    },
-    "24LC22A": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.01,
-        "capacity": 256,
-        "bitmask": "000",
-    },
-    "24LC256": {
-        "page_size": 64,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 32768,
-        "bitmask": "AAA",
-    },
-    "24LC32A": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24LC32AF": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "24LC512": {
-        "page_size": 128,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 65536,
-        "bitmask": "AAA",
-    },
-    "24LC64": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24LC64F": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24LC65": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "24LCS21A": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.01,
-        "capacity": 128,
-        "bitmask": "000",
-    },
-    "24LCS22A": {
-        "page_size": 8,
-        "max_clock": 400000,
-        "write_cycle": 0.01,
-        "capacity": 256,
-        "bitmask": "000",
-    },
-    "24VL014": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24VL014H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "24VL024": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24VL024H": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "24VL025": {
-        "page_size": 16,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24C01C": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "AT24C01D": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "AT24C02C": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24C02D": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24C04C": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAB",
-    },
-    "AT24C04D": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAB",
-    },
-    "AT24C08C": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "AAA",
-    },
-    "AT24C08D": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "ABB",
-    },
-    "AT24C128C": {
-        "page_size": 64,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 16384,
-        "bitmask": "AAA",
-    },
-    "AT24C16C": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "AT24C16D": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "AT24C256C": {
-        "page_size": 64,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 32768,
-        "bitmask": "AAA",
-    },
-    "AT24C32D": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "AT24C32E": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "AT24C512C": {
-        "page_size": 128,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 65536,
-        "bitmask": "AAA",
-    },
-    "AT24C64B": {
-        "page_size": 32,
-        "max_clock": 400000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "AT24C64D": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "AT24CM01": {
-        "page_size": 256,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAB",
-    },
-    "AT24CM02": {
-        "page_size": 256,
-        "max_clock": 1000000,
-        "write_cycle": 0.01,
-        "capacity": 256,
-        "bitmask": "ABB",
-    },
-    "AT24CS01": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "AT24CS02": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24CS04": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAB",
-    },
-    "AT24CS08": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "ABB",
-    },
-    "AT24CS16": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 2048,
-        "bitmask": "BBB",
-    },
-    "AT24CS32": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 4096,
-        "bitmask": "AAA",
-    },
-    "AT24CS64": {
-        "page_size": 32,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 8192,
-        "bitmask": "AAA",
-    },
-    "AT24CSW010": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 128,
-        "bitmask": "AAA",
-    },
-    "AT24CSW020": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24CSW040": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAA",
-    },
-    "AT24CSW080": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 1024,
-        "bitmask": "AAA",
-    },
-    "AT24HC02C": {
-        "page_size": 8,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24HC04B": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 512,
-        "bitmask": "AAB",
-    },
-    "AT24MAC402": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
-    "AT24MAC602": {
-        "page_size": 16,
-        "max_clock": 1000000,
-        "write_cycle": 0.005,
-        "capacity": 256,
-        "bitmask": "AAA",
-    },
+    "24AA00": {"page_size": 1, "max_clock": 400000, "write_cycle": 0.004, "capacity": 16, "bitmask": "xxx",},
+    "24AA01": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "xxx",},
+    "24AA014": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24AA014H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24AA01H": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "xxx",},
+    "24AA02": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24AA024": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA024H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA025": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA025E48": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA025E64": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA025UID": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24AA02E48": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24AA02E64": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24AA02H": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24AA02UID": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24AA04": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24AA044": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAB",},
+    "24AA04H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24AA08": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "xBB",},
+    "24AA08H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "xBB",},
+    "24AA1025": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "BAA",},
+    "24AA1026": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "AAB",},
+    "24AA128": {"page_size": 64, "max_clock": 400000, "write_cycle": 0.005, "capacity": 16384, "bitmask": "AAA",},
+    "24AA16": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24AA16H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24AA256": {"page_size": 64, "max_clock": 400000, "write_cycle": 0.005, "capacity": 32768, "bitmask": "AAA",},
+    "24AA256UID": {"page_size": 64, "max_clock": 400000, "write_cycle": 0.005, "capacity": 32768, "bitmask": "AAA",},
+    "24AA32A": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24AA32AF": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24AA512": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.005, "capacity": 65536, "bitmask": "AAA",},
+    "24AA64": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24AA64F": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24AA65": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24C00": {"page_size": 1, "max_clock": 400000, "write_cycle": 0.004, "capacity": 16, "bitmask": "xxx",},
+    "24C01C": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.001, "capacity": 128, "bitmask": "AAA",},
+    "24C02C": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.001, "capacity": 256, "bitmask": "AAA",},
+    "24C65": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24CW1280": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 16384, "bitmask": "AAA",},
+    "24CW16": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "AAA",},
+    "24CW160": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "AAA",},
+    "24CW32": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24CW320": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24CW64": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24CW640": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24FC01": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "xxx",},
+    "24FC02": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24FC04": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24FC04H": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24FC08": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "xBB",},
+    "24FC1025": {"page_size": 128, "max_clock": 1000000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "BAA",},
+    "24FC1026": {"page_size": 128, "max_clock": 1000000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "AAB",},
+    "24FC128": {"page_size": 64, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 16384, "bitmask": "AAA",},
+    "24FC16": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24FC16H": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24FC256": {"page_size": 64, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 32768, "bitmask": "AAA",},
+    "24FC512": {"page_size": 128, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 65536, "bitmask": "AAA",},
+    "24FC64": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24FC64F": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24LC00": {"page_size": 1, "max_clock": 400000, "write_cycle": 0.004, "capacity": 16, "bitmask": "xxx",},
+    "24LC014": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24LC014H": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24LC01B": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "xxx",},
+    "24LC01BH": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "xxx",},
+    "24LC024": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24LC024H": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24LC025": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24LC02B": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24LC02BH": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "xxx",},
+    "24LC04B": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24LC04BH": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 512, "bitmask": "xxB",},
+    "24LC08B": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "xBB",},
+    "24LC08BH": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "xBB",},
+    "24LC1025": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "BAA",},
+    "24LC1026": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.003, "capacity": 131072, "bitmask": "AAB",},
+    "24LC128": {"page_size": 64, "max_clock": 400000, "write_cycle": 0.005, "capacity": 16384, "bitmask": "AAA",},
+    "24LC16B": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24LC16BH": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "24LC21A": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.01, "capacity": 128, "bitmask": "000",},
+    "24LC22A": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.01, "capacity": 256, "bitmask": "000",},
+    "24LC256": {"page_size": 64, "max_clock": 400000, "write_cycle": 0.005, "capacity": 32768, "bitmask": "AAA",},
+    "24LC32A": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24LC32AF": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "24LC512": {"page_size": 128, "max_clock": 400000, "write_cycle": 0.005, "capacity": 65536, "bitmask": "AAA",},
+    "24LC64": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24LC64F": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24LC65": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "24LCS21A": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.01, "capacity": 128, "bitmask": "000",},
+    "24LCS22A": {"page_size": 8, "max_clock": 400000, "write_cycle": 0.01, "capacity": 256, "bitmask": "000",},
+    "24VL014": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24VL014H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "24VL024": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24VL024H": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "24VL025": {"page_size": 16, "max_clock": 400000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24C01C": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "AT24C01D": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "AT24C02C": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24C02D": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24C04C": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAB",},
+    "AT24C04D": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAB",},
+    "AT24C08C": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "AAA",},
+    "AT24C08D": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "ABB",},
+    "AT24C128C": {"page_size": 64, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 16384, "bitmask": "AAA",},
+    "AT24C16C": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "AT24C16D": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "AT24C256C": {"page_size": 64, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 32768, "bitmask": "AAA",},
+    "AT24C32D": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "AT24C32E": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "AT24C512C": {"page_size": 128, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 65536, "bitmask": "AAA",},
+    "AT24C64B": {"page_size": 32, "max_clock": 400000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "AT24C64D": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "AT24CM01": {"page_size": 256, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAB",},
+    "AT24CM02": {"page_size": 256, "max_clock": 1000000, "write_cycle": 0.01, "capacity": 256, "bitmask": "ABB",},
+    "AT24CS01": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "AT24CS02": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24CS04": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAB",},
+    "AT24CS08": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "ABB",},
+    "AT24CS16": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 2048, "bitmask": "BBB",},
+    "AT24CS32": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 4096, "bitmask": "AAA",},
+    "AT24CS64": {"page_size": 32, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 8192, "bitmask": "AAA",},
+    "AT24CSW010": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 128, "bitmask": "AAA",},
+    "AT24CSW020": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24CSW040": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAA",},
+    "AT24CSW080": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 1024, "bitmask": "AAA",},
+    "AT24HC02C": {"page_size": 8, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24HC04B": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 512, "bitmask": "AAB",},
+    "AT24MAC402": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
+    "AT24MAC602": {"page_size": 16, "max_clock": 1000000, "write_cycle": 0.005, "capacity": 256, "bitmask": "AAA",},
 }
 
 
@@ -961,11 +180,11 @@ def setbits(word, bits, value):
     """Map each bit of a value over a list of bit locations in a word"""
     # Make sure that value is expressible with bits given
     assert 1 << len(bits) > value
-    for i in range(0, len(bits)):
+    for i, bit in enumerate(bits):
         if value & 1 << i:
-            word |= 1 << bits[i]
+            word |= 1 << bit
         else:
-            word &= ~(1 << bits[i])
+            word &= ~(1 << bit)
     return word
 
 
@@ -975,14 +194,8 @@ class EEPROMDevice(binhoProgrammer):
     """
 
     def __init__(
-        self,
-        i2c_bus,
-        capacity,
-        page_size,
-        bitmask="AAA",
-        slave_address=0,
-        write_cycle_length=0.005,
-    ):
+        self, i2c_bus, capacity, page_size, bitmask="AAA", slave_address=0, write_cycle_length=0.005,
+    ):  # pylint: disable=too-many-arguments
         """
         Creates a new Microchip I2C EEPROM Device.
         EEPROMDevice is directly instantiable, but typically you would instantiate it via the EEPROM() helper
@@ -1013,7 +226,7 @@ class EEPROMDevice(binhoProgrammer):
         slave_address_bits = []
         for i in range(0, 3):
             bit = bitmask[2 - i]
-            if bit == "0" or bit == "1":  # Bit is of fixed value
+            if bit in ("0", "1"):  # Bit is of fixed value
                 mask |= 1 << i
                 base_address |= int(bit) * 1 << i
             elif bit == "A":  # Bit is part of pin selectable slave address
@@ -1047,7 +260,8 @@ class EEPROMDevice(binhoProgrammer):
         else:
             raise (
                 ValueError(
-                    "Specified capacity and number of block address bits would result in a block size that would take more than 16 bits to address."
+                    "Specified capacity and number of block address bits would result in a block size that would take \
+                     more than 16 bits to address."
                 )
             )
 
@@ -1056,10 +270,10 @@ class EEPROMDevice(binhoProgrammer):
         if self.address_bits == 8:
             l = address & 0xFF
             return bytes([l])
-        else:
-            h = (address >> 8) & 0xFF
-            l = address & 0xFF
-            return bytes([h, l])
+
+        h = (address >> 8) & 0xFF
+        l = address & 0xFF
+        return bytes([h, l])
 
     def device_for_address(self, address):
         """Returns the appropriate device for handling writes to this address"""
@@ -1088,30 +302,30 @@ class EEPROMDevice(binhoProgrammer):
             verifyResult = False
         else:
 
-            for i in range(len(readData)):
+            for i, data in enumerate(readData):
 
-                if not readData[i] == verifyData[i]:
+                if not data == verifyData[i]:
                     verifyResult = False
                     break
 
         return verifyResult
 
-    def verifyFile(self, file, format="bin"):
+    def verifyFile(self, file, fileformat="bin"):
 
         try:
             ih = IntelHex()
-            ih.loadfile(file, format)
+            ih.loadfile(file, fileformat)
             bytesToVerify = ih.tobinarray()
 
             return self.verify(bytesToVerify)
         except BaseException:
-            raise RuntimeError("Failed to write from File")
+            raise RuntimeError("Failed to write from File") from BaseException
 
     def read(self):
 
         return self.readBytes(0, self.capacity - 1)
 
-    def readToFile(self, file, format="bin"):
+    def readToFile(self, file, fileformat="bin"):
 
         result = False
 
@@ -1120,13 +334,11 @@ class EEPROMDevice(binhoProgrammer):
         ih = IntelHex()
         ih.frombytes(readData)
 
-        if format == "bin" or format == "hex":
-            ih.tofile(file, format=format)
+        if fileformat in ("bin", "hex"):
+            ih.tofile(file, format=fileformat)
             result = True
         else:
-            raise RuntimeError(
-                "Invalid Format. readToFile() does not support format={}".format(format)
-            )
+            raise RuntimeError("Invalid Format. readToFile() does not support format={}".format(format))
 
         return result
 
@@ -1170,7 +382,7 @@ class EEPROMDevice(binhoProgrammer):
             # Either to the end of the block, or to the end address
             while addr <= max_addr:
                 bytes_to_read = (max_addr - addr) + 1
-                read_data, status = device.read(min(bytes_to_read, buff_size))
+                read_data, status = device.read(min(bytes_to_read, buff_size))  # pylint: disable=unused-variable
                 buff = buff + bytes(read_data)
                 addr = addr + len(read_data)
 
@@ -1180,7 +392,7 @@ class EEPROMDevice(binhoProgrammer):
 
         blankData = []
 
-        for i in range(self.capacity):
+        for _ in range(self.capacity):
             blankData.append(blankValue)
 
         return self.write(blankData)
@@ -1189,20 +401,21 @@ class EEPROMDevice(binhoProgrammer):
 
         return self.writeBytes(0, data)
 
-    def writeFromFile(self, file, format="bin"):
+    def writeFromFile(self, file, fileformat="bin"):
 
         try:
             ih = IntelHex()
-            ih.loadfile(file, format)
+            ih.loadfile(file, fileformat)
             bytesToWrite = ih.tobinarray()
 
             return self.write(bytesToWrite)
         except BaseException:
-            raise RuntimeError("Failed to write from File")
+            raise RuntimeError("Failed to write from File") from BaseException
 
-    def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0):
+    def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0):  # pylint: disable=unused-argument
         """
-        Write bytes sequentially starting at a specified memory address. Will read data back to assure write was successful.
+        Write bytes sequentially starting at a specified memory address. Will read data back to assure write was
+          successful.
         Handles
         Parameters:
             word_address       -- Address of the start of the block to write.
@@ -1214,9 +427,7 @@ class EEPROMDevice(binhoProgrammer):
         """
 
         bytes_to_write = len(data)
-        data = bytes(
-            data
-        )  # What if it's something weird and not a bytestring? What then?
+        data = bytes(data)  # What if it's something weird and not a bytestring? What then?
 
         # We need to break the bytes up so that each write fits within page boundaries
         # Crossing a page boundary will cause a write cycle to begin, resulting in
@@ -1230,9 +441,7 @@ class EEPROMDevice(binhoProgrammer):
             # page/block boundary
             addr = word_address + i
             writeable_bytes = addr % self.page_size
-            writeable_bytes = (
-                writeable_bytes if writeable_bytes != 0 else self.page_size
-            )
+            writeable_bytes = writeable_bytes if writeable_bytes != 0 else self.page_size
             l = min(bytes_to_write - i, writeable_bytes)
 
             # Find appropriate device for this address

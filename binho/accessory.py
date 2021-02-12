@@ -1,7 +1,7 @@
 #
 
 
-class binhoAccessory(object):
+class binhoAccessory:
     """ Base class for objects representing accessory boards. """
 
     # Optional: subclasses can set this variable to override their accessory name.

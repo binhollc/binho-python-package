@@ -2,339 +2,130 @@
 
 from __future__ import print_function
 
-import os
-import sys
 import errno
-import argparse
+import sys
 
-from tqdm import tqdm
-
-
-from binho import binhoHostAdapter
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
-from binho.utils import from_eng_notation, human_readable_size, binhoArgumentParser
-from binho.programmers.spiFlash import SPIFlash
-
-from binho.comms.manager import CommandFailureError
 
 
-def print_flash_info(spi_flash, log_function, log_error, args):
-    """ Function that prints the relevant flash chip's information to the console. """
-
-    capacity = spi_flash.maximum_address + 1
-
-    if args.bypass_jedec:
-        log_function("Taking it on faith that an SPI flash is there.")
-    else:
-        log_function("SPI flash detected:")
-
-    log_function(
-        "\tManufacturer: {} (0x{:02x})".format(
-            spi_flash.manufacturer, spi_flash.manufacturer_id
-        )
-    )
-    log_function(
-        "\tPart number: {} (0x{:02x})".format(spi_flash.part, spi_flash.part_id)
-    )
-    log_function(
-        "\tCapacity: {} ({})".format(
-            human_readable_size(capacity), human_readable_size(capacity * 8, unit="b")
-        )
-    )
-    log_function("\tPage size: {} B".format(spi_flash.page_size))
-    log_function("")
-
-
-def log_summary(log_function, spi_flash):
-    """ Print a quick summary of the detected flash; for use in non-info commands. """
-
-    if spi_flash.manufacturer_id in SPIFlash.JEDEC_MANUFACTURERS:
-        log_function(
-            "Detected a {} {} ({}).".format(
-                spi_flash.manufacturer,
-                spi_flash.part,
-                human_readable_size(spi_flash.maximum_address + 1),
-            )
-        )
-    else:
-        log_function("Detected an unknown flash chip.")
-
-
-def be_cautious(args, log_error, operation="write to"):
-    """ Enforces the --cowardly option, which refuses to do dangerous things. """
-
-    if args.cowardly or os.getenv("BE_COWARDLY"):
-        log_error(
-            "Cowardly refusing to {} flash chip. [You provided -C.]".format(operation)
-        )
-        log_error("")
-        sys.exit(-3)
-
-
-def erase_chip(spi_flash, log_function, log_error, args):
-    """ Erase the provided SPI flash. """
-
-    log_summary(log_function, spi_flash)
-    be_cautious(args, log_error, operation="erase")
-
-    spi_flash.erase()
-    log_function("Erase complete.")
-
-
-def run_flash_operation(
-    operation_function, page_size, total_data, args, *pargs, **kwargs
-):
-    """ Runs a read or write operation, while showing nice progress bars when appropriate. """
-
-    with tqdm(
-        total=total_data, ncols=80, unit="B", leave=False, disable=not args.verbose
-    ) as progress:
-        kwargs["progress_callback"] = lambda written, total: progress.update(page_size)
-        operation_function(*pargs, **kwargs)
-
-
-def dump_chip(spi_flash, log_function, log_error, args):
-    """ Dump the contents of the provided chip. """
-
-    log_summary(log_function, spi_flash)
-
-    # Figure out how much we're going to read.
-    length_to_read = args.length if args.length else (spi_flash.maximum_address + 1)
-
-    # Truncate the read size to the flash's length, if necessary.
-    flash_size = spi_flash.maximum_address + 1
-    if (args.address + length_to_read) > flash_size:
-        length_to_read = flash_size - args.address
-
-        log_error(
-            "This operation would read past the end of flash -- truncating to {}.".format(
-                human_readable_size(length_to_read)
-            )
-        )
-
-    if args.filename is None:
-        log_error("You must provide a filename to write the captured data to!\n")
-        sys.exit(-1)
-
-    # Finally, run the flash operation.
-    try:
-        log_function("Reading {}.\n".format(human_readable_size(length_to_read)))
-        run_flash_operation(
-            spi_flash.dump,
-            spi_flash.page_size,
-            length_to_read,
-            args,
-            args.filename,
-            args.address,
-            length_to_read,
-            auto_truncate=args.truncate,
-        )
-        log_function("Read complete.\n")
-    except FileNotFoundError:
-        log_error("Cannot open {} for writing.\n".format(args.filename))
-
-
-def program_chip(spi_flash, log_function, log_error, args):
-    """ Programs data to the given chip. """
-
-    log_summary(log_function, spi_flash)
-    be_cautious(args, log_error, operation="erase")
-
-    if args.filename is None:
-        log_error("You must provide a filename that will provided the data to write!\n")
-        sys.exit(-1)
-
-    try:
-        # Grab the size of the file to read.
-        if args.length is None:
-            length_to_write = (
-                None if args.filename == "-" else os.path.getsize(args.filename)
-            )
-
-        # Check that we can write the relevant file into flash.
-        flash_size = spi_flash.maximum_address + 1
-        if length_to_write and ((length_to_write + args.address) > flash_size):
-            log_error(
-                "This operation would write past the end of flash. If you'd like to trim your file, try --length.\n"
-            )
-            sys.exit(-3)
-
-        log_function("Writing {}.\n".format(human_readable_size(length_to_write)))
-        run_flash_operation(
-            spi_flash.upload,
-            spi_flash.page_size,
-            length_to_write,
-            args,
-            args.filename,
-            args.address,
-            length_to_write,
-            erase_first=args.autoerase,
-        )
-        log_function("Write complete.\n")
-
-    except FileNotFoundError:
-        log_error("Cannot open {} for reading.\n".format(args.filename))
-
-
-def main():
-
-    commands = {
-        "info": print_flash_info,
-        "erase": erase_chip,
-        "read": dump_chip,
-        "write": program_chip,
-    }
+def main():  # pylint: disable=too-many-locals
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Utility for programming and dumping SPI flash chips",
-        verbose_by_default=True,
-    )
-    parser.add_argument("command", choices=commands, help="the operation to complete")
-    parser.add_argument(
-        "filename",
-        metavar="[filename]",
-        nargs="?",
-        help="the filename to read or write to, for read/write operations",
-    )
+    parser = binhoArgumentParser(description="Utility for working with SPI FLASH memory devices")
+
+    parser.add_argument("-c", "--chipselect", default=0, help="Set CS signal IO pin")
 
     parser.add_argument(
-        "-a",
-        "--address",
-        metavar="<addr>",
-        default=0,
-        type=from_eng_notation,
-        help="Starting offset in the given flash memory.",
+        "-n", "--invertCS", action="store_true", help="Set CS signal as inverted (Active High)",
     )
+    parser.add_argument("-m", "--mode", default=0, help="Set SPI mode")
+
     parser.add_argument(
-        "-l",
-        "--length",
-        metavar="<length>",
-        type=from_eng_notation,
-        default=None,
-        help="number of bytes to read (default: flash size)",
-    )
-    parser.add_argument(
-        "-E",
-        "--no-autoerase",
-        action="store_false",
-        dest="autoerase",
-        help="If provided, the target flash will not be erased before a write operation.",
-    )
-    parser.add_argument(
-        "-C",
-        "--cautious",
-        "--cowardly",
-        action="store_true",
-        dest="cowardly",
-        help="Refuses to do anything that might overwrite or lose chip data.",
-    )
-    parser.add_argument(
-        "-S",
-        "--no-spdf",
-        dest="autodetect",
-        action="store_false",
-        help="Don't attempt to use SPDF to autodetect flash parameters.",
-    )
-    parser.add_argument(
-        "-R",
-        "--require-spdf",
-        dest="allow_fallback",
-        action="store_false",
-        help="Only use SPDF; ignore any argument provided as fall-back options.",
-    )
-    parser.add_argument(
-        "-T",
-        "--auto-truncate",
-        dest="truncate",
-        action="store_true",
-        help="If provided, any read operations will truncate trailing unprogrammed words (0xFFs).",
-    )
-    parser.add_argument(
-        "--page-size",
-        metavar="<bytes>",
-        type=int,
-        default=256,
-        help="manually specify the page size of the target flash; for use with -S",
-    )
-    parser.add_argument(
-        "--flash-size",
-        metavar="<bytes>",
-        type=int,
-        default=8192,
-        help="manually specify the capacity of the target flash; for use with -S",
-    )
-    parser.add_argument(
-        "-J",
-        "--allow-null-jedec-id",
-        dest="bypass_jedec",
-        action="store_true",
-        help="Allow the device to work even if it doesn't appear to support a JEDEC ID.",
+        "-f", "--frequency", default=12000000, help="Specifies the frequency for the SPI Clock",
     )
 
     args = parser.parse_args()
-    device = parser.find_specified_device()
 
-    if device.inBootloaderMode:
-        print(
-            "{} found on {}, but it cannot be used now because it's in DFU mode".format(
-                device.productName, device.commPort
-            )
-        )
-        sys.exit(errno.ENODEV)
-    else:
-        log_function(
-            "{} found on {}. (Device ID: {})".format(
-                device.productName, device.commPort, device.deviceID
-            )
-        )
-
-    if args.command == "info":
-        args.verbose = True
-    elif args.filename == "-":
-        args.verbose = False
-
-    # Grab our log functions.
-    log_function, log_error = parser.get_log_functions()
+    log_function = log_verbose if args.verbose else log_silent
 
     try:
-        # Figure out the "override" page and flash size for any arguments provided.
-        # If autodetection is enabled and works, these aren't used.
-        maximum_address = args.flash_size - 1
-        num_pages = (args.flash_size + (args.page_size - 1)) // args.page_size
+        log_function("Trying to find a Binho host adapter...")
+        device = parser.find_specified_device()
 
-        # Create a SPI flash object.
-        spi_flash = device.create_programmer(
-            "spiFlash",
-            args.autodetect,
-            args.allow_fallback,
-            page_size=args.page_size,
-            maximum_address=maximum_address,
-            allow_null_jedec=args.bypass_jedec,
-        )
+        if device.inBootloaderMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DFU mode".format(
+                    device.productName, device.commPort
+                )
+            )
+            sys.exit(errno.ENODEV)
 
-        # If we have a device that's ancient enough to not speak JEDEC, notify
-        # the user. Pithily.
-        if (
-            args.bypass_jedec
-            and spi_flash.manufacturer_id == 0xFF
-            and spi_flash.part_id == 0xFFFF
-        ):
-            log_function("I... really can't see an SPI flash here. I'll trust you.")
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
+                )
+            )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
 
-    except CommandFailureError:
-        log_error("This device doesn't appear to support identifying itself.")
-        log_error(" You'll need to specify the page and flash size manually.")
-        sys.exit(-1)
-    except IOError as e:
-        log_error(str(e))
-        log_error("If you believe you have a device properly connected, you")
-        log_error(" may want to try again with --allow-null-jedec-id.")
-        log_error("")
-        sys.exit(-2)
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
-    command = commands[args.command]
-    command(spi_flash, log_function, log_error, args)
+    except DeviceNotFoundError:
+        if args.serial:
+            print(
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
+            )
+        else:
+            print("No Binho host adapter found!", file=sys.stderr)
+        sys.exit(errno.ENODEV)
+
+    # if we fail before here, no connection to the device was opened yet.
+    # however, if we fail after this point, we need to make sure we don't
+    # leave the serial port open.
+
+    try:
+
+        # set the host adapter operationMode to 'SPI'
+        device.operationMode = "SPI"
+
+        if args.frequency:
+            log_function("SPI clock set to {}Hz".format(args.frequency))
+
+        if args.mode:
+
+            if int(args.mode) < 0 or int(args.mode) > 3:
+                print("SPI mode must be 0, 1, 2, or 3. mode = {} is not a valid setting.".format(args.mode))
+                device.close()
+                sys.exit(errno.EINVAL)
+            else:
+                log_function("SPI mode set to mode {}".format(args.mode))
+
+        csPin = {}
+
+        if args.chipselect:
+            if args.chipselect.isnumeric():
+                chipSelectStr = "IO" + str(args.chipselect)
+            else:
+                chipSelectStr = args.chipselect
+
+            csPin = device.gpio.getPin(chipSelectStr)
+        else:
+            csPin = None
+
+        if csPin:
+            if args.invertCS:
+                log_function("Using IO{} as an Active-High (inverted) ChipSelect signal".format(csPin.pinNumber))
+            else:
+                log_function("Using IO{} as an Active-Low (standard) ChipSelect signal".format(csPin.pinNumber))
+        else:
+            log_function(
+                "No ChipSelect signal specified, will not be used for this transaction. Use -c to specify IO pin to\
+                 use for ChipSelect if desired."
+            )
+
+        # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
+        # This function accepts a number of parameters, not all shown or demo'd here
+        # spiFlash = device.create_programmer(
+        #    "spiFlash", chip_select_pin=csPin, autodetect=True, mode=args.mode,
+        #    clocK_frequency=args.frequency
+        # )
+
+        print("This command is still under construction. Please come back again later!")
+        sys.exit(1)
+
+    except Exception:  # pylint: disable=broad-except
+        # Catch any exception that was raised and display it
+        binho_error_hander()
+
+    finally:
+
+        # close the connection to the host adapter
+        device.close()
 
 
 if __name__ == "__main__":

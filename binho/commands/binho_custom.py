@@ -3,7 +3,8 @@
 from __future__ import print_function
 
 import sys
-from binho.utils import log_silent, log_verbose, binho_error_hander
+import errno
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 # this file is meant to serve as a template which can be used to create your own custom commands
@@ -16,15 +17,9 @@ from binho.errors import DeviceNotFoundError
 
 def main():
 
-    from binho.utils import binhoArgumentParser
-
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Sample template for creating custom Binho commands"
-    )
-    parser.add_argument(
-        "-n", "--iopin", default=0, help="Get an IO pin from the command arguments"
-    )
+    parser = binhoArgumentParser(description="Sample template for creating custom Binho commands")
+    parser.add_argument("-n", "--iopin", default=0, help="Get an IO pin from the command arguments")
 
     # run the argument parser
     args = parser.parse_args()
@@ -46,20 +41,23 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
-        else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
                 )
             )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -74,7 +72,7 @@ def main():
     try:
 
         # implement your custom command logic here
-
+        # pylint: disable=unused-variable
         pin = {}
 
         if args.iopin:
@@ -84,16 +82,15 @@ def main():
                 pin = args.iopin.upper()
         else:
             pin = "IO0"
+        # pylint: enable=unused-variable
 
         log_function("Taking {} samples...".format(args.sample_count))
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 
+    finally:
         # close the connection to the host adapter
         device.close()
 

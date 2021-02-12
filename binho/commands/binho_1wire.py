@@ -6,44 +6,26 @@ import errno
 import sys
 import ast
 
-import binho
-from binho import binhoHostAdapter
-from binho.utils import log_silent, log_verbose, binho_error_hander
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.interfaces.oneWireDevice import OneWireDevice
-from binho.interfaces.oneWireBus import OneWireBus
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Utility for 1-Wire communication via Binho host adapter"
+    parser = binhoArgumentParser(description="Utility for 1-Wire communication via Binho host adapter")
+    parser.add_argument("-n", "--iopin", default=0, help="Use the given IO pin number for the 1Wire bus")
+    parser.add_argument("-u", "--pullup", action="store_true", help="Enable 2.2k pullup resistor (3.3V)")
+    parser.add_argument(
+        "-r", "--read", default=0, help="Number of bytes expecting to receive from the 1Wire Bus",
     )
     parser.add_argument(
-        "-n", "--iopin", default=0, help="Use the given IO pin number for the 1Wire bus"
+        "-w", "--write", nargs="*", type=ast.literal_eval, default=[], help="Bytes to send over the 1Wire Bus",
     )
-    parser.add_argument(
-        "-u", "--pullup", action="store_true", help="Enable 2.2k pullup resistor (3.3V)"
-    )
-    parser.add_argument(
-        "-r",
-        "--read",
-        default=0,
-        help="Number of bytes expecting to receive from the 1Wire Bus",
-    )
-    parser.add_argument(
-        "-w",
-        "--write",
-        nargs="*",
-        type=ast.literal_eval,
-        default=[],
-        help="Bytes to send over the 1Wire Bus",
-    )
-    parser.add_argument(
-        "-k", "--skip", action="store_true", help="SKIP device selection"
-    )
+    parser.add_argument("-k", "--skip", action="store_true", help="SKIP device selection")
     parser.add_argument("-z", "--search", action="store_true", help="Search")
     args = parser.parse_args()
 
@@ -60,20 +42,23 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
-        else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
                 )
             )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -106,7 +91,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

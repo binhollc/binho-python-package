@@ -3,22 +3,18 @@
 from __future__ import print_function
 
 import sys
-import time
-import argparse
+import errno
 import statistics
 import serial
-import errno
-from binho.utils import log_silent, log_verbose, binho_error_hander
+
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="utility for reading from Binho host adapter's ADC"
-    )
+    parser = binhoArgumentParser(description="utility for reading from Binho host adapter's ADC")
     parser.add_argument(
         "-f",
         "--format",
@@ -29,16 +25,9 @@ def main():
         help="Format to output in.\nVoltage string, or raw fraction returned by the ADC.",
     )
     parser.add_argument(
-        "-s",
-        "--samples",
-        dest="sample_count",
-        type=int,
-        default=1,
-        help="The number of samples to read. (default: 1)",
+        "-s", "--samples", dest="sample_count", type=int, default=1, help="The number of samples to read. (default: 1)",
     )
-    parser.add_argument(
-        "-n", "--iopin", default=0, help="Use the given IO pin number for the ADC input"
-    )
+    parser.add_argument("-n", "--iopin", default=0, help="Use the given IO pin number for the ADC input")
 
     args = parser.parse_args()
 
@@ -55,16 +44,23 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
-        else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
                 )
             )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except serial.SerialException:
         print(
-            "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it."
+            "The target Binho host adapter was found, but failed to connect because another application already has an\
+             open connection to it."
         )
         print("Please close the connection in the other application and try again.")
         sys.exit(errno.ENODEV)
@@ -72,10 +68,7 @@ def main():
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -98,7 +91,7 @@ def main():
 
         if args.sample_count == 0:
             raise ValueError("Cannot take 0 samples! Samples must be >= 1.")
-        elif args.sample_count > 1:
+        if args.sample_count > 1:
             log_function("Taking {} samples...".format(args.sample_count))
         else:
             log_function("Taking {} sample...".format(args.sample_count))
@@ -112,15 +105,11 @@ def main():
             if args.format == "voltage":
 
                 sample = device.adc.readInputVoltage(adcPin)
-                log_function(
-                    "[{}] ADC channel {} reads {} Volts".format(x + 1, adcPin, sample)
-                )
+                log_function("[{}] ADC channel {} reads {} Volts".format(x + 1, adcPin, sample))
 
             else:
                 sample = device.adc.readInputRaw(adcPin)
-                log_function(
-                    "[{}] ADC channel {} reads {}".format(x + 1, adcPin, sample)
-                )
+                log_function("[{}] ADC channel {} reads {}".format(x + 1, adcPin, sample))
 
             samples.append(sample)
 
@@ -150,7 +139,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

@@ -1,7 +1,4 @@
-import time
-
-
-class binhoInterface(object):
+class binhoInterface:
     """
     Generic base class for binho peripherals.
     """

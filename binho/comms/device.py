@@ -1,16 +1,7 @@
 # import usb
-import future
-import time
-
-import threading
-import queue
-import signal
-import sys
-import serial
 import os
-import enum
 import collections
-import serial
+import hid
 
 from ..errors import DeviceNotFoundError
 
@@ -22,11 +13,15 @@ from .drivers.spi import binhoSPIDriver
 from .drivers.io import binhoIODriver
 from .drivers.onewire import binho1WireDriver
 
-
-class binhoAPI(object):
+# pylint: disable=too-many-instance-attributes
+class binhoAPI:
 
     HANDLED_BOARD_IDS = []
     USB_VID_PID = "04D8"
+
+    # Default device identifiers.
+    BOARD_VENDOR_ID = 0x1D50
+    BOARD_PRODUCT_ID = 0x60E6
 
     @classmethod
     def populate_default_identifiers(cls, device_identifiers, find_all=False):
@@ -49,6 +44,7 @@ class binhoAPI(object):
 
     def __init__(self, **device_identifiers):
 
+        self.name = "Unknown"
         self.serialPort = device_identifiers["port"]
         self.comms = binhoComms(device_identifiers["port"])
 
@@ -72,6 +68,10 @@ class binhoAPI(object):
         self._debug = os.getenv("BINHO_NOVA_DEBUG")
 
         self._inBootloader = False
+        self._inDAPLinkMode = False
+
+        self._hid_serial_number = "UNKNOWN"
+        self._hid_path = None
 
         # By default, accept any device with the default vendor/product IDs.
         self.identifiers = self.populate_default_identifiers(device_identifiers)
@@ -79,10 +79,7 @@ class binhoAPI(object):
         # For convenience, allow serial_number=None to be equivalent to not
         # providing a serial number: a board with any serial number will be
         # accepted.
-        if (
-            "serial_number" in self.identifiers
-            and self.identifiers["serial_number"] is None
-        ):
+        if "serial_number" in self.identifiers and self.identifiers["serial_number"] is None:
             del self.identifiers["serial_number"]
 
         # TODO: replace this with a comms_string
@@ -100,7 +97,6 @@ class binhoAPI(object):
 
     # Destructor
     def __del__(self):
-
         self.comms.close()
 
     # Public functions
@@ -144,7 +140,7 @@ class binhoAPI(object):
 
             subclass_devices = subclass.all_accepted_devices(**device_identifiers)
 
-            # FIXME: It's possible that two classes may choose to both advertise support
+            # NOTE: It's possible that two classes may choose to both advertise support
             # for the same device, in which case we'd wind up with duplicats here. We could
             # try to filter out duplicates using e.g. USB bus/device, but that assumes
             # things are USB connected.
@@ -158,7 +154,9 @@ class binhoAPI(object):
         return devices
 
     @classmethod
+    # pylint: disable=unused-argument
     def all_accepted_devices(cls, **device_identifiers):
+        # pylint: enable=unused-argument
         """
         Returns a list of all devices supported by the given class. This should be
         overridden if the device connects via anything other that USB.
@@ -169,8 +167,6 @@ class binhoAPI(object):
         devices = []
 
         # Grab the list of all devices that we theoretically could use.
-        # FIXME: use the comms backend for this!
-        # identifiers = cls.populate_default_identifiers(device_identifiers, find_all=True)
         manager = binhoDeviceManager()
         availablePorts = manager.listAvailablePorts()
         identifiers = {}
@@ -228,26 +224,34 @@ class binhoAPI(object):
         # HANDLED_BOARD_IDS.
         if usb_hwid:
             return cls.USB_VID_PID in usb_hwid
-        else:
-            return False
+
+        return False
+
+    def setProductName(self, productname):
+        self.name = productname
 
     @property
     def deviceID(self):
         """Reads the board ID number for the device."""
-        return self.apis.core.deviceID
+
+        if not self._inBootloader and not self._inDAPLinkMode:
+            return self.apis.core.deviceID.upper()
+
+        return self._hid_serial_number.upper()
 
     @property
     def commPort(self):
         return self.serialPort
 
-    def usb_info(self, port):
+    @classmethod
+    def usb_info(cls, port):
         usb_info = binhoDeviceManager.getUSBVIDPIDByPort(port)
         return usb_info
 
     @property
     def productName(self):
         """Returns the human-readable product-name for the device."""
-        return self.PRODUCT_NAME
+        return self.name
 
     @property
     def firmwareVersion(self):
@@ -266,6 +270,10 @@ class binhoAPI(object):
     def inBootloaderMode(self):
         return self._inBootloader
 
+    @property
+    def inDAPLinkMode(self):
+        return self._inDAPLinkMode
+
     def initialize_apis(self):
         """Hook-point for sub-boards to initialize their APIs after
         we have comms up and running and auto-enumeration is complete.
@@ -275,26 +283,79 @@ class binhoAPI(object):
         self.comms.start()
 
         try:
-            self.deviceID
+            # see if it's in DAPLink mode
+            self.deviceID  # pylint: disable=pointless-statement
+            self._inDAPLinkMode = False
             self._inBootloader = False
             return True
+
         except BaseException:
-            self._inBootloader = True
+
+            try:
+
+                h = hid.device()
+                h.open(
+                    int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
+                )
+
+                self._hid_serial_number = "0x" + h.get_serial_number_string()
+
+                if h.get_product_string() == "CMSIS-DAP":
+                    self._inDAPLinkMode = True
+                    self._inBootloader = False
+
+                else:
+                    self._inDAPLinkMode = False
+                    self._inBootloader = True
+
+                return True
+
+            except BaseException:
+                pass
+
             return False
 
-    def addIOPinAPI(self, name, ioPinNumber):
+    def addIOPinAPI(self, name, ioPinNumber):  # pylint: disable=unused-argument
         self.apis.io[ioPinNumber] = binhoIODriver(self.comms, ioPinNumber)
 
     def supports_api(self, class_name):
         """ Returns true iff the board supports the given API class. """
         return class_name in self.apis
 
-    def version_warnings(self):
+    @classmethod
+    def version_warnings(cls):
         """Returns any warning messages relevant to the device's firmware version.
         Can be used to warn the user when an upgrade is required.
         Returns a string with any warnings, or None  if no warnings apply.
         """
         return None
+
+    def reset_to_bootloader(self):
+
+        if self._inDAPLinkMode:
+            h = hid.device()
+            h.open(
+                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[1], 16),
+                self._hid_serial_number[2:],
+            )
+            h.set_nonblocking(1)
+            h.write([0x00, 0x80])
+
+        else:
+            self.apis.core.resetToBtldr(fail_silent=True)
+
+    def exit_bootloader(self):
+
+        if self._inBootloader:
+            h = hid.device()
+            h.open(
+                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[1], 16),
+                self._hid_serial_number[2:],
+            )
+            h.set_nonblocking(1)
+            h.write([0x00, 0x48, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00])
 
     def close(self):
         self.comms.close()
@@ -305,3 +366,6 @@ def _to_hex_string(byte_array):
 
     hex_generator = ("{:02x}".format(x) for x in byte_array)
     return "".join(hex_generator)
+
+
+# pylint: enable=too-many-instance-attributes

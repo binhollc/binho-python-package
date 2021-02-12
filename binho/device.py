@@ -4,35 +4,17 @@ Module containing the core definitions for a binhoDevice.
 
 import string
 from weakref import WeakSet
+from types import ModuleType
 
 from .comms.device import binhoAPI
+from .accessory import binhoAccessory
 
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO
-from .interfaces.adc import ADC
-from .interfaces.dac import DAC
 
-# from .interfaces.uart import UART
-
-# from .interfaces.pattern_generator import PatternGenerator
-# from .interfaces.sdir import SDIRTransceiver
+from .programmers import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 from . import programmers as ProgrammerModules
-from .programmers.eeprom import EEPROM
-
-from .programmers import *
-
-# from .programmers.m0 import M0Coprocessor
-# from .programmers.firmware import DeviceFirmwareManager
-
-# from .glitchkit import *
-
-
-# from .debug.lpc43xx import LPC43xxTarget
-
-# Default device identifiers.
-BINHO_VENDOR_ID = 0x1D50
-BINHO_PRODUCT_ID = 0x60E6
 
 # Quirk constant that helps us identify libusb's pipe errors, which bubble
 # up as generic USBErrors with errno 32 on affected platforms.
@@ -47,18 +29,11 @@ class binhoDevice(binhoAPI):
     Class describing Binho host adapters.
     """
 
-    # Default device identifiers.
-    BOARD_VENDOR_ID = 0x1D50
-    BOARD_PRODUCT_ID = 0x60E6
-
-    """
-    The mappings from GPIO names to port numbers. Paths in names can be delineated
-    with underscores to group gpios. For example, if Jumper 7, Pin 3 is Port 5, Pin 11,
-    you could add an entry that reads "J7_P3": (5, 11).
-    """
-    GPIO_MAPPINGS = {}
-
+    # The mappings from GPIO names to port numbers. Paths in names can be delineated
+    # with underscores to group gpios. For example, if Jumper 7, Pin 3 is Port 5, Pin 11,
+    # you could add an entry that reads "J7_P3": (5, 11).
     SIMPLE_CLASS_MAPPINGS = {"gpio": ("gpio", GPIO)}
+    leds = []
 
     def __init__(self, *args, **kwargs):
         """ Initialize a new binhoDevice instance with our additional properties. """
@@ -66,7 +41,8 @@ class binhoDevice(binhoAPI):
         # Create a new list of interfaces and programmers.
         self._interfaces = []
         self._instantiated_programmers = WeakSet()
-        super(binhoDevice, self).__init__(*args, **kwargs)
+
+        super().__init__(*args, **kwargs)
 
     def available_interfaces(self):
         """ Returns a list of peripheral properties that exist on this board. """
@@ -83,30 +59,29 @@ class binhoDevice(binhoAPI):
         for i in range(1, led_count + 1):
             self.leds[i] = LED(self, i)
 
-    def _populate_gpio(self):
+    @staticmethod
+    def _populate_gpio(board, gpio, mapping):
         """ Adds GPIO pin definitions to the board's main GPIO object. """
 
         # Handle each GPIO mapping.
-        for name, pin in self.GPIO_MAPPINGS.items():
-            self.gpio.registerGPIO(name, pin)
+        for name, pin in mapping.items():
+            gpio.registerGPIO(board, name, pin)
 
-    def _populate_adc(self):
+    @staticmethod
+    def _populate_adc(adc, mapping):
         """Adds ADC definitions to the board."""
 
         # Handle each ADC mapping.
-        for name, pin in self.ADC_MAPPINGS.items():
-            ADC.registerADC(name, pin)
+        for name, pin in mapping.items():
+            adc.registerADC(name, pin)
 
-        self.adc = ADC(self)
-
-    def _populate_dac(self):
+    @staticmethod
+    def _populate_dac(dac, mapping):
         """Adds DAC definitions to the board."""
 
         # Handle each ADC mapping.
-        for name, pin in self.DAC_MAPPINGS.items():
-            DAC.registerDAC(name, pin)
-
-        self.dac = DAC(self)
+        for name, pin in mapping.items():
+            dac.registerDAC(name, pin)
 
     def _add_interface(self, name, instance):
         """
@@ -137,12 +112,15 @@ class binhoDevice(binhoAPI):
     def _populate_simple_interfaces(self):
         """ Adds simple interfaces to the board object by parsing the SIMPLE_CLASS_MAPPINGS dictionary. """
 
+        # pylint: disable=unused-variable
         for comms_class, interface in self.SIMPLE_CLASS_MAPPINGS.items():
 
             name, python_class = interface
             self._add_simple_interface(name, python_class)
+        # pylint: enable=unused-variable
 
-    def available_accessories(self):
+    @classmethod
+    def available_accessories(cls):
         """ Returns the list of available accessory drivers. """
         return binhoAccessory.available_accessories()
 
@@ -156,10 +134,9 @@ class binhoDevice(binhoAPI):
 
         return accessory
 
-    def available_programmers(self, as_dictionary=False):
+    @classmethod
+    def available_programmers(cls, as_dictionary=False):
         """ Returns the list of available programmers. """
-
-        from types import ModuleType
 
         programmers = {}
 
@@ -170,8 +147,8 @@ class binhoDevice(binhoAPI):
 
         if as_dictionary:
             return programmers
-        else:
-            return list(programmers.values())
+
+        return list(programmers.values())
 
     def create_programmer(self, name, *args, **kwargs):
         """ Creates a new instance of the programmer with the given name. """
@@ -188,10 +165,10 @@ class binhoDevice(binhoAPI):
             return programmer
 
         except KeyError:
-            raise KeyError("no available programmer named {}".format(name))
+            raise KeyError("no available programmer named {}".format(name)) from LookupError
 
     def __dir__(self):
         """ Generate a cleaned-up dir listing for the relevant board. """
 
-        items = super(binhoDevice, self).__dir__()
+        items = super().__dir__()
         return [item for item in items if item[0] in string.ascii_lowercase]

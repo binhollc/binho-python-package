@@ -1,7 +1,6 @@
 import sys
 import errno
 from serial import SerialException
-from intelhex import IntelHex
 
 # import the binho library
 from binho import binhoHostAdapter
@@ -91,23 +90,21 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-
     print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
     print()
 
     # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
     # This function accepts a number of parameters, not all shown or demo'd here
-    spiFlash = binho.create_programmer(
-        "spiFlash", chip_select_pin=csPin, autodetect=True, mode=0, clocK_frequency=12000000,
-    )
-
-    # Notice we increased the clock frequency to 12MHz to make this quick
+    spiFlash = binho.create_programmer("spiFlash", chip_select_pin=csPin, autodetect=True, mode=0)
 
     # Let's see how much we can learn about the device without any prior knowledge
     # We can do this by first reading the Flash JEDEC ID and checking if it
     # supports SFDP (Serial Flash Discoverable Parameters)
+    # SFDP standard is defined in JESD216 (https://www.jedec.org/standards-documents/docs/jesd216b)
+    # and is freely available after creating a free login on the above website. Additionally,
+    # some manufacturers have released App Notes with SDPF information for their Flash ICs.
     print(
-        "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} Kbits".format(
+        "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} Kbit".format(
             hex(spiFlash.jedecID), spiFlash.manufacturer, spiFlash.mem_partNumber, spiFlash.capacity / 1024,
         )
     )
@@ -117,60 +114,19 @@ try:
     print()
 
     # if the device supports SFDP, print out the parameter table
+    # Note that the values printed are the raw values read out from the Flash
+    # Reference the SFDP specification document linked above to understand how
+    # to interpret the values into meaningful data.
+
     if deviceSupportForSFDP:
 
         print("Discovered parameters:")
-        print(
-            "Capacity: {} bytes, Page Size: {} bytes, Page Count: {}".format(
-                spiFlash.capacityBytes, spiFlash.pageSizeBytes, spiFlash.pageCount
-            )
-        )
-    # See the 21_spi_flash_sfdp.py example to explore the full capability of SFDP
+        for param, value in spiFlash.parameterTable.items():
+            print("{}: {}".format(param, value))
 
-    # Let's read a byte
-    address = 0x000000
-    rxByte = spiFlash.readByte(address)
-    print("Read a Byte @ address {}. Value = {}".format(address, hex(rxByte)))
+    else:
 
-    # Let's read a page
-    print("Reading a page of data:")
-    page_size = 256
-    rxBytes = spiFlash.readBytes(address, page_size)
-    print("Read byte count: {}".format(len(rxBytes)))
-
-    print("offset", end="\t")
-    for k in range(8):
-        print(" {}".format(k), end="\t")
-    print()
-
-    for i in range(page_size // 8):
-        print(hex(address + 8 * i), end="\t")
-        for j in range(8):
-            print(hex(rxBytes[i * 8 + j]), end="\t")
-        print()
-
-    # Let's read 1KB
-    rxBytes = spiFlash.readBytes(address, 1024)
-    print("length: {}".format(len(rxBytes)))
-
-    # Let's read a non-integer multiple of pages
-    rxBytes = spiFlash.readBytes(address, 3000)
-    print("length: {}".format(len(rxBytes)))
-
-    ## Lets write a page
-    pageData = [0xDE, 0xAD, 0xBE, 0xEF]
-    spiFlash.pageProgram(address, pageData)
-
-    # Erasing is important too -- this is commented out so it doesn't accidentally
-    # erase anyone's flash memory while trying out this demo.
-    spiFlash.chipErase()
-
-    # Let's read all the data
-    # max_bytes = 16384 * 1024
-    # rxBytes = spiFlash.readBytes(
-    #    address, max_bytes
-    # )
-    # print("length: {}".format(len(rxBytes)))
+        print("Flash IC does not support SFDP! Giving up!")
 
 
 # It's generally bad practice to indiscriminately catch all exceptions, however the

@@ -15,22 +15,6 @@ from serial import SerialException
 from binho.errors import DeviceNotFoundError
 from binho.utils import binho_error_hander
 
-
-"""
-This programmer can configure itself using Microchip part numbers to identify the device we wish to address.
-In most cases, we will want to create the programmer like this:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128')
-Then read some bytes:
-     read_bytes = p.read_bytes(0x000, 0x3FFF)
-or maybe write some bytes:
-    p.write_bytes(0x000, b'\xde\xad\xbe\xef')
-Occasionally, we might need to pass an argument to specify the address bits that have been set on the EEPROM:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128', slave_address=0b010)
-Or to configure the EEPROM ourselves, by specifying the capacity and the page size, with a few other options:
-    p = gf.create_programmer(capacity, page_size, bitmask="AAA", slave_address=0, write_cycle_length=0.005)
-By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different I2C bus object.
-"""
-
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
 targetComport = "COM3"
@@ -58,20 +42,19 @@ try:
 except SerialException:
 
     print(
-        "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it.",
+        "The target Binho host adapter was found, but failed to connect because another application already has an open\
+         connection to it.",
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -94,11 +77,13 @@ programmer = binho.create_programmer("eeprom", device="24FC512")
 # Alternatively, if the device is not built in, the EEPROM parameters needed can supplied as follows:
 # eepromCapacityBytes = 65536         # capacity of EEPROM in Bytes
 # eepromPageSizeBytes = 128           # EEPROM page size in Bytes
-# eepromAddressOffset = 000           # Address offset determined by pins A0-A3, if present on package. Defaults to 0b000
+# eepromAddressOffset = 000           # Address offset determined by pins A0-A3, if present on package. Defaults to
+#                                       0b000
 # eepromWriteCycleTime = 0.005        # Time to wait for a write cycle, in
 # seconds. Defaults to 5ms.
 
-# The last parameter requires a bit of an explanation -- the bitmask indicates the meaning of the the 3 lowest address bits
+# The last parameter requires a bit of an explanation -- the bitmask indicates the meaning of the the 3 lowest address
+#  bits
 # eepromAddressBitmask = 'AAA'
 # '0' or '1' = Bit is of fixed value
 # 'A' = Bit is part of pin selectable slave address
@@ -106,7 +91,8 @@ programmer = binho.create_programmer("eeprom", device="24FC512")
 # 'x' = Bit is a "don't care"
 
 # And then pass all of those parameters in to create the programmer
-# programmer = binho.create_programmer('eeprom', eepromCapacityBytes, eepromPageSizeBytes, bitmask=eepromAddressBitmask, slave_address=eepromAddressOffset, write_cycle_length=eepromWriteCycleTime)
+# programmer = binho.create_programmer('eeprom', eepromCapacityBytes, eepromPageSizeBytes, bitmask=eepromAddressBitmask,
+#              slave_address=eepromAddressOffset, write_cycle_length=eepromWriteCycleTime)
 
 # If you want to use the on-board pullup resistors, engage them now
 binho.i2c.useInternalPullUps = True

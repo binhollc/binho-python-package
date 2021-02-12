@@ -12,13 +12,8 @@ class I2CBus(binhoInterface):
     INTERFACE_SHORT_NAME = "i2c"
 
     def __init__(
-        self,
-        board,
-        name="i2c bus",
-        buffer_size=1024,
-        clock_frequency=400000,
-        enable_pullups=False,
-    ):
+        self, board, name="i2c bus", buffer_size=1024, clock_frequency=400000, enable_pullups=False,
+    ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new I2C bus.
         Args:
@@ -26,6 +21,8 @@ class I2CBus(binhoInterface):
             name -- The display name for the given I2C bus.
             buffer_size -- The size of the I2C receive buffer on the Binho host adapter.
         """
+
+        super().__init__(board)
 
         # Store a reference to the parent board, and our API.
         self.board = board
@@ -100,9 +97,7 @@ class I2CBus(binhoInterface):
             raise ValueError("invalid receive length!")
 
         if receive_length > self.buffer_size:
-            raise ValueError(
-                "Tried to receive more than the size of the receive buffer."
-            )
+            raise ValueError("Tried to receive more than the size of the receive buffer.")
 
         if address > 127 or address < 0:
             raise ValueError("Tried to transmit to an invalid I2C address!")
@@ -110,9 +105,7 @@ class I2CBus(binhoInterface):
         result = []
         status = True
         try:
-            result = self.api.writeToReadFrom(
-                hex(address), True, receive_length, 0, None
-            )
+            result = self.api.writeToReadFrom(hex(address), True, receive_length, 0, None)
         except BaseException:
             status = False
 
@@ -135,7 +128,7 @@ class I2CBus(binhoInterface):
 
         writeSuccess = True
         try:
-            result = self.api.writeToReadFrom(hex(address), True, 0, len(data), data)
+            self.api.writeToReadFrom(hex(address), True, 0, len(data), data)
         except BaseException:
             writeSuccess = False
 
@@ -148,9 +141,7 @@ class I2CBus(binhoInterface):
         result = []
         status = True
         try:
-            result = self.api.writeToReadFrom(
-                hex(address), True, receive_length, len(data), data
-            )
+            result = self.api.writeToReadFrom(hex(address), True, receive_length, len(data), data)
         except BaseException:
             status = False
 

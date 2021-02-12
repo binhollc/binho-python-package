@@ -26,7 +26,7 @@ if os.path.isfile("../VERSION"):
 else:
     setup_options["version_config"] = {
         "version_format": "{tag}.dev+git.{sha}",
-        "starting_version": "2020.10.05",
+        "starting_version": "2020.10.06",
     }
     setup_req.append("even-better-setuptools-git-version")
 
@@ -41,7 +41,6 @@ setup(
             "binho = binho.commands.binho:main",
             "binho_shell = binho.commands.binho_shell:main",
             "binho_info = binho.commands.binho_info:main",
-            "binho_uart = binho.commands.binho_uart:main",
             "binho_i2c = binho.commands.binho_i2c:main",
             "binho_spi = binho.commands.binho_spi:main",
             "binho_spiflash = binho.commands.binho_spiflash:main",
@@ -52,8 +51,9 @@ setup(
             "binho_gpio = binho.commands.binho_gpio:main",
             "binho_pwm = binho.commands.binho_pwm:main",
             "binho_eeprom = binho.commands.binho_eeprom:main",
-            "binho_firmware = binho.commands.binho_firmware:main",
-            "binho_dfu = binho.commands.binho_firmware:main",
+            "binho_dfu = binho.commands.binho_dfu:main",
+            "binho_daplink = binho.commands.binho_daplink:main",
+            "binho_flasher = binho.commands.binho_flasher:main",
         ],
     },
     author="Binho LLC",
@@ -65,8 +65,10 @@ setup(
         "tabulate",
         "intelhex",
         "prompt_toolkit<2.1.0",
-        "pyserial"
+        "pyserial",
+        "hidapi",
     ],
+    data_files=[("/binho/assets", [])],
     description="Python package for Binho USB host adapter products",
     long_description=read("README.md"),
     packages=find_packages(),
@@ -84,11 +86,6 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
     ],
-    extras_require={
-        "dev": [
-            "sphinx",
-            "sphinx_rtd_theme",
-        ]
-    },
+    extras_require={"dev": ["sphinx", "sphinx_rtd_theme",]},
     **setup_options,
 )

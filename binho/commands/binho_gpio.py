@@ -2,21 +2,16 @@
 
 from __future__ import print_function
 
+import errno
 import sys
-import time
-import argparse
-import statistics
-from binho.utils import log_silent, log_verbose, binho_error_hander
+from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
 def main():
-    from binho.utils import binhoArgumentParser
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="utility for reading from Binho host adapter's ADC"
-    )
+    parser = binhoArgumentParser(description="utility for controller Binho host adapter's GPIO pins")
     parser.add_argument(
         "-m",
         "--mode",
@@ -26,9 +21,7 @@ def main():
         choices=["DIN", "DOUT"],
         help="Set the mode of the IO pin",
     )
-    parser.add_argument(
-        "-n", "--iopin", default=0, help="Provide the IO pin to use for this operation"
-    )
+    parser.add_argument("-n", "--iopin", default=0, help="Provide the IO pin to use for this operation")
     parser.add_argument("-o", "--output", default=None, help="Set the output value")
 
     args = parser.parse_args()
@@ -46,20 +39,23 @@ def main():
                 )
             )
             sys.exit(errno.ENODEV)
-        else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
+
+        elif device.inDAPLinkMode:
+            print(
+                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                    device.productName, device.commPort
                 )
             )
+            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+            sys.exit(errno.ENODEV)
+
+        else:
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -97,34 +93,22 @@ def main():
                 elif int(args.output) == 1:
                     pin.value = 1
                 else:
-                    raise ValueError(
-                        "Output can only be set to 0 or 1, not {}".format(args.output)
-                    )
+                    raise ValueError("Output can only be set to 0 or 1, not {}".format(args.output))
 
-                log_function(
-                    "Configured {} as a digital output = {} ".format(
-                        pinStr, int(args.output)
-                    )
-                )
+                log_function("Configured {} as a digital output = {} ".format(pinStr, int(args.output)))
 
             elif args.output.upper() == "HIGH":
                 pin.value = 1
                 log_function(
-                    "Configured {} as a digital output and drove the signal {} ".format(
-                        pinStr, args.output.upper()
-                    )
+                    "Configured {} as a digital output and drove the signal {} ".format(pinStr, args.output.upper())
                 )
             elif args.output.upper() == "LOW":
                 pin.value = 0
                 log_function(
-                    "Configured {} as a digital output and drove the signal {} ".format(
-                        pinStr, args.output.upper()
-                    )
+                    "Configured {} as a digital output and drove the signal {} ".format(pinStr, args.output.upper())
                 )
             else:
-                raise ValueError(
-                    "Output can only be set to LOW or HIGH, not {}".format(args.output)
-                )
+                raise ValueError("Output can only be set to LOW or HIGH, not {}".format(args.output))
 
         else:
 
@@ -138,7 +122,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

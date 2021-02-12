@@ -4,21 +4,25 @@
 
 from __future__ import print_function
 
+from decimal import Decimal
+
 import sys
 import ast
 import time
 import errno
 import argparse
 import linecache
-import requests
-
+import os
 import urllib.request
 import json
+import shutil
+import psutil
+import requests
 
-from decimal import Decimal
 
-# from . import binhoHostAdapter, _binhoHostAdapterSingletonWrapper
-from .errors import DeviceNotFoundError, DeviceInBootloaderError
+from . import _binhoHostAdapterSingletonWrapper
+from . import binhoHostAdapter
+from .errors import DeviceNotFoundError
 
 
 from .comms.manager import binhoDeviceManager
@@ -35,10 +39,10 @@ SI_PREFIXES = {
     "E+12": "T",
 }
 
-
+# pylint: disable=unused-argument
 def log_silent(string, end=None):
     """Silently discards all log data, but provides our logging interface."""
-    pass
+    # pylint: enable=unused-argument
 
 
 def log_verbose(string, end="\n"):
@@ -87,10 +91,10 @@ def from_eng_notation(string, unit=None, units=None, to_type=None):
         units.append(unit)
 
     # If we have an acceptable unit, strip it off before we process things.
-    for unit in units:
-        string = string.replace(unit, "")
-        string = string.replace(unit.upper(), "")
-        string = string.replace(unit.lower(), "")
+    for unitstr in units:
+        string = string.replace(unitstr, "")
+        string = string.replace(unitstr.upper(), "")
+        string = string.replace(unitstr.lower(), "")
 
     # Strip off any unnecessary whitespace.
     string = string.strip()
@@ -136,63 +140,231 @@ def human_readable_size(byte_count, unit="B", binary_marker="i"):
     return "{} {}{}".format(byte_count, SUFFIXES[suffix_order], unit)
 
 
-class register:
-    def __init__(self, initialValue=0x00, widthInBits=8, name="Unnamed Register"):
-
-        self.name = name
-        self.widthInBits = widthInBits
-        self.value = initialValue
-
-    def getBit(self, bitNumber):
-        bitVal = (self.value & (1 << bitNumber)) >> bitNumber
-        return bitVal
-
-    def getBits(self, staringfromBit, upToIncludingBit):
-
-        bitMask = 0
-
-        for i in range((upToIncludingBit - staringfromBit) + 1):
-            bitMask = (bitMask << 1) + 1
-
-        bitMask = bitMask << staringfromBit
-
-        bitsVal = (self.value & bitMask) >> staringfromBit
-
-        return bitsVal
-
-
 class binhoDFUManager:
+
+    _fw_releases_url = "releases.json"
+    _fw_latest_url = "latest/latest.json"
+    _daplink_latest_url = "latest/latest_dap.json"
+
+    cachedManifestData = []
+    cachedManifestUrl = ""
+
+    removableDrivesSnapshot = []
+
+    bootloaderInfo = {"version": "unknown", "model": "unknown", "boardID": "unknown"}
+
+    @classmethod
+    def switchToBootloader(cls, device):
+
+        binhoDFUManager.takeDrivesSnapshot()
+
+        device.reset_to_bootloader()
+        time.sleep(5)
+
+        newDrives = binhoDFUManager.getNewDrives()
+
+        binhoDFUManager.getBootloaderInfo(newDrives[0])
+
+        return newDrives[0]
+
+    @classmethod
+    def switchToNormal(cls, device, release=None):
+
+        fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, release)
+        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
+
+        if fw_image_url:
+
+            binhoDFUManager.downloadFirmwareFile(fw_image_url)
+
+            bootloaderDrive = binhoDFUManager.switchToBootloader(device)
+
+            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
+
+            return True
+
+        return False
+
+    @classmethod
+    def switchToDAPLink(cls, device):
+
+        fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, daplink=True)
+        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
+
+        if fw_image_url:
+            binhoDFUManager.downloadFirmwareFile(fw_image_url)
+
+            bootloaderDrive = binhoDFUManager.switchToBootloader(device)
+
+            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
+
+            return True
+
+        return False
+
+    @classmethod
+    def takeDrivesSnapshot(cls):
+
+        snapshot = psutil.disk_partitions()
+
+        binhoDFUManager.removableDrivesSnapshot = [x for x in snapshot if x.opts == "rw,removable"]
+
+    @classmethod
+    def getNewDrives(cls):
+
+        snapshot = psutil.disk_partitions()
+
+        rmDrives = [x for x in snapshot if x.opts == "rw,removable"]
+
+        for drive in rmDrives:
+            binhoDFUManager.getBootloaderInfo(drive)
+
+        return rmDrives
+
+    @staticmethod
+    def getBootloaderInfo(drive):
+
+        btldr_info = drive.mountpoint + "\\INFO.TXT"
+
+        if os.path.isfile(btldr_info):
+            with open(btldr_info, "r") as file:
+                binhoDFUManager.bootloaderInfo["version"] = file.readline().strip()
+                productModel = file.readline().strip()
+                boardID = file.readline().strip()
+
+                if productModel.startswith("Model: "):
+                    binhoDFUManager.bootloaderInfo["model"] = productModel[7:]
+
+                if boardID.startswith("Board-ID: "):
+                    binhoDFUManager.bootloaderInfo["boardID"] = boardID[10:]
+
+    @staticmethod
+    def getBootloaderVersion(drive):
+
+        btldr_version = "unknown"
+
+        btldr_info = drive.mountpoint + "\\INFO.TXT"
+        if os.path.isfile(btldr_info):
+            with open(btldr_info, "r") as file:
+                # pylint: disable=unused-variable
+                btldr_version = file.readline().strip()
+                productModel = file.readline().strip()
+                boardID = file.readline().strip()
+                # pylint: enable=unused-variable
+
+        return btldr_version
+
+    @staticmethod
     def parseVersionString(verStr):
 
         ver = verStr.split(".")
 
         return int(ver[0]), int(ver[1]), int(ver[2])
 
-    def getLatestFirmwareVersion(firmwareUpdateURL, fail_silent=False):
+    @classmethod
+    def getJsonManifestParameter(cls, manifestURL, paramName, fail_silent=False):
 
         try:
-            with urllib.request.urlopen(firmwareUpdateURL) as url:
-                data = json.loads(url.read().decode())
-                return data["version"]
+
+            if binhoDFUManager.cachedManifestUrl == manifestURL:
+                return binhoDFUManager.cachedManifestData[paramName]
+
+            with urllib.request.urlopen(manifestURL) as url:
+                binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
+                binhoDFUManager.cachedManifestUrl = manifestURL
+                return binhoDFUManager.cachedManifestData[paramName]
         except BaseException:
             if fail_silent:
                 return None
-            else:
-                raise RuntimeError(
-                    "Unable to connect to Binho server to check the latest firmware version!"
-                )
 
-    def downloadFirmwareFile(url, fail_silent=False):
+            raise RuntimeError("Unable to connect to Binho server and retrieve the data!") from BaseException
+
+    @classmethod
+    def getLatestFirmwareVersion(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_latest_url
+
+        return binhoDFUManager.getJsonManifestParameter(manifestURL, "version", fail_silent)
+
+    @classmethod
+    def getLatestFirmwareFilename(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_latest_url
+
+        url = binhoDFUManager.getJsonManifestParameter(manifestURL, "url", fail_silent)
+
+        return url.split("/")[-1]
+
+    @classmethod
+    def getLatestFirmwareUrl(cls, base_url, fail_silent=False):
+
+        manifestURL = base_url + binhoDFUManager._fw_latest_url
+
+        return binhoDFUManager.getJsonManifestParameter(manifestURL, "url", fail_silent)
+
+    @classmethod
+    def getFirmwareImageUrl(cls, base_url, release=None, daplink=False, fail_silent=False):
+
+        if not release:
+
+            manifestURL = base_url + binhoDFUManager._fw_latest_url
+
+            if daplink:
+                manifestURL = base_url + binhoDFUManager._daplink_latest_url
+
+            return binhoDFUManager.getJsonManifestParameter(manifestURL, "url", fail_silent)
+
+        manifestURL = base_url + binhoDFUManager._fw_releases_url
+
+        with urllib.request.urlopen(manifestURL) as url:
+            data = json.loads(url.read().decode())
+
+            for r in data["releases"]:
+                if r["version"] == release:
+                    return r["url"]
+
+        return None
+
+    @classmethod
+    def getFirmwareFilename(cls, firmware_image_url):
+
+        return firmware_image_url.split("/")[-1]
+
+    @classmethod
+    def getAvailableFirmwareReleases(cls, base_url):
+
+        manifestURL = base_url + binhoDFUManager._fw_releases_url
+        releases = []
+
+        with urllib.request.urlopen(manifestURL) as url:
+            data = json.loads(url.read().decode())
+
+            for r in data["releases"]:
+                releases.append(r["version"])
+
+        return releases
+
+    @classmethod
+    def isFirmwareVersionAvailable(cls, base_url, release):
+
+        avail_releases = binhoDFUManager.getAvailableFirmwareReleases(base_url)
+
+        if release in avail_releases:
+            return True
+
+        return False
+
+    @classmethod
+    def downloadFirmwareFile(cls, url, fail_silent=False):
 
         assetsDir = binho_assets_directory()
 
-        print(assetsDir)
-        print(ur)
+        firmwareFilename = url.split("/")[-1]
 
         try:
             r = requests.get(url)
 
-            with open("assetsDir/test", "wb") as f:
+            with open(assetsDir + "/" + firmwareFilename, "wb") as f:
                 f.write(r.content)
 
             return True
@@ -200,14 +372,30 @@ class binhoDFUManager:
 
             if fail_silent:
                 return False
-            else:
-                raise RuntimeError("Failed to download firmware file online!")
+            raise RuntimeError("Failed to download firmware file online!") from BaseException
+
+    # pylint: disable=unused-argument
+    @classmethod
+    def loadFirmwareFile(cls, figFileName, btldr_drive, fail_silent=False):
+
+        assetsDir = binho_assets_directory()
+
+        firmwareFilename = assetsDir + "/" + figFileName
+
+        if os.path.isfile(firmwareFilename):
+            shutil.copy2(firmwareFilename, btldr_drive.mountpoint + "\\fw.uf2")
+        else:
+            return False
+
+        return True
+
+    # pylint: enable=unused-argument
 
 
 class binhoArgumentParser(argparse.ArgumentParser):
     """ Convenience-extended argument parser for Binho host adapter. """
 
-    """ Serial number expected from a device in DFU. """
+    # Serial number expected from a device in DFU.
     DFU_STUB_SERIAL = "dfu_flash_stub"
 
     def __init__(self, *args, **kwargs):
@@ -241,7 +429,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             self.raise_device_find_failures = False
 
         # Invoke the core function.
-        super(binhoArgumentParser, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Start off with no memoized arguments.
         self.memoized_args = None
@@ -293,11 +481,7 @@ class binhoArgumentParser(argparse.ArgumentParser):
             )
         else:
             self.add_argument(
-                "-v",
-                "--verbose",
-                dest="verbose",
-                action="store_true",
-                help="Log more details to the console.",
+                "-v", "--verbose", dest="verbose", action="store_true", help="Log more details to the console.",
             )
 
         # TODO: specify protocol?
@@ -319,7 +503,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
                 dest="dfu_stub",
                 metavar="<stub.dfu>",
                 type=str,
-                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically find one.",
+                help="The stub to use for DFU programming. If not provided, the utility will attempt to automtaically "
+                + "find one.",
             )
 
     def find_specified_device(self):
@@ -346,19 +531,14 @@ class binhoArgumentParser(argparse.ArgumentParser):
                         raise
 
                     # Otherwise, print a message and bail out.
-                    if args.device:
+                    if args.deviceID:
                         print(
-                            "No Binho host adapter found matching Device ID '{}'.".format(
-                                args.device
-                            ),
+                            "No Binho host adapter found matching Device ID '{}'.".format(args.deviceID),
                             file=sys.stderr,
                         )
                     elif args.index:
                         print(
-                            "No Binho host adapter found with index '{}'.".format(
-                                args.index
-                            ),
-                            file=sys.stderr,
+                            "No Binho host adapter found with index '{}'.".format(args.index), file=sys.stderr,
                         )
                     else:
                         print("No Binho host adapter found!", file=sys.stderr)
@@ -370,8 +550,8 @@ class binhoArgumentParser(argparse.ArgumentParser):
 
     def get_singleton_for_specified_device(self):
         """
-        Connects to the Binho host adapter specified by the user's command line arguments, but gets a singleton that persists
-        across reconnects.
+        Connects to the Binho host adapter specified by the user's command line arguments, but gets a singleton that
+        persists across reconnects.
         """
 
         # Grab the device itself, and find its deviceID.
@@ -387,21 +567,26 @@ class binhoArgumentParser(argparse.ArgumentParser):
         return log_verbose if self.parse_args().verbose else log_silent
 
     def get_log_functions(self):
-        """ Returns a 2-tuple of a function that can be used for logging data and errors, attempting to repsect -v/-q."""
+        """ Returns a 2-tuple of a function that can be used for logging data and errors, attempting to
+            repsect -v/-q."""
         return self.get_log_function(), log_error
 
+    # pylint: disable=arguments-differ
     def parse_args(self):
         """ Specialized version of parse_args that memoizes, for Binho host adapters. """
 
         # If we haven't called parse_args yet, let the base class handle the parsing,
         # first.
         if self.memoized_args is None:
-            self.memoized_args = super(binhoArgumentParser, self).parse_args()
+            self.memoized_args = super().parse_args()
 
         # Always return our memoized version.
         return self.memoized_args
 
-    def _find_binhoHostAdapter(self, args):
+    # pylint: enable=arguments-differ
+
+    @classmethod
+    def _find_binhoHostAdapter(cls, args):
         """ Finds a Binho Host Adapter matching the relevant arguments."""
 
         # If we have an index argument, grab _all_ Binho Host Adapters and
@@ -413,17 +598,16 @@ class binhoArgumentParser(argparse.ArgumentParser):
 
             if port:
                 return binhoHostAdapter(deviceID=args.deviceID)
-            else:
-                raise DeviceNotFoundError
+            raise DeviceNotFoundError
 
-        elif args.port:
+        if args.port:
             ports = manager.listAvailablePorts()
 
             if args.port not in ports:
                 raise DeviceNotFoundError
             return binhoHostAdapter(port=args.port)
 
-        elif args.index:
+        if args.index:
             # Find _all_ Binho host adapters
             ports = manager.listAvailablePorts()
 
@@ -435,18 +619,16 @@ class binhoArgumentParser(argparse.ArgumentParser):
         # If we have a serial number, look only for a single device. Theoretically,
         # we should never have more than one Binho host adapter with the same
         # serial number.
-        else:
-            ports = manager.listAvailablePorts()
+        ports = manager.listAvailablePorts()
 
-            # ... and then select the one with the provided index.
-            if len(ports) < 1:
-                raise DeviceNotFoundError
-            return binhoHostAdapter(port=ports[0])
+        # ... and then select the one with the provided index.
+        if len(ports) < 1:
+            raise DeviceNotFoundError
+        return binhoHostAdapter(port=ports[0])
 
 
 def binho_assets_directory():
     """ Provide a quick function that helps us get at our assets directory. """
-    import os
 
     # Find the path to the module, and then find its assets folder.
     module_path = os.path.dirname(__file__)
@@ -455,19 +637,19 @@ def binho_assets_directory():
 
 def find_binho_asset(filename):
     """ Returns the path to a given Binho asset, if it exists, or None if the Binho asset isn't provided."""
-    import os
 
     asset_path = os.path.join(binho_assets_directory(), filename)
 
     if os.path.isfile(asset_path):
         return asset_path
-    else:
-        return None
+
+    return None
 
 
 def binho_error_hander():
-
+    # pylint: disable=unused-variable
     exc_type, exc_obj, tb = sys.exc_info()
+    # pylint: enable=unused-variable
     f = tb.tb_frame
     lineno = tb.tb_lineno
     filename = f.f_code.co_filename
@@ -475,6 +657,7 @@ def binho_error_hander():
     line = linecache.getline(filename, lineno, f.f_globals)
 
     print()
+    print("Exception: {}".format(exc_type.__name__))
     print("Exception in {}, on line {}:".format(filename, lineno))
     print('"{}"'.format(line.strip()))
     print("{}".format(exc_obj))

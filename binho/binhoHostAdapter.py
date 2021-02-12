@@ -1,9 +1,9 @@
 from .device import binhoDevice
+from .devices import nova  # pylint: disable=unused-import
 
 # Ensure that we have access to all Binho host adapter devices. Normally, we'd avoid
 # importing an entire namespace, but in this case, this allows us to ensure
 # that all board modules are loaded for autoidentification.
-from .devices import *
 from .errors import DeviceNotFoundError
 
 active_connections = {}
@@ -23,20 +23,25 @@ def binhoHostAdapter(**board_identifiers):
     if not board_identifiers:
         board_identifiers["index"] = 0
         return binhoDevice.autodetect(board_identifiers)
-    elif "port" in board_identifiers and board_identifiers["port"]:
+
+    if (
+        "port" in board_identifiers
+        and board_identifiers["port"]
+        or "deviceID" in board_identifiers
+        and board_identifiers["deviceID"]
+        or "index" in board_identifiers
+    ):
         return binhoDevice.autodetect(board_identifiers)
-    elif "deviceID" in board_identifiers and board_identifiers["deviceID"]:
-        return binhoDevice.autodetect(board_identifiers)
-    elif "index" in board_identifiers:
-        return binhoDevice.autodetect(board_identifiers)
-    elif "find_all" in board_identifiers and board_identifiers["find_all"]:
+
+    if "find_all" in board_identifiers and board_identifiers["find_all"]:
         return binhoDevice.autodetect_all(board_identifiers)
-    else:
-        raise DeviceNotFoundError
+
+    raise DeviceNotFoundError
 
 
 def binhoHostAdapterSingleton(serial=None):
-    """ Returns a binhoHostAdapter object, re-using an existing object if we already have a connection to the given binhoHostAdapter. """
+    """ Returns a binhoHostAdapter object, re-using an existing object if we already have a connection to the given
+        binhoHostAdapter. """
 
     # If we already have a binhoHostAdapter with the given serial,
     if serial in active_connections:

@@ -1,18 +1,18 @@
-import os
-
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIO
+from ..interfaces.gpio import GPIOProvider
+
+# from ..interfaces.dac import DAC
+# from ..interfaces.adc import ADC
 
 from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
 from ..interfaces.oneWireBus import OneWireBus
 
-from ..programmers.spiFlash import SPIFlash
-
+# from ..programmers.spiFlash import SPIFlash
 # from ..programmers.firmware import DeviceFirmwareManager
 # from ..interfaces.pattern_generator import PatternGenerator
 # from ..interfaces.sdir import SDIRTransceiver
-from ..interfaces.uart import UART
+# from ..interfaces.uart import UART
 
 
 class binhoProtonovaSPI(binhoDevice):
@@ -66,20 +66,22 @@ class binhoProtonovaSPI(binhoDevice):
             "J2_P23": ((7, 2), 6),  # RX
             "J2_P25": ((7, 1), 6),  # TX
         },
-        {
-            "J2_P8": ((4, 2), 6),  # RX
-            "J2_P19": ((2, 4), 2),  # RX
-            "J2_P20": ((2, 3), 2),  # TX
-        },
+        {"J2_P8": ((4, 2), 6), "J2_P19": ((2, 4), 2), "J2_P20": ((2, 3), 2),},  # RX  # RX  # TX
     ]
 
     def initialize_apis(self):
         """ Initialize a new Binho Protonova connection. """
 
         # Set up the core connection.
-        initSuccess = super(binhoProtonovaSPI, self).initialize_apis()
+        initSuccess = super().initialize_apis()
 
         if initSuccess:
+            gpio = GPIOProvider(self)
+            # adc = ADC(self)
+            # dac = DAC(self)
+
+            # Set product name
+            self.setProductName(self.PRODUCT_NAME)
 
             # Create our simple peripherals.
             self._populate_simple_interfaces()
@@ -87,23 +89,23 @@ class binhoProtonovaSPI(binhoDevice):
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
             # if self.supports_api("gpio"):
-            self._populate_gpio()
+            self._populate_gpio(self, gpio, self.GPIO_MAPPINGS)
 
             # if self.supports_api("adc"):
-            # self._populate_adc()
+            # self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
             # if self.supports_api('i2c'):
             # print('supports_api i2c success')
             self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0])
+            self._add_interface("i2c", [I2CBus(self, "I2C0")])
 
             # if self.supports_api('spi') and self.supports_api('gpio'):
             #    chip_select = self.gpio.get_pin('J1_P37')
             self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0])
+            self._add_interface("spi", [SPIBus(self, 0, "SPI0")])
 
             self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0])
+            self._add_interface("oneWire", [OneWireBus(self, "1WIRE0")])
 
             # if self.supports_api('uart'):
             # self._add_interface('uart', UART(self))

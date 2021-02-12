@@ -11,7 +11,7 @@ class OneWireBus(binhoInterface):
 
     def __init__(
         self, board, name="1wire bus", io_number=0, pullup=False, buffer_size=1024
-    ):
+    ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new 1Wire bus.
 
@@ -22,6 +22,8 @@ class OneWireBus(binhoInterface):
             pullup              -- True to engage the internal pullup resistor.
             buffer_size         -- The size of the 1Wire receive buffer on the Binho host adapter.
         """
+
+        super().__init__(board)
 
         # Store a reference to the parent board.
         self.api = board.apis.oneWire

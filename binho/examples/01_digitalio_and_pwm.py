@@ -41,20 +41,19 @@ try:
 except SerialException:
 
     print(
-        "The target Binho host adapter was found, but failed to connect because another application already has an open connection to it.",
+        "The target Binho host adapter was found, but failed to connect because another application already has an open\
+         connection to it.",
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -64,11 +63,7 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'IO'
     binho.operationMode = "IO"
@@ -161,19 +156,11 @@ try:
     # now set the value of the pwm generator, valid range is 0 (off) - 1024
     # (fully high)
     io0.value = 512
-    print(
-        "PWM output on {} is {} (pwmFreq = {}Hz).".format(
-            io0.pinName, io0.value, io0.pwmFreq
-        )
-    )
+    print("PWM output on {} is {} (pwmFreq = {}Hz).".format(io0.pinName, io0.value, io0.pwmFreq))
 
     # for convenience, you can also set the duty cycle using percent
     io0.value = "50%"
-    print(
-        "PWM output on {} is {} (pwmFreq = {}Hz).".format(
-            io0.pinName, io0.value, io0.pwmFreq
-        )
-    )
+    print("PWM output on {} is {} (pwmFreq = {}Hz).".format(io0.pinName, io0.value, io0.pwmFreq))
 
     print("Finished!")
 

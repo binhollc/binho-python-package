@@ -1,21 +1,6 @@
 from __future__ import absolute_import
-from future import utils as future_utils
 
-# import usb
-# import time
-# import struct
-
-# from ..api import CommsBackend
-# from ..errors import DeviceNotFoundError
-
-
-import threading
-import queue
-import signal
-import sys
 import serial
-import os
-import enum
 from serial.tools.list_ports import comports
 
 
@@ -28,10 +13,9 @@ class CommandFailureError(CommsError):
 
 
 class binhoDeviceManager:
-    def _checkForDeviceID(self, serialPort):
-        comport = serial.Serial(
-            serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05
-        )
+    @classmethod
+    def _checkForDeviceID(cls, serialPort):
+        comport = serial.Serial(serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
         command = "+ID ?\n"
         comport.write(command.encode("utf-8"))
         receivedData = comport.readline().strip().decode("utf-8")
@@ -41,7 +25,8 @@ class binhoDeviceManager:
         comport.close()
         return receivedData
 
-    def listAvailablePorts(self):
+    @classmethod
+    def listAvailablePorts(cls):
 
         HWID = "04D8"  # vid:pid
         ports = []
@@ -73,10 +58,11 @@ class binhoDeviceManager:
 
         if len(result) > 0:
             return result[0]
-        else:
-            return None
 
-    def getUSBVIDPIDByPort(self, comport):
+        return None
+
+    @classmethod
+    def getUSBVIDPIDByPort(cls, comport):
 
         for port in comports():
             if comport in port.device:
