@@ -65,7 +65,7 @@ setup(
         "tabulate",
         "intelhex",
         "prompt_toolkit<2.1.0",
-        "pyserial",
+        "pyserial==3.3",
         "hidapi",
     ],
     data_files=[("/binho/assets", [])],
