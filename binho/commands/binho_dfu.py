@@ -5,21 +5,23 @@ from __future__ import print_function
 import errno
 import sys
 
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoDFUManager, binhoArgumentParser
+from binho.utils import (
+    log_silent,
+    log_verbose,
+    binho_error_hander,
+    binhoDFUManager,
+    binhoArgumentParser,
+)
 from binho.errors import DeviceNotFoundError
 
-def main(): # pylint: disable=too-many-branches, too-many-statements
+
+def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="utility for updating firmware on Binho host adapters"
-    )
+    parser = binhoArgumentParser(description="utility for updating firmware on Binho host adapters")
 
     parser.add_argument(
-        "-q",
-        "--quit",
-        action="store_true",
-        help="Exit DFU mode, return to normal operation.",
+        "-q", "--quit", action="store_true", help="Exit DFU mode, return to normal operation.",
     )
 
     parser.add_argument(
@@ -37,10 +39,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
     )
 
     parser.add_argument(
-        "-r",
-        "--release",
-        default=None,
-        help="Update the firmware of the desired device to a specific release version",
+        "-r", "--release", default=None, help="Update the firmware of the desired device to a specific release version",
     )
 
     args = parser.parse_args()
@@ -52,19 +51,12 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
         log_function("Trying to find a Binho host adapter...")
         device = parser.find_specified_device()
 
-        log_function(
-            "{} found on {}. (Device ID: {})".format(
-                device.productName, device.commPort, device.deviceID
-            )
-        )
+        log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -80,36 +72,38 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
 
             if device.inBootloaderMode:
 
-                log_function('Exiting bootloader...')
+                log_function("Exiting bootloader...")
                 device.exit_bootloader()
-                log_function('Completed!')
+                log_function("Completed!")
 
             elif device.inDAPLinkMode:
 
-                log_function('{} is not in bootloader, cannot exit!'.format(device.productName))
+                log_function("{} is not in bootloader, cannot exit!".format(device.productName))
                 log_function("Note: You can exit DAPLink mode using the 'binho daplink -q' command.")
 
             else:
 
-                log_function('{} is not in bootloader, cannot exit!'.format(device.productName))
+                log_function("{} is not in bootloader, cannot exit!".format(device.productName))
                 log_function("Note: You can enter bootloader mode using the 'binho dfu' command.")
 
         elif args.btldr:
 
             if device.inBootloaderMode:
 
-                log_function("{}:{} on {} is already in it's bootloader".format(
-                    device.productName, device.deviceID, device.commPort)
+                log_function(
+                    "{}:{} on {} is already in it's bootloader".format(
+                        device.productName, device.deviceID, device.commPort
+                    )
                 )
 
             else:
                 log_function("Resetting {} into it's bootloader".format(device.productName))
                 binhoDFUManager.switchToBootloader(device)
-                log_function('Bootloader Details:')
-                log_function("Version: {}".format(binhoDFUManager.bootloaderInfo['version']))
-                log_function("Model: {}".format(binhoDFUManager.bootloaderInfo['model']))
-                log_function("BoardID: {}".format(binhoDFUManager.bootloaderInfo['boardID']))
-                log_function('Completed!')
+                log_function("Bootloader Details:")
+                log_function("Version: {}".format(binhoDFUManager.bootloaderInfo["version"]))
+                log_function("Model: {}".format(binhoDFUManager.bootloaderInfo["model"]))
+                log_function("BoardID: {}".format(binhoDFUManager.bootloaderInfo["boardID"]))
+                log_function("Completed!")
 
         else:
 
@@ -121,7 +115,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
 
                 log_function("Getting latest firmware release...")
                 latestVersion = binhoDFUManager.getLatestFirmwareVersion(device.FIRMWARE_UPDATE_URL)
-                log_function('Latest Version: {}'.format(latestVersion))
+                log_function("Latest Version: {}".format(latestVersion))
 
                 if device.firmwareVersion == latestVersion:
 
@@ -129,16 +123,18 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
 
                 else:
 
-                    log_function('Updating device...')
+                    log_function("Updating device...")
                     binhoDFUManager.switchToNormal(device)
                     log_function("Firmware Update Complete!")
-
 
             elif args.release:
 
                 if device.firmwareVersion == args.release:
-                    print("This {} is already running firmware version {}.".format(device.productName,
-                                                                                   device.firmwareVersion))
+                    print(
+                        "This {} is already running firmware version {}.".format(
+                            device.productName, device.firmwareVersion
+                        )
+                    )
 
                 else:
 
@@ -156,7 +152,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
 
             device.close()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

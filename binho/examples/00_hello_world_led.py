@@ -46,16 +46,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -65,11 +63,7 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the LED to any color based on RGB values (0 - 255)
     red = 255

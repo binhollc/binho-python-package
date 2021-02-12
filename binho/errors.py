@@ -14,15 +14,12 @@ class DeviceMemoryError(MemoryError):
     """ Error indicating that the Binho host adapter has run out of memory. """
 
 
-
 class NotFoundError(IOError):
     """ Error indicating that a resource was not found. """
 
 
-
 class binhoError(RuntimeError):
     """ Runtime error used when no better description is available. """
-
 
 
 class ExternalDeviceError(IOError):

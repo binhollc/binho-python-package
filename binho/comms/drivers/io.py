@@ -11,9 +11,7 @@ class binhoIODriver:
 
         if not result.startswith("-IO" + str(self.ioNumber) + " MODE"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-IO'
-                + str(self.ioNumber)
-                + ' MODE"'
+                f'Error Binho responded with {result}, not the expected "-IO' + str(self.ioNumber) + ' MODE"'
             )
 
         return result[10:]
@@ -24,9 +22,7 @@ class binhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -37,9 +33,7 @@ class binhoIODriver:
 
         if not result.startswith("-IO" + str(self.ioNumber) + " PWMFREQ"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-IO'
-                + str(self.ioNumber)
-                + ' PWMFREQ"'
+                f'Error Binho responded with {result}, not the expected "-IO' + str(self.ioNumber) + ' PWMFREQ"'
             )
 
         return int(result[13:])
@@ -50,9 +44,7 @@ class binhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -63,9 +55,7 @@ class binhoIODriver:
 
         if not result.startswith("-IO" + str(self.ioNumber) + " INT"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-IO'
-                + str(self.ioNumber)
-                + ' INT"'
+                f'Error Binho responded with {result}, not the expected "-IO' + str(self.ioNumber) + ' INT"'
             )
 
         return result[8:]
@@ -76,9 +66,7 @@ class binhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -89,9 +77,7 @@ class binhoIODriver:
 
         if not result.startswith("-IO" + str(self.ioNumber) + " VALUE"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-IO'
-                + str(self.ioNumber)
-                + ' VALUE"'
+                f'Error Binho responded with {result}, not the expected "-IO' + str(self.ioNumber) + ' VALUE"'
             )
 
         if "%" in result or "V" in result:
@@ -107,9 +93,7 @@ class binhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 

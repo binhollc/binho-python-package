@@ -1,5 +1,6 @@
 from ..interface import binhoInterface
 
+
 class UART(binhoInterface):
     """
     TODO: description
@@ -17,7 +18,7 @@ class UART(binhoInterface):
 
     def __init__(
         self, board, baud=115200, data_bits=8, stop_bits=1, parity=None, uart_number=0
-    ): # pylint: disable=too-many-arguments, unused-argument
+    ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Args:
             board -- Binho host adapter whose UART lines are to be controlled
@@ -55,9 +56,7 @@ class UART(binhoInterface):
         self.parity = parity if (parity is not None) else self.parity
 
         # Set up the relevant UART.
-        self.actual_baud = self.api.initialize(
-            self.uart_number, self.baud, self.data_bits, self.parity, self.stop_bits
-        )
+        self.actual_baud = self.api.initialize(self.uart_number, self.baud, self.data_bits, self.parity, self.stop_bits)
 
         # Mark ourselves as initialized.
         self.initialized = True

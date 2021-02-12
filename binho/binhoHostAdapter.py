@@ -1,5 +1,5 @@
 from .device import binhoDevice
-from .devices import nova # pylint: disable=unused-import
+from .devices import nova  # pylint: disable=unused-import
 
 # Ensure that we have access to all Binho host adapter devices. Normally, we'd avoid
 # importing an entire namespace, but in this case, this allows us to ensure
@@ -7,6 +7,7 @@ from .devices import nova # pylint: disable=unused-import
 from .errors import DeviceNotFoundError
 
 active_connections = {}
+
 
 def binhoHostAdapter(**board_identifiers):
     """
@@ -23,9 +24,13 @@ def binhoHostAdapter(**board_identifiers):
         board_identifiers["index"] = 0
         return binhoDevice.autodetect(board_identifiers)
 
-    if "port" in board_identifiers and board_identifiers["port"] or \
-        "deviceID" in board_identifiers and board_identifiers["deviceID"] or \
-        "index" in board_identifiers:
+    if (
+        "port" in board_identifiers
+        and board_identifiers["port"]
+        or "deviceID" in board_identifiers
+        and board_identifiers["deviceID"]
+        or "index" in board_identifiers
+    ):
         return binhoDevice.autodetect(board_identifiers)
 
     if "find_all" in board_identifiers and board_identifiers["find_all"]:

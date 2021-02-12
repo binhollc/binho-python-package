@@ -82,9 +82,7 @@ class binho1WireDriver:
 
         return int(result[15:], 16)
 
-    def exchangeBytes(
-        self, oneWireCmd, bytesToWrite=None, bytesToRead=0, oneWireIndex=0
-    ):
+    def exchangeBytes(self, oneWireCmd, bytesToWrite=None, bytesToRead=0, oneWireIndex=0):
         """
         Issues one of the following commands to the one wire bus:
             None (this is the default)
@@ -122,16 +120,12 @@ class binho1WireDriver:
 
         if bytesToRead == 0:
             if not result.startswith("-OK"):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-OK"'
-                )
+                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return bytearray()
 
         if not result.startswith("-1WIRE0 RXD "):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."')
 
         return bytearray.fromhex(result[12:])
 

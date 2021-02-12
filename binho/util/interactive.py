@@ -18,14 +18,14 @@ class binhoShellMagics(Magics):
         return self.shell.user_ns["binho"]
 
     @line_magic
-    def reconnect(self, line): # pylint: disable=unused-argument
+    def reconnect(self, line):  # pylint: disable=unused-argument
         """ Reconnects to the active binhoHostAdapter, when possible. """
 
         # Try to reconnect to the attached binhoHostAdapter.
         self.binho().try_reconnect()
 
     @line_magic
-    def reload(self, line): # pylint: disable=unused-argument
+    def reload(self, line):  # pylint: disable=unused-argument
         """ Attempts to reload any modules that have changed. Wrapper for %autoreload. """
 
         try:
@@ -34,12 +34,12 @@ class binhoShellMagics(Magics):
             pass
 
     @line_magic
-    def dmesg(self, line): # pylint: disable=unused-argument
+    def dmesg(self, line):  # pylint: disable=unused-argument
         """ Print's the binhoHostAdapter's debug buffer. """
         self.binho().dmesg()
 
     @line_magic
-    def resetHW(self, line): # pylint: disable=unused-argument
+    def resetHW(self, line):  # pylint: disable=unused-argument
         """ Resets the attached binhoHostAdapter, and then reconnects. Hey, %reset was taken. """
 
         self.binho().reset(reconnect=True)
@@ -77,8 +77,7 @@ class binhoShellMagics(Magics):
         else:
             try:
                 ans = self.shell.ask_yes_no(
-                    "Once deleted, variables cannot be recovered. Proceed (y/[n])?",
-                    default="n",
+                    "Once deleted, variables cannot be recovered. Proceed (y/[n])?", default="n",
                 )
             except StdinNotImplementedError:
                 ans = True
@@ -91,8 +90,7 @@ class binhoShellMagics(Magics):
         else:
             try:
                 reset_adapter = self.shell.ask_yes_no(
-                    "Would you like to reset the Binho host adapter hardware, as well (y/[n])?",
-                    default="n",
+                    "Would you like to reset the Binho host adapter hardware, as well (y/[n])?", default="n",
                 )
             except StdinNotImplementedError:
                 reset_adapter = False
@@ -113,5 +111,5 @@ class binhoShellMagics(Magics):
             self.shell.reset(new_session=False)
 
         # ... and then reconnect to the Binho host adapter.
-        binho = self.shell.connect_function() # pylint: disable=unused-variable
+        binho = self.shell.connect_function()  # pylint: disable=unused-variable
         self.shell.push("binho")

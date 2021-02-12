@@ -14,9 +14,7 @@ class ADC(binhoInterface):
 
         # Sanity check:
         if adc_num not in (0, 1):
-            raise ValueError(
-                "Specified an unavailable ADC! (Valid values are 0 and 1)."
-            )
+            raise ValueError("Specified an unavailable ADC! (Valid values are 0 and 1).")
 
         self.device = device
         self.api = self.device.apis.io
@@ -44,9 +42,7 @@ class ADC(binhoInterface):
                 raise ValueError("No pins are registered to the ADC!")
 
         self.api[pin].mode = "AIN"
-        voltage = float(
-            "%.3f" % (self.api[pin].value / self.maxCounts * self.maxVoltage)
-        )
+        voltage = float("%.3f" % (self.api[pin].value / self.maxCounts * self.maxVoltage))
 
         return voltage
 

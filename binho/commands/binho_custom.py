@@ -18,12 +18,8 @@ from binho.errors import DeviceNotFoundError
 def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Sample template for creating custom Binho commands"
-    )
-    parser.add_argument(
-        "-n", "--iopin", default=0, help="Get an IO pin from the command arguments"
-    )
+    parser = binhoArgumentParser(description="Sample template for creating custom Binho commands")
+    parser.add_argument("-n", "--iopin", default=0, help="Get an IO pin from the command arguments")
 
     # run the argument parser
     args = parser.parse_args()
@@ -56,19 +52,12 @@ def main():
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -97,7 +86,7 @@ def main():
 
         log_function("Taking {} samples...".format(args.sample_count))
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

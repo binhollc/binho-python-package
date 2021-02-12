@@ -8,6 +8,7 @@ import serial
 
 SERIAL_TIMEOUT = 0.5
 
+
 class SerialPortManager(threading.Thread):
 
     serialPort = None
@@ -17,7 +18,7 @@ class SerialPortManager(threading.Thread):
     stopper = None
     inBridgeMode = False
 
-    def __init__(self, serialPort, txdQueue, rxdQueue, intQueue, stopper): # pylint: disable=too-many-arguments
+    def __init__(self, serialPort, txdQueue, rxdQueue, intQueue, stopper):  # pylint: disable=too-many-arguments
         super().__init__()
         self.serialPort = serialPort
         self.txdQueue = txdQueue
@@ -30,13 +31,11 @@ class SerialPortManager(threading.Thread):
     def run(self):
 
         try:
-            comport = serial.Serial(
-                self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05
-            )
+            comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
         except BaseException:
             self.stopper.set()
 
-        while not self.stopper.is_set(): # pylint: disable=too-many-nested-blocks
+        while not self.stopper.is_set():  # pylint: disable=too-many-nested-blocks
 
             try:
                 if self.inBridgeMode:
@@ -64,7 +63,7 @@ class SerialPortManager(threading.Thread):
                         serialCommand = self.txdQueue.get() + "\n"
                         comport.write(serialCommand.encode("utf-8"))
 
-            except Exception as e: # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except
                 self.stopper.set()
                 self.exception = e
                 # print('Comm Error!')
@@ -126,7 +125,7 @@ class oneWireCmd(enum.Enum):
     SKIP = "SKIP"
 
 
-class binhoComms(): # pylint: disable=too-many-public-methods
+class binhoComms:
     def __init__(self, serialPort):
 
         self.serialPort = serialPort
@@ -202,9 +201,7 @@ class binhoComms(): # pylint: disable=too-many-public-methods
         self._rxdQueue = None
         self._intQueue = None
 
-        comport = serial.Serial(
-            self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05
-        )
+        comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
         comport.close()
 
         self.interrupts = set()
@@ -217,11 +214,7 @@ class binhoComms(): # pylint: disable=too-many-public-methods
         # we need to keep track of the workers but not start them yet
         # workers = [StatusChecker(url_queue, result_queue, stopper) for i in range(num_workers)]
         self.manager = SerialPortManager(
-            self.serialPort,
-            self._txdQueue,
-            self._rxdQueue,
-            self._intQueue,
-            self._stopper,
+            self.serialPort, self._txdQueue, self._rxdQueue, self._intQueue, self._stopper,
         )
 
         # create our signal handler and connect it
@@ -315,9 +308,7 @@ class binhoComms(): # pylint: disable=too-many-public-methods
         for x in data:
             bufferData += " " + str(x)
 
-        self.sendCommand(
-            "BUF" + str(bufferIndex) + " WRITE " + str(startIndex) + bufferData
-        )
+        self.sendCommand("BUF" + str(bufferIndex) + " WRITE " + str(startIndex) + bufferData)
         result = self.readResponse()
 
         return result
@@ -512,23 +503,14 @@ class binhoComms(): # pylint: disable=too-many-public-methods
 
     def setPacketDataSWI(self, swiIndex, index, value):
 
-        self.sendCommand(
-            "SWI" + str(swiIndex) + " PACKET DATA " + str(index) + " " + str(value)
-        )
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET DATA " + str(index) + " " + str(value))
         result = self.readResponse()
 
         return result
 
     def setPacketDataFromBufferSWI(self, swiIndex, byteCount, bufferName):
 
-        self.sendCommand(
-            "SWI"
-            + str(swiIndex)
-            + " PACKET DATA "
-            + str(byteCount)
-            + " "
-            + str(bufferName)
-        )
+        self.sendCommand("SWI" + str(swiIndex) + " PACKET DATA " + str(byteCount) + " " + str(bufferName))
         result = self.readResponse()
 
         return result

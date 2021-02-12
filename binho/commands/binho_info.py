@@ -19,7 +19,7 @@ def print_core_info(device):
         print("  Port: {}".format(device.commPort))
         print("  Device ID: {}".format(device.deviceID))
         print(
-            "  Note: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r" \
+            "  Note: This device is in DFU Mode! It will not respond to USB commands until a firmware update\n\r"
             "        is completed or it is power cycled."
         )
 
@@ -28,7 +28,7 @@ def print_core_info(device):
         print("  Port: {}".format(device.commPort))
         print("  Device ID: {}".format(device.deviceID))
         print(
-            "  Note: This device is in DAPlink Mode! It can be returned to host adapter (normal) mode\n\r" \
+            "  Note: This device is in DAPlink Mode! It can be returned to host adapter (normal) mode\n\r"
             "        by issuing 'binho daplink -q' command."
         )
 
@@ -39,21 +39,11 @@ def print_core_info(device):
         print("  Device ID: {}".format(device.deviceID))
 
         if device.FIRMWARE_UPDATE_URL:
-            latestVersion = binhoDFUManager.getLatestFirmwareVersion(
-                device.FIRMWARE_UPDATE_URL, True
-            )
+            latestVersion = binhoDFUManager.getLatestFirmwareVersion(device.FIRMWARE_UPDATE_URL, True)
 
             if latestVersion:
-                (
-                    latestVerMajor,
-                    latestVerMinor,
-                    latestVerRev,
-                ) = binhoDFUManager.parseVersionString(latestVersion)
-                (
-                    currVerMajor,
-                    currVerMinor,
-                    currVerRev,
-                ) = binhoDFUManager.parseVersionString(fwVersion)
+                (latestVerMajor, latestVerMinor, latestVerRev,) = binhoDFUManager.parseVersionString(latestVersion)
+                (currVerMajor, currVerMinor, currVerRev,) = binhoDFUManager.parseVersionString(fwVersion)
 
                 newFwVerAvail = False
                 if currVerMajor < latestVerMajor:
@@ -65,10 +55,8 @@ def print_core_info(device):
 
                 if newFwVerAvail:
                     print(
-                        "  Firmware Version: {} [A newer version is available! Use 'binho dfu' shell command to " \
-                           "update.]".format(
-                            fwVersion
-                        )
+                        "  Firmware Version: {} [A newer version is available! Use 'binho dfu' shell command to "
+                        "update.]".format(fwVersion)
                     )
                 else:
                     print("  Firmware Version: {} [Up To Date]".format(fwVersion))
@@ -81,11 +69,8 @@ def print_core_info(device):
     warnings = device.version_warnings()
     if warnings:
         wrapped_warnings = textwrap.wrap(warnings)
-        wrapped_warnings = "\n".join(
-            ["    {}".format(line) for line in wrapped_warnings]
-        )
+        wrapped_warnings = "\n".join(["    {}".format(line) for line in wrapped_warnings])
         print("\n  !!! WARNING !!!\n{}\n".format(wrapped_warnings))
-
 
 
 def main():

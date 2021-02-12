@@ -11,7 +11,7 @@ class OneWireBus(binhoInterface):
 
     def __init__(
         self, board, name="1wire bus", io_number=0, pullup=False, buffer_size=1024
-    ): # pylint: disable=too-many-arguments, unused-argument
+    ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new 1Wire bus.
 

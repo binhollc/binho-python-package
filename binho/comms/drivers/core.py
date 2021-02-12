@@ -11,9 +11,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-ID"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-ID"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-ID"')
 
         return result[4:]
 
@@ -24,9 +22,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-FWVER"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-FWVER"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-FWVER"')
 
         return result[7:]
 
@@ -37,9 +33,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-HWVER"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-HWVER"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-HWVER"')
 
         return result[7:]
 
@@ -50,9 +44,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-CMDVER"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-CMDVER"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-CMDVER"')
 
         return result[8:]
 
@@ -62,9 +54,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK") and not fail_silent:
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -74,9 +64,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -85,9 +73,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -97,9 +83,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-MODE"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-MODE"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-MODE"')
 
         return result[8:]
 
@@ -109,9 +93,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -121,9 +103,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-BASE"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-BASE"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-BASE"')
 
         return result[6:]
 
@@ -133,9 +113,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -144,9 +122,7 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -155,8 +131,6 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True

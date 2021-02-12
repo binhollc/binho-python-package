@@ -1,17 +1,18 @@
 from ..device import binhoDevice
 from ..interfaces.gpio import GPIOProvider
-#from ..interfaces.dac import DAC
-#from ..interfaces.adc import ADC
+
+# from ..interfaces.dac import DAC
+# from ..interfaces.adc import ADC
 
 from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
 from ..interfaces.oneWireBus import OneWireBus
 
-#from ..programmers.spiFlash import SPIFlash
-#from ..programmers.firmware import DeviceFirmwareManager
-#from ..interfaces.pattern_generator import PatternGenerator
-#from ..interfaces.sdir import SDIRTransceiver
-#from ..interfaces.uart import UART
+# from ..programmers.spiFlash import SPIFlash
+# from ..programmers.firmware import DeviceFirmwareManager
+# from ..interfaces.pattern_generator import PatternGenerator
+# from ..interfaces.sdir import SDIRTransceiver
+# from ..interfaces.uart import UART
 
 
 class binhoProtonovaSPI(binhoDevice):
@@ -65,11 +66,7 @@ class binhoProtonovaSPI(binhoDevice):
             "J2_P23": ((7, 2), 6),  # RX
             "J2_P25": ((7, 1), 6),  # TX
         },
-        {
-            "J2_P8": ((4, 2), 6),  # RX
-            "J2_P19": ((2, 4), 2),  # RX
-            "J2_P20": ((2, 3), 2),  # TX
-        },
+        {"J2_P8": ((4, 2), 6), "J2_P19": ((2, 4), 2), "J2_P20": ((2, 3), 2),},  # RX  # RX  # TX
     ]
 
     def initialize_apis(self):
@@ -80,8 +77,8 @@ class binhoProtonovaSPI(binhoDevice):
 
         if initSuccess:
             gpio = GPIOProvider(self)
-            #adc = ADC(self)
-            #dac = DAC(self)
+            # adc = ADC(self)
+            # dac = DAC(self)
 
             # Set product name
             self.setProductName(self.PRODUCT_NAME)

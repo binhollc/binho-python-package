@@ -1,5 +1,4 @@
-
-class binhoInterface():
+class binhoInterface:
     """
     Generic base class for binho peripherals.
     """

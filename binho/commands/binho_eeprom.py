@@ -8,21 +8,18 @@ import sys
 import time
 
 from intelhex import IntelHex
-import binho # pylint: disable=unused-import
-from binho import binhoHostAdapter # pylint: disable=unused-import
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
-def main(): # pylint: disable=too-many-locals
+def main():  # pylint: disable=too-many-locals
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(description="Utility for working with I2C EEPROMs")
     parser.add_argument(
-        "-u",
-        "--pullup",
-        action="store_true",
-        help="Enable 2.2k pullup resistors (3.3V)",
+        "-u", "--pullup", action="store_true", help="Enable 2.2k pullup resistors (3.3V)",
     )
 
     parser.add_argument(
@@ -34,10 +31,7 @@ def main(): # pylint: disable=too-many-locals
     )
 
     parser.add_argument(
-        "-f",
-        "--frequency",
-        default=400000,
-        help="Max supported clock frequency of the EEPROM",
+        "-f", "--frequency", default=400000, help="Max supported clock frequency of the EEPROM",
     )
     parser.add_argument(
         "-a",
@@ -45,21 +39,15 @@ def main(): # pylint: disable=too-many-locals
         default=0,
         help="Offset from base address set on pins A0-A2, if present on package. Defaults to 0b000",
     )
-    parser.add_argument(
-        "-c", "--capacity", default=None, type=int, help="EEPROM capacity in bytes"
-    )
-    parser.add_argument(
-        "-t", "--writetime", default=0.005, type=float, help="EEPROM write cycle time"
-    )
+    parser.add_argument("-c", "--capacity", default=None, type=int, help="EEPROM capacity in bytes")
+    parser.add_argument("-t", "--writetime", default=0.005, type=float, help="EEPROM write cycle time")
     parser.add_argument(
         "-m",
         "--bitmask",
         default="AAA",
         help="Bitmask to determine how to use lowest three bits of EEPROM I2C Address",
     )
-    parser.add_argument(
-        "-g", "--pagesize", default=None, type=int, help="EEPROM page size in bytes"
-    )
+    parser.add_argument("-g", "--pagesize", default=None, type=int, help="EEPROM page size in bytes")
 
     parser.add_argument(
         "-b",
@@ -67,29 +55,16 @@ def main(): # pylint: disable=too-many-locals
         action="store_true",
         help="Check if the EEPROM is blank. No other operation will be performed.",
     )
+    parser.add_argument("-e", "--erase", action="store_true", help="Erase the EEPROM before writing")
     parser.add_argument(
-        "-e", "--erase", action="store_true", help="Erase the EEPROM before writing"
-    )
-    parser.add_argument(
-        "-y",
-        "--verify",
-        action="store_true",
-        help="Verify the EEPROM contents after writing",
+        "-y", "--verify", action="store_true", help="Verify the EEPROM contents after writing",
     )
 
     parser.add_argument(
-        "-r",
-        "--read",
-        default=None,
-        type=str,
-        help="Read EEPROM data and save it to the provided file",
+        "-r", "--read", default=None, type=str, help="Read EEPROM data and save it to the provided file",
     )
     parser.add_argument(
-        "-w",
-        "--write",
-        default=None,
-        type=str,
-        help="Write the data from the provided file to the EEPROM",
+        "-w", "--write", default=None, type=str, help="Write the data from the provided file to the EEPROM",
     )
 
     args = parser.parse_args()
@@ -118,19 +93,12 @@ def main(): # pylint: disable=too-many-locals
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -144,26 +112,16 @@ def main(): # pylint: disable=too-many-locals
 
         t0 = time.time()  # pylint: disable=unused-variable
 
-        ih = IntelHex()   # pylint: disable=unused-variable
-        programmer = []   # pylint: disable=unused-variable
+        ih = IntelHex()  # pylint: disable=unused-variable
+        programmer = []  # pylint: disable=unused-variable
         device.operationMode = "I2C"
 
         if args.partnumber:
             # programmer = device.create_programmer('eeprom', device='24FC512')
-            log_function(
-                "Using predefined parameters for EEPROM part number {}".format(
-                    args.partnumber.upper()
-                )
-            )
+            log_function("Using predefined parameters for EEPROM part number {}".format(args.partnumber.upper()))
             programmer = device.create_programmer("eeprom", device=args.partnumber.upper())
 
-        elif (
-            args.frequency
-            and args.capacity
-            and args.writetime
-            and args.bitmask
-            and args.pagesize
-        ):
+        elif args.frequency and args.capacity and args.writetime and args.bitmask and args.pagesize:
             log_function("EEPROM manually defined:")
             log_function(
                 "Max Clock Frequency: {}, Base Address Offset: {}, Bitmask: {}".format(
@@ -186,12 +144,8 @@ def main(): # pylint: disable=too-many-locals
             )
 
         else:
-            log_function(
-                "EEPROM part number not provided, parameters must be manually supplied."
-            )
-            log_function(
-                "Flags -f, -a, -c, -t, -m, -g should be used to supply the device parameters"
-            )
+            log_function("EEPROM part number not provided, parameters must be manually supplied.")
+            log_function("Flags -f, -a, -c, -t, -m, -g should be used to supply the device parameters")
             log_function("when the device part number cannot be used.")
             device.close()
             sys.exit(1)
@@ -201,7 +155,7 @@ def main(): # pylint: disable=too-many-locals
         if args.pullup:
             log_function(
                 "Engaging the internal 2.2kOhm PullUp resistors. (Pulled to 3.3V). Remove the '-u' flag to rely on "
-                 "external resistors."
+                "external resistors."
             )
             device.i2c.useInternalPullUps = True
         else:
@@ -232,32 +186,24 @@ def main(): # pylint: disable=too-many-locals
             elapsedTime = "%.3f" % (t_stop - t_start)
 
             if isBlank:
-                log_function(
-                    "EEPROM is blank! Elapsed time: {} seconds".format(elapsedTime)
-                )
+                log_function("EEPROM is blank! Elapsed time: {} seconds".format(elapsedTime))
                 device.close()
                 sys.exit(0)
             else:
-                log_function(
-                    "EEPROM is NOT blank! Elapsed time: {} seconds".format(elapsedTime)
-                )
+                log_function("EEPROM is NOT blank! Elapsed time: {} seconds".format(elapsedTime))
                 device.close()
                 sys.exit(1)
 
         if args.erase:
-
             log_function("Erasing the EEPROM...")
             te_start = time.time()
             programmer.erase()
             te_stop = time.time()
             elapsedTime = "%.3f" % (te_stop - te_start)
-            log_function(
-                "EEPROM Erase completed! Elapsed time: {} seconds".format(elapsedTime)
-            )
+            log_function("EEPROM Erase completed! Elapsed time: {} seconds".format(elapsedTime))
 
         if args.read:
-
-            filename, file_extension = os.path.splitext(args.read) # pylint: disable=unused-variable
+            filename, file_extension = os.path.splitext(args.read)  # pylint: disable=unused-variable
 
             fileFormat = "bin"
             if file_extension == ".hex":
@@ -268,12 +214,8 @@ def main(): # pylint: disable=too-many-locals
             programmer.readToFile(args.read, format=fileFormat)
             tr_stop = time.time()
             elapsedTime = "%.3f" % (tr_stop - tr_start)
-            log_function(
-                "EEPROM Read completed! Elapsed time: {} seconds".format(elapsedTime)
-            )
-            log_function(
-                "EEPROM Data saved as {} file to : {}".format(fileFormat, args.read)
-            )
+            log_function("EEPROM Read completed! Elapsed time: {} seconds".format(elapsedTime))
+            log_function("EEPROM Data saved as {} file to : {}".format(fileFormat, args.read))
 
         if args.write:
 
@@ -283,36 +225,26 @@ def main(): # pylint: disable=too-many-locals
             if file_extension == ".hex":
                 fileFormat = "hex"
 
-            log_function(
-                "Writing Data to EEPROM from {} file: {}".format(fileFormat, args.write)
-            )
+            log_function("Writing Data to EEPROM from {} file: {}".format(fileFormat, args.write))
             tw_start = time.time()
             programmer.writeFromFile(args.write, format=fileFormat)
             tw_stop = time.time()
             elapsedTime = "%.3f" % (tw_stop - tw_start)
-            log_function(
-                "EEPROM Write completed! Elapsed time: {} seconds".format(elapsedTime)
-            )
+            log_function("EEPROM Write completed! Elapsed time: {} seconds".format(elapsedTime))
 
         if args.verify:
 
-            log_function(
-                "Verifying Data written to EEPROM from {} file: {}".format(
-                    fileFormat, args.write
-                )
-            )
+            log_function("Verifying Data written to EEPROM from {} file: {}".format(fileFormat, args.write))
             ty_start = time.time()
             programmer.verifyFile(args.write, format=fileFormat)
             ty_stop = time.time()
             elapsedTime = "%.3f" % (ty_stop - ty_start)
-            log_function(
-                "EEPROM Verify completed! Elapsed time: {} seconds".format(elapsedTime)
-            )
+            log_function("EEPROM Verify completed! Elapsed time: {} seconds".format(elapsedTime))
 
         # close the connection to the host adapter
         device.close()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

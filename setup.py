@@ -66,9 +66,9 @@ setup(
         "intelhex",
         "prompt_toolkit<2.1.0",
         "pyserial",
-        "hidapi"
+        "hidapi",
     ],
-    data_files=[('/binho/assets', [])],
+    data_files=[("/binho/assets", [])],
     description="Python package for Binho USB host adapter products",
     long_description=read("README.md"),
     packages=find_packages(),
@@ -86,11 +86,6 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
     ],
-    extras_require={
-        "dev": [
-            "sphinx",
-            "sphinx_rtd_theme",
-        ]
-    },
+    extras_require={"dev": ["sphinx", "sphinx_rtd_theme",]},
     **setup_options,
 )

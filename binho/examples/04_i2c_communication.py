@@ -46,16 +46,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -65,22 +63,14 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'I2C'
     binho.operationMode = "I2C"
 
     # Let's start by looking at the default I2C bus settings
     print("Default I2C bus configuration:")
-    print(
-        "Clk Freq: {} Hz, Use Internal PullUps: {}".format(
-            binho.i2c.frequency, binho.i2c.useInternalPullUps
-        )
-    )
+    print("Clk Freq: {} Hz, Use Internal PullUps: {}".format(binho.i2c.frequency, binho.i2c.useInternalPullUps))
     print()
 
     # The clock frequency can be configured to our desired frequency as shown below
@@ -103,11 +93,7 @@ try:
 
     # Hint: If you want to print the device list to the console in a much more human-friendly format
     # you can do it this way:
-    print(
-        "Found {} I2C devices on the bus, but displayed more conveniently:".format(
-            len(scanResults)
-        )
-    )
+    print("Found {} I2C devices on the bus, but displayed more conveniently:".format(len(scanResults)))
     print("[{}]".format(", ".join(hex(x) for x in scanResults)))
     print()
 
@@ -120,9 +106,7 @@ try:
 
     else:
 
-        raise Exception(
-            "No I2C Devices found, please connect a device to run the rest of the example."
-        )
+        raise Exception("No I2C Devices found, please connect a device to run the rest of the example.")
 
     # We know there's a device on the bus if we made it this far
     # so let's try to do a simple read from the device
@@ -207,9 +191,7 @@ try:
     regNumber = 0x01
     registersToRead = 1
 
-    rxData, result = binho.i2c.transfer(
-        targetDeviceAddress, [regNumber], registersToRead
-    )
+    rxData, result = binho.i2c.transfer(targetDeviceAddress, [regNumber], registersToRead)
 
     if result:
         print("The value of register {} is {}".format(regNumber, rxData[0]))

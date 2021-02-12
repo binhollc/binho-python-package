@@ -46,16 +46,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -65,11 +63,7 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to '1WIRE'
     binho.operationMode = "1WIRE"
@@ -97,11 +91,7 @@ try:
 
     except BaseException:
 
-        print(
-            "No 1Wire device was found attached to {}. Please check your setup and try again!".format(
-                ioPin
-            )
-        )
+        print("No 1Wire device was found attached to {}. Please check your setup and try again!".format(ioPin))
         sys.exit(1)
 
     # You can continue searching over and over again until all devices have been found. The search loads the
@@ -179,9 +169,7 @@ try:
     # Now let's write some data to the scratchpad
     eepromCommand = [0x0F, 0x00, 0x00]
     scratchpadData = [0xDE, 0xAD, 0xBE, 0xEF]
-    rxData, status = binho.oneWire.transfer(
-        eepromCommand + scratchpadData, 0, command="SKIP"
-    )
+    rxData, status = binho.oneWire.transfer(eepromCommand + scratchpadData, 0, command="SKIP")
 
     if status:
         rcvdBytes = "Write To Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
@@ -211,9 +199,7 @@ try:
 
     # Send the Copy Scratchpad command to commit the data to the EEPROM
     eepromCommand = [0x55]
-    rxData, status = binho.oneWire.transfer(
-        eepromCommand + list(commitConf), 7, command="SKIP"
-    )
+    rxData, status = binho.oneWire.transfer(eepromCommand + list(commitConf), 7, command="SKIP")
 
     if status:
         rcvdBytes = "Copy Scratchpad - Resp: {} byte(s):\t".format(len(rxData))

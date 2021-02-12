@@ -12,7 +12,7 @@ from .accessory import binhoAccessory
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO
 
-from .programmers import * # pylint: disable=wildcard-import, unused-wildcard-import
+from .programmers import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 from . import programmers as ProgrammerModules
 

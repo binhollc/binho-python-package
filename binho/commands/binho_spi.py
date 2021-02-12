@@ -6,8 +6,8 @@ import errno
 import sys
 import ast
 
-import binho # pylint: disable=unused-import
-from binho import binhoHostAdapter # pylint: disable=unused-import
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.interfaces.spiBus import SPIBus
 from binho.errors import DeviceNotFoundError
@@ -16,30 +16,17 @@ from binho.errors import DeviceNotFoundError
 def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Utility for SPI communication via Binho host adapter"
+    parser = binhoArgumentParser(description="Utility for SPI communication via Binho host adapter")
+    parser.add_argument(
+        "-r", "--read", default=0, help="Number of bytes expecting to receive from the SPI Bus",
     )
     parser.add_argument(
-        "-r",
-        "--read",
-        default=0,
-        help="Number of bytes expecting to receive from the SPI Bus",
-    )
-    parser.add_argument(
-        "-w",
-        "--write",
-        nargs="*",
-        type=ast.literal_eval,
-        default=[],
-        help="Bytes to send over the SPI Bus",
+        "-w", "--write", nargs="*", type=ast.literal_eval, default=[], help="Bytes to send over the SPI Bus",
     )
     parser.add_argument("-f", "--frequency", default=None, help="Set clock frequency")
     parser.add_argument("-c", "--chipselect", default=0, help="Set CS signal IO pin")
     parser.add_argument(
-        "-n",
-        "--invertCS",
-        action="store_true",
-        help="Set CS signal as inverted (Active High)",
+        "-n", "--invertCS", action="store_true", help="Set CS signal as inverted (Active High)",
     )
     parser.add_argument("-m", "--mode", default=0, help="Set SPI mode")
     args = parser.parse_args()
@@ -68,19 +55,12 @@ def main():
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -100,11 +80,7 @@ def main():
             if args.mode:
 
                 if int(args.mode) < 0 or int(args.mode) > 3:
-                    print(
-                        "SPI mode must be 0, 1, 2, or 3. mode = {} is not a valid setting.".format(
-                            args.mode
-                        )
-                    )
+                    print("SPI mode must be 0, 1, 2, or 3. mode = {} is not a valid setting.".format(args.mode))
                     device.close()
                     sys.exit(errno.EINVAL)
                 else:
@@ -124,17 +100,9 @@ def main():
 
             if csPin:
                 if args.invertCS:
-                    log_function(
-                        "Using IO{} as an Active-High (inverted) ChipSelect signal".format(
-                            csPin.pinNumber
-                        )
-                    )
+                    log_function("Using IO{} as an Active-High (inverted) ChipSelect signal".format(csPin.pinNumber))
                 else:
-                    log_function(
-                        "Using IO{} as an Active-Low (standard) ChipSelect signal".format(
-                            csPin.pinNumber
-                        )
-                    )
+                    log_function("Using IO{} as an Active-Low (standard) ChipSelect signal".format(csPin.pinNumber))
             else:
                 log_function(
                     "No ChipSelect signal specified, will not be used for this transaction. Use -c to specify IO pin to\
@@ -142,13 +110,7 @@ def main():
                 )
 
             transmit(
-                device,
-                args.write,
-                int(args.read),
-                csPin,
-                args.invertCS,
-                args.mode,
-                log_function,
+                device, args.write, int(args.read), csPin, args.invertCS, args.mode, log_function,
             )
 
         else:
@@ -161,7 +123,7 @@ def main():
             # close the connection to the host adapter
             device.close()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
 
         # Catch any exception that was raised and display it
         binho_error_hander()
@@ -172,12 +134,9 @@ def main():
         device.close()
 
 
-def transmit(device, data, receive_length, csPin, invCS, mode, log_function): \
-    # pylint: disable=too-many-arguments
+def transmit(device, data, receive_length, csPin, invCS, mode, log_function):  # pylint: disable=too-many-arguments
     spi_bus = SPIBus(device)
-    result = spi_bus.transfer(
-        data, receive_length, chip_select=csPin, spi_mode=mode, invert_chip_select=invCS
-    )
+    result = spi_bus.transfer(data, receive_length, chip_select=csPin, spi_mode=mode, invert_chip_select=invCS)
     log_function("SPI Transfer Completed:")
 
     sentBytes = "W"

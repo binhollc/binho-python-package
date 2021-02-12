@@ -12,13 +12,8 @@ class SPIBus(binhoInterface):
     INTERFACE_SHORT_NAME = "spi"
 
     def __init__(
-        self,
-        board,
-        chip_select_gpio=None,
-        name="spi bus",
-        buffer_size=1024,
-        clock_frequency=2000000,
-    ): # pylint: disable=too-many-arguments, unused-argument
+        self, board, chip_select_gpio=None, name="spi bus", buffer_size=1024, clock_frequency=2000000,
+    ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new SPI bus.
 
@@ -119,7 +114,7 @@ class SPIBus(binhoInterface):
         spi_mode=0,
         invert_chip_select=False,
         frequency=None,
-    ): # pylint: disable=too-many-arguments, too-many-locals
+    ):  # pylint: disable=too-many-arguments, too-many-locals
         """
         Sends (and typically receives) data over the SPI bus.
         Args:

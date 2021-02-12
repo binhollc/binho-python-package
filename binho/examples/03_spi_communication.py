@@ -46,16 +46,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -65,11 +63,7 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'SPI'
     binho.operationMode = "SPI"
@@ -101,10 +95,7 @@ try:
     print("Default SPI bus configuration:")
     print(
         "Mode: {}, Clk Freq: {} Hz, Bit Order: {}, Bits per Transfer: {}".format(
-            binho.spi.mode,
-            binho.spi.frequency,
-            binho.spi.bitOrder,
-            binho.spi.bitsPerTransfer,
+            binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
     print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
@@ -130,10 +121,7 @@ try:
     print("New SPI bus configuration:")
     print(
         "Mode: {}, Clk Freq: {} Hz, Bit Order: {}, Bits per Transfer: {}".format(
-            binho.spi.mode,
-            binho.spi.frequency,
-            binho.spi.bitOrder,
-            binho.spi.bitsPerTransfer,
+            binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
     print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
@@ -146,9 +134,7 @@ try:
     # since SPI bus is full-duplex, it can receive data while sending, so we'll use the transfer
     # function like this to capture any data that was sent back to the host
     # adapter
-    rxData = binho.spi.transfer(
-        txData, 4, chip_select=csPin, invert_chip_select=invertCS
-    )
+    rxData = binho.spi.transfer(txData, 4, chip_select=csPin, invert_chip_select=invertCS)
 
     # A simple way to test this is to connect the SDI and SDO signals together to create a
     # loopback. This will allow us to see how data is received.

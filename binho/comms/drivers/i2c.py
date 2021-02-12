@@ -12,9 +12,7 @@ class binhoI2CDriver:
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " CLK"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C'
-                + str(self.i2cIndex)
-                + ' CLK"'
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
             )
 
         return int(result[10:])
@@ -26,9 +24,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -51,18 +47,13 @@ class binhoI2CDriver:
         elif pull in (False, 0):
             val = 0
         else:
-            raise AttributeError(
-                "usePullups can be only be set to a value of True (1) or False (0), not "
-                + str(pull)
-            )
+            raise AttributeError("usePullups can be only be set to a value of True (1) or False (0), not " + str(pull))
 
         self.usb.sendCommand("I2C" + str(self.i2cIndex) + " PULL " + str(val))
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -74,9 +65,7 @@ class binhoI2CDriver:
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " ADDR"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C'
-                + str(self.i2cIndex)
-                + ' CLK"'
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
             )
 
         if "8BIT" in result:
@@ -85,9 +74,7 @@ class binhoI2CDriver:
             return 7
 
         raise RuntimeError(
-            f'Error Binho responded with {result}, not the expected "-I2C'
-            + str(self.i2cIndex)
-            + ' CLK"'
+            f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
         )
 
     @addressBits.setter
@@ -98,15 +85,11 @@ class binhoI2CDriver:
             result = self.usb.readResponse()
 
             if not result.startswith("-OK"):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-OK"'
-                )
+                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return True
 
-        raise AttributeError(
-            "AddressBits can be only be set to a value of 7 or 8, not " + str(bits)
-        )
+        raise AttributeError("AddressBits can be only be set to a value of 7 or 8, not " + str(bits))
 
     def scanAddress(self, address, i2cIndex=0):
 
@@ -126,20 +109,12 @@ class binhoI2CDriver:
             dataPacket += " " + str(x)
 
         self.usb.sendCommand(
-            "I2C"
-            + str(self.i2cIndex)
-            + " WRITE "
-            + str(address)
-            + " "
-            + str(startingRegister)
-            + dataPacket
+            "I2C" + str(self.i2cIndex) + " WRITE " + str(address) + " " + str(startingRegister) + dataPacket
         )
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -149,46 +124,35 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
     def readByte(self, address):
 
-        self.usb.sendCommand(
-            "I2C" + str(self.i2cIndex) + " REQ " + str(address) + " 1"
-        )
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " REQ " + str(address) + " 1")
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C'
-                + str(self.i2cIndex)
-                + ' RXD"'
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' RXD"'
             )
 
         return chr(result[10:])
 
     def readBytes(self, address, numBytes):
 
-        self.usb.sendCommand(
-            "I2C" + str(self.i2cIndex) + " REQ " + str(address) + " " + str(numBytes)
-        )
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " REQ " + str(address) + " " + str(numBytes))
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD"):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C'
-                + str(self.i2cIndex)
-                + ' RXD"'
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' RXD"'
             )
 
         return bytearray.fromhex(result[10:])
 
-    def writeToReadFrom(self, address, stop, numReadBytes, numWriteBytes, data): \
-        # pylint: disable=too-many-arguments
+    def writeToReadFrom(self, address, stop, numReadBytes, numWriteBytes, data):  # pylint: disable=too-many-arguments
 
         dataPacket = ""
         endStop = "1"
@@ -224,17 +188,13 @@ class binhoI2CDriver:
 
         if numReadBytes == 0:
             if not result.startswith("-OK"):
-                raise RuntimeError(
-                    f'Error Binho responded with {result}, not the expected "-OK"'
-                )
+                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return bytearray()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD "):
             raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-I2C '
-                + str(self.i2cIndex)
-                + ' RXD ..."'
+                f'Error Binho responded with {result}, not the expected "-I2C ' + str(self.i2cIndex) + ' RXD ..."'
             )
 
         return bytearray.fromhex(result[9:])
@@ -245,9 +205,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
         return True
 
     def end(self, repeat=False):
@@ -260,9 +218,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(
-                f'Error Binho responded with {result}, not the expected "-OK"'
-            )
+            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -302,64 +258,42 @@ class binhoI2CDriver:
 
     def setSlaveRegisterI2C(self, i2cIndex, register, value):
 
-        self.usb.sendCommand(
-            "I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " " + str(value)
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " " + str(value))
         result = self.usb.readResponse()
 
         return result
 
     def getSlaveRegisterI2C(self, i2cIndex, register):
 
-        self.usb.sendCommand(
-            "I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " ?"
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " ?")
         result = self.usb.readResponse()
 
         return result
 
     def setSlaveReadMaskI2C(self, i2cIndex, register, value):
 
-        self.usb.sendCommand(
-            "I2C"
-            + str(i2cIndex)
-            + " SLAVE READMASK "
-            + str(register)
-            + " "
-            + str(value)
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE READMASK " + str(register) + " " + str(value))
         result = self.usb.readResponse()
 
         return result
 
     def getSlaveReadMaskI2C(self, i2cIndex, register):
 
-        self.usb.sendCommand(
-            "I2C" + str(i2cIndex) + " SLAVE READMASK " + str(register) + " ?"
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE READMASK " + str(register) + " ?")
         result = self.usb.readResponse()
 
         return result
 
     def setSlaveWriteMaskI2C(self, i2cIndex, register, value):
 
-        self.usb.sendCommand(
-            "I2C"
-            + str(i2cIndex)
-            + " SLAVE WRITEMASK "
-            + str(register)
-            + " "
-            + str(value)
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE WRITEMASK " + str(register) + " " + str(value))
         result = self.usb.readResponse()
 
         return result
 
     def getSlaveWriteMaskI2C(self, i2cIndex, register):
 
-        self.usb.sendCommand(
-            "I2C" + str(i2cIndex) + " SLAVE WRITEMASK " + str(register) + " ?"
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE WRITEMASK " + str(register) + " ?")
         result = self.usb.readResponse()
 
         return result
@@ -380,9 +314,7 @@ class binhoI2CDriver:
 
     def setSlaveRegisterCount(self, i2cIndex, registerCount):
 
-        self.usb.sendCommand(
-            "I2C" + str(i2cIndex) + " SLAVE REGCNT " + str(registerCount)
-        )
+        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REGCNT " + str(registerCount))
         result = self.usb.readResponse()
 
         return result

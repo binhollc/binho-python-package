@@ -46,15 +46,13 @@ class bits:
         value = operator.index(value)
         if length is None:
             if value < 0:
-                raise ValueError(
-                    "invalid negative input for bits(): '{}'".format(value)
-                )
+                raise ValueError("invalid negative input for bits(): '{}'".format(value))
             length = value.bit_length()
         else:
             length = operator.index(length)
             value &= ~(-1 << length)
         inst = object.__new__(cls)
-        inst._len_ = length # pylint: disable=protected-access
+        inst._len_ = length  # pylint: disable=protected-access
         inst._int_ = value  # pylint: disable=protected-access
         return inst
 
@@ -63,9 +61,7 @@ class bits:
         value = re.sub(r"[\s_]", "", value)
         if value:
             if value[0] == "-":
-                raise ValueError(
-                    "invalid negative input for bits(): '{}'".format(value)
-                )
+                raise ValueError("invalid negative input for bits(): '{}'".format(value))
             if value[0] == "+":
                 length = len(value) - 1
             else:
@@ -95,30 +91,19 @@ class bits:
             return cls.from_int(value, length)
         if isinstance(value, str):
             if length is not None:
-                raise ValueError(
-                    "invalid input for bits(): when converting from str "
-                    "length must not be provided"
-                )
+                raise ValueError("invalid input for bits(): when converting from str " "length must not be provided")
             return cls.from_str(value)
         if isinstance(value, (bytes, bytearray, memoryview)):
             if length is None:
-                raise ValueError(
-                    "invalid input for bits(): when converting from bytes "
-                    "length must be provided"
-                )
+                raise ValueError("invalid input for bits(): when converting from bytes " "length must be provided")
             return cls.from_bytes(value, length, byteorder)
         if isinstance(value, collections.abc.Iterable):
             if length is not None:
                 raise ValueError(
-                    "invalid input for bits(): when converting from an iterable "
-                    "length must not be provided"
+                    "invalid input for bits(): when converting from an iterable " "length must not be provided"
                 )
             return cls.from_iter(value)
-        raise TypeError(
-            "invalid input for bits(): cannot convert from {}".format(
-                value.__class__.__name__
-            )
-        )
+        raise TypeError("invalid input for bits(): cannot convert from {}".format(value.__class__.__name__))
 
     def __len__(self):
         return self._len_
@@ -159,11 +144,7 @@ class bits:
                 return self.__class__()
 
             return self.__class__(self._int_ >> start, stop - start)
-        raise TypeError(
-            "bits indices must be integers or slices, not {}".format(
-                key.__class__.__name__
-            )
-        )
+        raise TypeError("bits indices must be integers or slices, not {}".format(key.__class__.__name__))
 
     def __iter__(self):
         for bit in range(self._len_):
@@ -178,9 +159,7 @@ class bits:
 
     def __add__(self, other):
         other = self.__class__(other)
-        return self.__class__(
-            self._int_ | (other._int_ << self._len_), self._len_ + other._len_
-        )
+        return self.__class__(self._int_ | (other._int_ << self._len_), self._len_ + other._len_)
 
     def __radd__(self, other):
         other = self.__class__(other)
@@ -189,12 +168,7 @@ class bits:
     def __mul__(self, other):
         if isinstance(other, int):
             return self.__class__(
-                reduce(
-                    lambda a, b: (a << self._len_) | b,
-                    (self._int_ for _ in range(other)),
-                    0,
-                ),
-                self._len_ * other,
+                reduce(lambda a, b: (a << self._len_) | b, (self._int_ for _ in range(other)), 0,), self._len_ * other,
             )
         return NotImplemented
 

@@ -13,56 +13,41 @@ from binho.utils import log_silent, log_verbose, binho_error_hander
 from binho.errors import DeviceNotFoundError
 from binho.utils import binhoArgumentParser
 
-def main(): # pylint: disable=too-many-branches, too-many-statements
+
+def main():
 
     # Set up a simple argument parser.
     parser = binhoArgumentParser(
         description="utility for using supported Binho host adapters in DAPLink mode to flash code to MCUs"
     )
 
+    parser.add_argument("-t", "--target", default=None, help="Manufacturer part number of target device")
+
+    parser.add_argument("-f", "--file", default=None, help="Path to binary file to program")
+
     parser.add_argument(
-        "-t",
-        "--target",
-        default=None,
-        help="Manufacturer part number of target device"
+        "-e", "--erase", action="store_true", help="Perform chip-erase before programming",
     )
 
     parser.add_argument(
-        "-f",
-        "--file",
-        default=None,
-        help="Path to binary file to program"
-    )
-
-    parser.add_argument(
-        "-e",
-        "--erase",
-        action="store_true",
-        help="Perform chip-erase before programming",
-    )
-
-    parser.add_argument(
-        "-r",
-        "--reset",
-        action="store_true",
-        help="Reset the device after programming completes",
+        "-r", "--reset", action="store_true", help="Reset the device after programming completes",
     )
 
     args = parser.parse_args()
 
     log_function = log_verbose if args.verbose else log_silent
 
-    log_function('Checking for pyOCD...')
+    log_function("Checking for pyOCD...")
 
     try:
-        import pyocd # pylint: disable=import-outside-toplevel
+        import pyocd  # pylint: disable=import-outside-toplevel
 
     except ModuleNotFoundError:
 
         print("PyOCD must be installed for this to work. Use 'pip install pyocd' to install the module.")
         sys.exit(1)
 
-    log_function('pyOCD installation confirmed!')
+    log_function("pyOCD installation confirmed!")
 
     try:
 
@@ -77,11 +62,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
             )
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
             print("The {} is not in DAPLink mode. Please use the 'binho daplink' command ")
             sys.exit(errno.ENODEV)
@@ -89,10 +70,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -105,14 +83,14 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
     try:
 
         if not args.file and not (args.erase or args.reset):
-            print('No binary file to program was supplied.')
+            print("No binary file to program was supplied.")
             sys.exit(1)
 
-        erase_setting = 'auto'
-        target_override = 'cortex_m'
+        erase_setting = "auto"
+        target_override = "cortex_m"
 
         if args.erase:
-            erase_setting = 'chip'
+            erase_setting = "chip"
 
         if args.target:
             target_override = args.target
@@ -122,8 +100,9 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
         else:
             logging.basicConfig(level=logging.WARNING)
 
-        with ConnectHelper.session_with_chosen_probe(target_override=target_override, chip_erase=erase_setting,
-                                                     smart_flash='false') as session:
+        with ConnectHelper.session_with_chosen_probe(
+            target_override=target_override, chip_erase=erase_setting, smart_flash="false",
+        ) as session:
 
             board = session.board
             target = board.target
@@ -133,22 +112,24 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
             if args.erase:
                 eraser = FlashEraser(session, FlashEraser.Mode.CHIP)
                 eraser.erase()
-                print('{} erased'.format(target.part_number))
+                print("{} erased".format(target.part_number))
 
             if args.file:
                 FileProgrammer(session).program(args.file)
-                log_function('Target {} programmed with {}'.format(target.part_number, args.file))
+                log_function("Target {} programmed with {}".format(target.part_number, args.file))
 
             if args.reset:
                 target.reset()
-                print('Target {} reset'.format(target.part_number))
+                print("Target {} reset".format(target.part_number))
 
     except pyocd.core.exceptions.TransferError:
 
-        print("Problem communicating with the target MCU. Please make sure SWDIO, SWCLK, and GND are properly " \
-              " connected and the MCU is powered up.")
+        print(
+            "Problem communicating with the target MCU. Please make sure SWDIO, SWCLK, and GND are properly "
+            " connected and the MCU is powered up."
+        )
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
 
         # Catch any exception that was raised and display it
         binho_error_hander()
@@ -157,6 +138,7 @@ def main(): # pylint: disable=too-many-branches, too-many-statements
 
         # close the connection to the host adapter
         device.close()
+
 
 if __name__ == "__main__":
     main()

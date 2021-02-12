@@ -13,22 +13,13 @@ from binho.errors import DeviceNotFoundError
 def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="utility for reading from Binho host adapter's ADC"
-    )
+    parser = binhoArgumentParser(description="utility for reading from Binho host adapter's ADC")
     parser.add_argument(
-        "-f",
-        "--frequency",
-        default=None,
-        help="Set PWM frequency from 750Hz to 80000Hz",
+        "-f", "--frequency", default=None, help="Set PWM frequency from 750Hz to 80000Hz",
     )
+    parser.add_argument("-n", "--iopin", default=0, help="Provide the IO pin to use for the pwm output")
     parser.add_argument(
-        "-n", "--iopin", default=0, help="Provide the IO pin to use for the pwm output"
-    )
-    parser.add_argument(
-        "value",
-        metavar="[value]",
-        help="The desired duty cycle or raw value to load into the pwm generator.",
+        "value", metavar="[value]", help="The desired duty cycle or raw value to load into the pwm generator.",
     )
 
     args = parser.parse_args()
@@ -57,11 +48,7 @@ def main():
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except serial.SerialException:
         print(
@@ -74,10 +61,7 @@ def main():
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -105,9 +89,7 @@ def main():
         # however, will need to do some plumbing to make that work, don't want it to delay the
         # initial release of this library
         if pinStr == "IO1":
-            raise ValueError(
-                "PWM Functionality is not supported on IO1 - please choose another pin!"
-            )
+            raise ValueError("PWM Functionality is not supported on IO1 - please choose another pin!")
 
         # get the desired pin
         pin = device.gpio.getPin(pinStr)
@@ -122,21 +104,13 @@ def main():
                 targetFreq = int(args.frequency)
                 if targetFreq < 750 or targetFreq > 80000:
                     raise ValueError(
-                        "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(
-                            args.frequency
-                        )
+                        "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency)
                     )
 
                 pin.pwmFreq = targetFreq
-                log_function(
-                    "Setting PWM Frequency to {} Hz".format(args.frequency)
-                )
+                log_function("Setting PWM Frequency to {} Hz".format(args.frequency))
             else:
-                raise ValueError(
-                    "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(
-                        args.frequency
-                    )
-                )
+                raise ValueError("PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency))
 
         if args.value.isnumeric():
 
@@ -150,11 +124,7 @@ def main():
                 )
 
             else:
-                raise ValueError(
-                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(
-                        args.value
-                    )
-                )
+                raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
         elif "%" in args.value:
 
@@ -175,29 +145,19 @@ def main():
 
                 else:
                     raise ValueError(
-                        "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}%".format(
-                            dutyCycle
-                        )
+                        "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}%".format(dutyCycle)
                     )
 
             else:
-                raise ValueError(
-                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(
-                        args.value
-                    )
-                )
+                raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
         else:
-            raise ValueError(
-                "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(
-                    args.value
-                )
-            )
+            raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
         # close the connection to the host adapter
         device.close()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

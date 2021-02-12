@@ -21,7 +21,7 @@ except NameError:
     unichr = chr
 
 
-class ConsoleBase():
+class ConsoleBase:
     """OS abstraction for console (input/output codec, no echo)"""
 
     def __init__(self):
@@ -72,7 +72,7 @@ class ConsoleBase():
 
 
 class NTConsole(ConsoleBase):
-    class Out():
+    class Out:
         """file-like wrapper that uses os.write"""
 
         def __init__(self, fd):
@@ -91,9 +91,7 @@ class NTConsole(ConsoleBase):
         self._saved_icp = ctypes.windll.kernel32.GetConsoleCP()
         ctypes.windll.kernel32.SetConsoleOutputCP(65001)
         ctypes.windll.kernel32.SetConsoleCP(65001)
-        self.output = codecs.getwriter("UTF-8")(
-            self.Out(sys.stdout.fileno()), "replace"
-        )
+        self.output = codecs.getwriter("UTF-8")(self.Out(sys.stdout.fileno()), "replace")
         # the change of the code page is not propagated to Python, manually fix
         # it
         sys.stderr = codecs.getwriter("UTF-8")(self.Out(sys.stderr.fileno()), "replace")
@@ -166,6 +164,4 @@ def Console():
     if os.name == "nt":
         return NTConsole()
 
-    raise NotImplementedError(
-        "Console support not implemented for OS '{}'.".format(os.name)
-    )
+    raise NotImplementedError("Console support not implemented for OS '{}'.".format(os.name))

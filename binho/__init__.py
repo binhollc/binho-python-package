@@ -7,7 +7,8 @@ from .binhoHostAdapter import binhoHostAdapter
 from .binhoHostAdapter import binhoHostAdapterSingleton as binhoSingleton
 from .binhoHostAdapter import binhoDevice
 
-class _binhoHostAdapterSingletonWrapper():
+
+class _binhoHostAdapterSingletonWrapper:
 
     """
     Convenience function that acts like binhoHostAdapterSingleton, but also allows Magic:

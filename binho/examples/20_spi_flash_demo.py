@@ -41,16 +41,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -60,16 +58,10 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
-
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'SPI'
     binho.operationMode = "SPI"
-
 
     # Let's explore which pins are available for use as CS pins
     # when we're in SPI mode
@@ -96,10 +88,7 @@ try:
     print("Default SPI bus configuration:")
     print(
         "Mode: {}, Clk Freq: {} Hz, Bit Order: {}, Bits per Transfer: {}".format(
-            binho.spi.mode,
-            binho.spi.frequency,
-            binho.spi.bitOrder,
-            binho.spi.bitsPerTransfer,
+            binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
 
@@ -109,8 +98,7 @@ try:
     # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
     # This function accepts a number of parameters, not all shown or demo'd here
     spiFlash = binho.create_programmer(
-        "spiFlash", chip_select_pin=csPin, autodetect=True, mode=0,
-        clocK_frequency=12000000
+        "spiFlash", chip_select_pin=csPin, autodetect=True, mode=0, clocK_frequency=12000000,
     )
 
     # Notice we increased the clock frequency to 12MHz to make this quick
@@ -120,10 +108,7 @@ try:
     # supports SFDP (Serial Flash Discoverable Parameters)
     print(
         "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} Kbits".format(
-            hex(spiFlash.jedecID),
-            spiFlash.manufacturer,
-            spiFlash.mem_partNumber,
-            spiFlash.capacity / 1024,
+            hex(spiFlash.jedecID), spiFlash.manufacturer, spiFlash.mem_partNumber, spiFlash.capacity / 1024,
         )
     )
 
@@ -153,15 +138,15 @@ try:
     rxBytes = spiFlash.readBytes(address, page_size)
     print("Read byte count: {}".format(len(rxBytes)))
 
-    print('offset', end='\t')
+    print("offset", end="\t")
     for k in range(8):
-        print(' {}'.format(k), end='\t')
+        print(" {}".format(k), end="\t")
     print()
 
-    for i in range(page_size//8):
-        print(hex(address + 8*i), end='\t')
+    for i in range(page_size // 8):
+        print(hex(address + 8 * i), end="\t")
         for j in range(8):
-            print(hex(rxBytes[i*8+j]), end='\t')
+            print(hex(rxBytes[i * 8 + j]), end="\t")
         print()
 
     # Let's read 1KB
@@ -180,13 +165,12 @@ try:
     # erase anyone's flash memory while trying out this demo.
     spiFlash.chipErase()
 
-
     # Let's read all the data
     # max_bytes = 16384 * 1024
-    #rxBytes = spiFlash.readBytes(
+    # rxBytes = spiFlash.readBytes(
     #    address, max_bytes
-    #)
-    #print("length: {}".format(len(rxBytes)))
+    # )
+    # print("length: {}".format(len(rxBytes)))
 
 
 # It's generally bad practice to indiscriminately catch all exceptions, however the

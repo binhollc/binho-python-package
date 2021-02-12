@@ -76,9 +76,7 @@ class GPIOProvider(binhoInterface):
 
         # If this class doesn't allow pin registration, raise an error.
         if not self.ALLOW_EXTERNAL_REGISTRATION:
-            raise NotImplementedError(
-                "This GPIO collection does not allow registration of new pins."
-            )
+            raise NotImplementedError("This GPIO collection does not allow registration of new pins.")
 
         # Otherwise, delegate to our internal registration method.
         self.__registerGPIO(board, name, line, used)
@@ -117,7 +115,7 @@ class GPIOProvider(binhoInterface):
         if name not in self.available_pins:
             self.available_pins.append(name)
 
-    def getAvailablePins(self, include_active=True): # pylint: disable=unused-argument
+    def getAvailablePins(self, include_active=True):  # pylint: disable=unused-argument
         """ Returns a list of available GPIO names. """
         available = self.available_pins[:]
         available.extend(self.active_gpio.keys())
@@ -307,7 +305,7 @@ class GPIO(GPIOProvider):
         return "IO" + str(line)
 
 
-class GPIOPin():
+class GPIOPin:
     """
     Class representing a single GPIO pin.
     """

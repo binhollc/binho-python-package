@@ -79,9 +79,7 @@ def find_all_subcommands():
                 full_path = os.path.join(directory, executable)
 
                 # Strip .exe suffix if applicable
-                executable = (
-                    executable[:-4] if executable.endswith(".exe") else executable
-                )
+                executable = executable[:-4] if executable.endswith(".exe") else executable
 
                 subcommand_name = executable[len(BINHO_PREFIX) :]
                 subcommands[subcommand_name] = full_path
@@ -106,11 +104,7 @@ def find_subcommand(name, allow_partial_matches=True, print_errors=True):
 
     # If we're accepting partial matches, look for one.
     if allow_partial_matches:
-        matches = [
-            subcommand
-            for subcommand in subcommands
-            if subcommand.startswith(name)
-        ]
+        matches = [subcommand for subcommand in subcommands if subcommand.startswith(name)]
 
         # If we've found exactly one, use it.
         if len(matches) == 1:
@@ -119,11 +113,7 @@ def find_subcommand(name, allow_partial_matches=True, print_errors=True):
         # Otherwise, print the error.
         if matches and print_errors:
             matches = "\n\t".join(matches)
-            print(
-                "Subcommand short-name '{}' is ambiguous; it could refer to:\n\t{}\n".format(
-                    name, matches
-                )
-            )
+            print("Subcommand short-name '{}' is ambiguous; it could refer to:\n\t{}\n".format(name, matches))
             return False
 
     if print_errors:
@@ -169,14 +159,8 @@ def print_usage(argv):
         print("\t{}".format(subcommand))
 
     print("\nTo get help for a subcommand, use '{} <subcommand> --help'.".format(name))
-    print(
-        "For example, for help with the firmware subcommand, use '{} firmware --help'.\n\n".format(
-            name
-        )
-    )
-    print(
-        "You can create and install your own subcommands. Simply create an executable with"
-    )
+    print("For example, for help with the firmware subcommand, use '{} firmware --help'.\n\n".format(name))
+    print("You can create and install your own subcommands. Simply create an executable with")
     print("the name binho_<subcommand>, and add it to your path.")
 
 

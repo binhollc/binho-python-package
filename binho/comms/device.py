@@ -14,7 +14,7 @@ from .drivers.io import binhoIODriver
 from .drivers.onewire import binho1WireDriver
 
 # pylint: disable=too-many-instance-attributes
-class binhoAPI():
+class binhoAPI:
 
     HANDLED_BOARD_IDS = []
     USB_VID_PID = "04D8"
@@ -70,7 +70,7 @@ class binhoAPI():
         self._inBootloader = False
         self._inDAPLinkMode = False
 
-        self._hid_serial_number = 'UNKNOWN'
+        self._hid_serial_number = "UNKNOWN"
         self._hid_path = None
 
         # By default, accept any device with the default vendor/product IDs.
@@ -79,10 +79,7 @@ class binhoAPI():
         # For convenience, allow serial_number=None to be equivalent to not
         # providing a serial number: a board with any serial number will be
         # accepted.
-        if (
-            "serial_number" in self.identifiers
-            and self.identifiers["serial_number"] is None
-        ):
+        if "serial_number" in self.identifiers and self.identifiers["serial_number"] is None:
             del self.identifiers["serial_number"]
 
         # TODO: replace this with a comms_string
@@ -287,7 +284,7 @@ class binhoAPI():
 
         try:
             # see if it's in DAPLink mode
-            self.deviceID # pylint: disable=pointless-statement
+            self.deviceID  # pylint: disable=pointless-statement
             self._inDAPLinkMode = False
             self._inBootloader = False
             return True
@@ -297,11 +294,13 @@ class binhoAPI():
             try:
 
                 h = hid.device()
-                h.open(int(self.USB_VID_PID.split(':')[0], 16), int(self.USB_VID_PID.split(':')[1], 16))
+                h.open(
+                    int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
+                )
 
-                self._hid_serial_number = '0x' + h.get_serial_number_string()
+                self._hid_serial_number = "0x" + h.get_serial_number_string()
 
-                if h.get_product_string() == 'CMSIS-DAP':
+                if h.get_product_string() == "CMSIS-DAP":
                     self._inDAPLinkMode = True
                     self._inBootloader = False
 
@@ -316,7 +315,7 @@ class binhoAPI():
 
             return False
 
-    def addIOPinAPI(self, name, ioPinNumber): # pylint: disable=unused-argument
+    def addIOPinAPI(self, name, ioPinNumber):  # pylint: disable=unused-argument
         self.apis.io[ioPinNumber] = binhoIODriver(self.comms, ioPinNumber)
 
     def supports_api(self, class_name):
@@ -335,9 +334,11 @@ class binhoAPI():
 
         if self._inDAPLinkMode:
             h = hid.device()
-            h.open(int(self.USB_VID_PID.split(':')[0], 16),
-                   int(self.USB_VID_PID.split(':')[1], 16),
-                   self._hid_serial_number[2:])
+            h.open(
+                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[1], 16),
+                self._hid_serial_number[2:],
+            )
             h.set_nonblocking(1)
             h.write([0x00, 0x80])
 
@@ -348,12 +349,13 @@ class binhoAPI():
 
         if self._inBootloader:
             h = hid.device()
-            h.open(int(self.USB_VID_PID.split(':')[0], 16),
-                   int(self.USB_VID_PID.split(':')[1], 16),
-                   self._hid_serial_number[2:])
+            h.open(
+                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[1], 16),
+                self._hid_serial_number[2:],
+            )
             h.set_nonblocking(1)
             h.write([0x00, 0x48, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00])
-
 
     def close(self):
         self.comms.close()
@@ -364,5 +366,6 @@ def _to_hex_string(byte_array):
 
     hex_generator = ("{:02x}".format(x) for x in byte_array)
     return "".join(hex_generator)
+
 
 # pylint: enable=too-many-instance-attributes

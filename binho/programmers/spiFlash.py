@@ -175,10 +175,10 @@ class SPIFlash(binhoProgrammer):
         for i in range(20):
 
             value = (
-                (tableData[i*4 + 3] << 24)
-                + (tableData[i*4 + 2] << 16)
-                + (tableData[i*4 + 1] << 8)
-                + tableData[i*4]
+                (tableData[i * 4 + 3] << 24)
+                + (tableData[i * 4 + 2] << 16)
+                + (tableData[i * 4 + 1] << 8)
+                + tableData[i * 4]
             )
 
             paramRegisters.append(register(value, 32))
@@ -200,9 +200,7 @@ class SPIFlash(binhoProgrammer):
         paramTable["SUPPORTS_1-1-2_FAST_READ"] = paramRegisters[0].getBit(16)
         paramTable["4KB_ERASE_INSTRUCTION"] = paramRegisters[0].getBits(8, 15)
         paramTable["WRITE_ENABLE_INSTRUCTION_SELECT"] = paramRegisters[0].getBit(4)
-        paramTable["VOLATILE_STATUS_REGISTER_BLOCK_PROTECT_BITS"] = paramRegisters[
-            0
-        ].getBit(3)
+        paramTable["VOLATILE_STATUS_REGISTER_BLOCK_PROTECT_BITS"] = paramRegisters[0].getBit(3)
         paramTable["WRITE_GRANULARITY"] = paramRegisters[0].getBit(2)
         paramTable["BLOCK_ERASE_SIZES"] = paramRegisters[0].getBits(0, 1)
 
@@ -211,9 +209,7 @@ class SPIFlash(binhoProgrammer):
 
         # 3rd DWORD
         paramTable["1-1-4_FAST_READ_INSTRUCTION"] = paramRegisters[2].getBits(24, 31)
-        paramTable["1-1-4_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[2].getBits(
-            21, 23
-        )
+        paramTable["1-1-4_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[2].getBits(21, 23)
         paramTable["1-1-4_FAST_READ_NUM_WAITS"] = paramRegisters[2].getBits(16, 20)
         paramTable["1-4-4_FAST_READ_INSTRUCTION"] = paramRegisters[2].getBits(8, 15)
         paramTable["1-4-4_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[2].getBits(5, 7)
@@ -221,9 +217,7 @@ class SPIFlash(binhoProgrammer):
 
         # 4th DWORD
         paramTable["1-2-2_FAST_READ_INSTRUCTION"] = paramRegisters[3].getBits(24, 31)
-        paramTable["1-2-2_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[3].getBits(
-            21, 23
-        )
+        paramTable["1-2-2_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[3].getBits(21, 23)
         paramTable["1-2-2_FAST_READ_NUM_WAITS"] = paramRegisters[3].getBits(16, 20)
         paramTable["1-1-2_FAST_READ_INSTRUCTION"] = paramRegisters[3].getBits(8, 15)
         paramTable["1-1-2_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[3].getBits(5, 7)
@@ -235,16 +229,12 @@ class SPIFlash(binhoProgrammer):
 
         # 6th DWORD
         paramTable["2-2-2_FAST_READ_INSTRUCTION"] = paramRegisters[5].getBits(24, 31)
-        paramTable["2-2-2_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[5].getBits(
-            21, 23
-        )
+        paramTable["2-2-2_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[5].getBits(21, 23)
         paramTable["2-2-2_FAST_READ_NUM_WAITS"] = paramRegisters[5].getBits(16, 20)
 
         # 7th DWORD
         paramTable["4-4-4_FAST_READ_INSTRUCTION"] = paramRegisters[6].getBits(24, 31)
-        paramTable["4-4-4_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[6].getBits(
-            21, 23
-        )
+        paramTable["4-4-4_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[6].getBits(21, 23)
         paramTable["4-4-4_FAST_READ_NUM_WAITS"] = paramRegisters[6].getBits(16, 20)
 
         # 8th DWORD
@@ -264,44 +254,24 @@ class SPIFlash(binhoProgrammer):
         paramTable["ERASE_TYPE_3_TYPICAL_TIME"] = paramRegisters[9].getBits(18, 24)
         paramTable["ERASE_TYPE_2_TYPICAL_TIME"] = paramRegisters[9].getBits(11, 17)
         paramTable["ERASE_TYPE_1_TYPICAL_TIME"] = paramRegisters[9].getBits(4, 10)
-        paramTable["ERASE_MULTIPLIER_FROM_TYPICAL_TIME_TO_MAX"] = paramRegisters[
-            9
-        ].getBits(0, 3)
+        paramTable["ERASE_MULTIPLIER_FROM_TYPICAL_TIME_TO_MAX"] = paramRegisters[9].getBits(0, 3)
 
         # 11th DWORD
         paramTable["CHIP_ERASE_TYPICAL_TIME"] = paramRegisters[10].getBits(24, 30)
-        paramTable["BYTE_PROGRAM_TYPICAL_TIME_ADDITIONAL"] = paramRegisters[10].getBits(
-            19, 23
-        )
-        paramTable["BYTE_PROGRAM_TYPICAL_TIME_FIRST_BYTE"] = paramRegisters[10].getBits(
-            14, 18
-        )
+        paramTable["BYTE_PROGRAM_TYPICAL_TIME_ADDITIONAL"] = paramRegisters[10].getBits(19, 23)
+        paramTable["BYTE_PROGRAM_TYPICAL_TIME_FIRST_BYTE"] = paramRegisters[10].getBits(14, 18)
         paramTable["PAGE_PROGRAM_TYPICAL_TIME"] = paramRegisters[10].getBits(8, 13)
         paramTable["PAGE_SIZE"] = paramRegisters[10].getBits(4, 7)
-        paramTable[
-            "PAGE_BYTE_PROGRAM_MULTIPLIER_FROM_TYPICAL_TIME_TO_MAX"
-        ] = paramRegisters[10].getBits(0, 3)
+        paramTable["PAGE_BYTE_PROGRAM_MULTIPLIER_FROM_TYPICAL_TIME_TO_MAX"] = paramRegisters[10].getBits(0, 3)
 
         # 12th DWORD
         paramTable["SUSPEND_RESUME_SUPPORTED"] = paramRegisters[11].getBit(31)
-        paramTable["SUSPEND_INPROG_ERASE_MAX_LATENCY"] = paramRegisters[11].getBits(
-            24, 30
-        )
-        paramTable["ERASE_RESUME_TO_SUSPEND_INTERVAL"] = paramRegisters[11].getBits(
-            20, 23
-        )
-        paramTable["SUSPEND_INPROG_PROGRAM_MAX_LATENCY"] = paramRegisters[11].getBits(
-            13, 19
-        )
-        paramTable["PROGRAM_RESUME_TO_SUSPEND_INTERVAL"] = paramRegisters[11].getBits(
-            9, 12
-        )
-        paramTable["PROHIBITED_OPS_DURING_ERASE_SUSPEND"] = paramRegisters[11].getBits(
-            4, 7
-        )
-        paramTable["PROHIBITED_OPS_DURING_PROGRAM_SUSPEND"] = paramRegisters[
-            11
-        ].getBits(0, 3)
+        paramTable["SUSPEND_INPROG_ERASE_MAX_LATENCY"] = paramRegisters[11].getBits(24, 30)
+        paramTable["ERASE_RESUME_TO_SUSPEND_INTERVAL"] = paramRegisters[11].getBits(20, 23)
+        paramTable["SUSPEND_INPROG_PROGRAM_MAX_LATENCY"] = paramRegisters[11].getBits(13, 19)
+        paramTable["PROGRAM_RESUME_TO_SUSPEND_INTERVAL"] = paramRegisters[11].getBits(9, 12)
+        paramTable["PROHIBITED_OPS_DURING_ERASE_SUSPEND"] = paramRegisters[11].getBits(4, 7)
+        paramTable["PROHIBITED_OPS_DURING_PROGRAM_SUSPEND"] = paramRegisters[11].getBits(0, 3)
 
         # 13th DWORD
         paramTable["SUSPEND_INSTRUCTION"] = paramRegisters[12].getBits(24, 31)
@@ -311,18 +281,10 @@ class SPIFlash(binhoProgrammer):
 
         # 14th DWORD
         paramTable["DEEP_POWERDOWN_SUPPORTED"] = paramRegisters[13].getBit(31)
-        paramTable["ENTER_DEEP_POWERDOWN_INSTRUCTION"] = paramRegisters[13].getBits(
-            23, 30
-        )
-        paramTable["EXIT_DEEP_POWERDOWN_INSTRUCTION"] = paramRegisters[13].getBits(
-            15, 22
-        )
-        paramTable["EXIT_DEEP_POWERDOWN_TO_NEXT_OP_DELAY"] = paramRegisters[13].getBits(
-            8, 14
-        )
-        paramTable["STATUS_REGISTER_POLLING_DEVICE_BUSY"] = paramRegisters[13].getBits(
-            2, 7
-        )
+        paramTable["ENTER_DEEP_POWERDOWN_INSTRUCTION"] = paramRegisters[13].getBits(23, 30)
+        paramTable["EXIT_DEEP_POWERDOWN_INSTRUCTION"] = paramRegisters[13].getBits(15, 22)
+        paramTable["EXIT_DEEP_POWERDOWN_TO_NEXT_OP_DELAY"] = paramRegisters[13].getBits(8, 14)
+        paramTable["STATUS_REGISTER_POLLING_DEVICE_BUSY"] = paramRegisters[13].getBits(2, 7)
 
         # 15th DWORD
         paramTable["HOLD_OR_RESET_DISABLE"] = paramRegisters[14].getBit(23)
@@ -336,18 +298,12 @@ class SPIFlash(binhoProgrammer):
         # 16th DWORD
         paramTable["ENTER_4BYTE_ADDRESSING"] = paramRegisters[15].getBits(24, 31)
         paramTable["EXIT_4BYTE_ADDRESSING"] = paramRegisters[15].getBits(14, 23)
-        paramTable["SOFT_RESET_AND_RESCUE_SEQ_SUPPORT"] = paramRegisters[15].getBits(
-            8, 13
-        )
-        paramTable[
-            "VOLATILE_OR_NV_REGISTER_AND_WE_INSTRUCTION_STATUSREG1"
-        ] = paramRegisters[15].getBits(0, 6)
+        paramTable["SOFT_RESET_AND_RESCUE_SEQ_SUPPORT"] = paramRegisters[15].getBits(8, 13)
+        paramTable["VOLATILE_OR_NV_REGISTER_AND_WE_INSTRUCTION_STATUSREG1"] = paramRegisters[15].getBits(0, 6)
 
         # 17th DWORD
         paramTable["1-1-8_FAST_READ_INSTRUCTION"] = paramRegisters[16].getBits(24, 31)
-        paramTable["1-1-8_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[16].getBits(
-            21, 23
-        )
+        paramTable["1-1-8_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[16].getBits(21, 23)
         paramTable["1-1-8_FAST_READ_NUM_WAITS"] = paramRegisters[16].getBits(16, 20)
         paramTable["1-8-8_FAST_READ_INSTRUCTION"] = paramRegisters[16].getBits(8, 15)
         paramTable["1-8-8_FAST_READ_NUM_MODE_CLOCKS"] = paramRegisters[16].getBits(5, 7)
@@ -355,22 +311,12 @@ class SPIFlash(binhoProgrammer):
 
         # 18th DWORD
         paramTable["BYTE_ORDER_IN_8D-8D-8D_MODE"] = paramRegisters[17].getBit(31)
-        paramTable["8D-8D-8D_COMMAND_AND_CMD_EXTENSION"] = paramRegisters[17].getBits(
-            29, 30
-        )
-        paramTable["DATA_STROBE_SUPPORT_FOR_QPI_DTR_MODE"] = paramRegisters[17].getBit(
-            27
-        )
-        paramTable["DATA_STROBE_SUPPORT_FOR_QPI_STR_MODE"] = paramRegisters[17].getBit(
-            26
-        )
-        paramTable["DATA_STROBE_WAVEFORMS_IN_STR_MODE"] = paramRegisters[17].getBits(
-            24, 25
-        )
+        paramTable["8D-8D-8D_COMMAND_AND_CMD_EXTENSION"] = paramRegisters[17].getBits(29, 30)
+        paramTable["DATA_STROBE_SUPPORT_FOR_QPI_DTR_MODE"] = paramRegisters[17].getBit(27)
+        paramTable["DATA_STROBE_SUPPORT_FOR_QPI_STR_MODE"] = paramRegisters[17].getBit(26)
+        paramTable["DATA_STROBE_WAVEFORMS_IN_STR_MODE"] = paramRegisters[17].getBits(24, 25)
         paramTable["JEDEC_SPI_PROTOCOL_RESET"] = paramRegisters[17].getBit(23)
-        paramTable["VARIABLE_OUTPUT_DRIVER_STRENGTH"] = paramRegisters[17].getBits(
-            18, 22
-        )
+        paramTable["VARIABLE_OUTPUT_DRIVER_STRENGTH"] = paramRegisters[17].getBits(18, 22)
 
         # 19th DWORD
         paramTable["OCTAL_ENABLE_REQUIREMENTS"] = paramRegisters[18].getBits(20, 22)
@@ -381,30 +327,16 @@ class SPIFlash(binhoProgrammer):
         paramTable["8S-8S-8S_MODE_DISABLE_SEQUENCES"] = paramRegisters[18].getBits(0, 3)
 
         # 20th DWORD
-        paramTable["MAX_OP_SPEED_8D-8D-8D-WITH_STROBE"] = paramRegisters[19].getBits(
-            28, 31
-        )
-        paramTable["MAX_OP_SPEED_8D-8D-8D-NO_STROBE"] = paramRegisters[19].getBits(
-            24, 27
-        )
+        paramTable["MAX_OP_SPEED_8D-8D-8D-WITH_STROBE"] = paramRegisters[19].getBits(28, 31)
+        paramTable["MAX_OP_SPEED_8D-8D-8D-NO_STROBE"] = paramRegisters[19].getBits(24, 27)
 
-        paramTable["MAX_OP_SPEED_8S-8S-8S-WITH_STROBE"] = paramRegisters[19].getBits(
-            20, 23
-        )
-        paramTable["MAX_OP_SPEED_8S-8S-8S-NO_STROBE"] = paramRegisters[19].getBits(
-            16, 19
-        )
+        paramTable["MAX_OP_SPEED_8S-8S-8S-WITH_STROBE"] = paramRegisters[19].getBits(20, 23)
+        paramTable["MAX_OP_SPEED_8S-8S-8S-NO_STROBE"] = paramRegisters[19].getBits(16, 19)
 
-        paramTable["MAX_OP_SPEED_4S-4D-4D-WITH_STROBE"] = paramRegisters[19].getBits(
-            12, 15
-        )
-        paramTable["MAX_OP_SPEED_4S-4D-4D-NO_STROBE"] = paramRegisters[19].getBits(
-            8, 11
-        )
+        paramTable["MAX_OP_SPEED_4S-4D-4D-WITH_STROBE"] = paramRegisters[19].getBits(12, 15)
+        paramTable["MAX_OP_SPEED_4S-4D-4D-NO_STROBE"] = paramRegisters[19].getBits(8, 11)
 
-        paramTable["MAX_OP_SPEED_4S-4S-4S-WITH_STROBE"] = paramRegisters[19].getBits(
-            4, 7
-        )
+        paramTable["MAX_OP_SPEED_4S-4S-4S-WITH_STROBE"] = paramRegisters[19].getBits(4, 7)
         paramTable["MAX_OP_SPEED_4S-4S-4S-NO_STROBE"] = paramRegisters[19].getBits(0, 3)
 
         return paramTable
@@ -425,9 +357,7 @@ class SPIFlash(binhoProgrammer):
         paramHeader["PARAMETER_MINOR_REV"] = headerData[1]
         paramHeader["PARAMETER_MAJOR_REV"] = headerData[2]
         paramHeader["PARAMETER_LENGTH_DWORDS"] = headerData[3]
-        paramHeader["PARAMETER_TABLE_POINTER"] = (
-            (headerData[6] << 16) + (headerData[5] << 8) + headerData[4]
-        )
+        paramHeader["PARAMETER_TABLE_POINTER"] = (headerData[6] << 16) + (headerData[5] << 8) + headerData[4]
         paramHeader["PARAMETERID_MSB"] = headerData[7]
 
         return paramHeader
@@ -440,9 +370,7 @@ class SPIFlash(binhoProgrammer):
 
         txData = [0x5A] + addr + [0x00]
 
-        rxData = self.board.spi.transfer(
-            txData, len(txData) + bytesToRead, chip_select=self.csPin
-        )
+        rxData = self.board.spi.transfer(txData, len(txData) + bytesToRead, chip_select=self.csPin)
 
         return rxData[5 : bytesToRead + 5]
 
@@ -450,9 +378,7 @@ class SPIFlash(binhoProgrammer):
 
         txData = [0x4B] + [0x00, 0x00, 0x00, 0x00]
 
-        rxData = self.board.spi.transfer(
-            txData, len(txData) + 8, chip_select=self.csPin
-        )
+        rxData = self.board.spi.transfer(txData, len(txData) + 8, chip_select=self.csPin)
 
         return rxData[5:13]
 
@@ -477,9 +403,7 @@ class SPIFlash(binhoProgrammer):
 
         txData = [0x03] + addr
 
-        rxData = self.board.spi.transfer(
-            txData, len(txData) + 1, chip_select=self.csPin
-        )
+        rxData = self.board.spi.transfer(txData, len(txData) + 1, chip_select=self.csPin)
 
         return rxData[4]
 
@@ -501,10 +425,7 @@ class SPIFlash(binhoProgrammer):
                 txData = [0x03] + addr
 
                 data = self.board.spi.transfer(
-                    txData,
-                    len(txData) + 1020,
-                    chip_select=self.csPin,
-                    deassert_chip_select=False,
+                    txData, len(txData) + 1020, chip_select=self.csPin, deassert_chip_select=False,
                 )
                 rxData += data[4:1024]
                 bytesRemaining = bytesRemaining - 1020
@@ -518,9 +439,7 @@ class SPIFlash(binhoProgrammer):
 
                 txData = [0x03] + addr
 
-                data = self.board.spi.transfer(
-                    txData, len(txData) + bytesRemaining, chip_select=self.csPin
-                )
+                data = self.board.spi.transfer(txData, len(txData) + bytesRemaining, chip_select=self.csPin)
                 rxData += data[4 : bytesRemaining + 4]
                 bytesRemaining = 0
 
@@ -685,7 +604,7 @@ class SPIFlash(binhoProgrammer):
         clocK_frequency=2000000,
         mode=0,
         force_page_size=None,
-    ): # pylint: disable=too-many-arguments, too-many-locals, unused-argument
+    ):  # pylint: disable=too-many-arguments, too-many-locals, unused-argument
         """Set up a new SPI flash connection.
         Args:
             board -- The Binho Host Adapter that will be programming our flash chip.
@@ -712,8 +631,7 @@ class SPIFlash(binhoProgrammer):
         self._deviceTopology["PAGE_SIZE_BYTES"] = page_size
         self._deviceTopology["TOTAL_SIZE_BYTES"] = page_size * pages
         self._deviceTopology["PAGE_COUNT"] = (
-            self._deviceTopology["TOTAL_SIZE_BYTES"]
-            / self._deviceTopology["PAGE_SIZE_BYTES"]
+            self._deviceTopology["TOTAL_SIZE_BYTES"] / self._deviceTopology["PAGE_SIZE_BYTES"]
         )
 
         # If autodetect is set to True, we'll try to automatically detect
@@ -728,24 +646,14 @@ class SPIFlash(binhoProgrammer):
 
                     paramHeader = self.readSFPDParameterHeader(0x08)
 
-                    if (
-                        paramHeader["PARAMETERID_LSB"] == 0x00
-                        and paramHeader["PARAMETERID_MSB"] == 0xFF
-                    ):
+                    if paramHeader["PARAMETERID_LSB"] == 0x00 and paramHeader["PARAMETERID_MSB"] == 0xFF:
 
-                        self._paramTable = self.readSFPDBasicFlashParameterTable(
-                            paramHeader["PARAMETER_TABLE_POINTER"]
-                        )
+                        self._paramTable = self.readSFPDBasicFlashParameterTable(paramHeader["PARAMETER_TABLE_POINTER"])
 
-                        self._deviceTopology["PAGE_SIZE_BYTES"] = (
-                            2 ** self._paramTable["PAGE_SIZE"]
-                        )
-                        self._deviceTopology["TOTAL_SIZE_BYTES"] = (
-                            self._paramTable["FLASH_MEMORY_DENSITY"] + 1
-                        ) / 8
+                        self._deviceTopology["PAGE_SIZE_BYTES"] = 2 ** self._paramTable["PAGE_SIZE"]
+                        self._deviceTopology["TOTAL_SIZE_BYTES"] = (self._paramTable["FLASH_MEMORY_DENSITY"] + 1) / 8
                         self._deviceTopology["PAGE_COUNT"] = (
-                            self._deviceTopology["TOTAL_SIZE_BYTES"]
-                            / self._deviceTopology["PAGE_SIZE_BYTES"]
+                            self._deviceTopology["TOTAL_SIZE_BYTES"] / self._deviceTopology["PAGE_SIZE_BYTES"]
                         )
 
                     else:
@@ -756,6 +664,4 @@ class SPIFlash(binhoProgrammer):
 
             else:
                 if not allow_fallback:
-                    raise RuntimeError(
-                        "Could not read SFDP on connected device & Fallback is disabled! Giving Up!"
-                    )
+                    raise RuntimeError("Could not read SFDP on connected device & Fallback is disabled! Giving Up!")

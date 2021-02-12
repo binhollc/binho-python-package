@@ -11,12 +11,11 @@ from IPython.terminal.interactiveshell import TerminalInteractiveShell
 from binho.utils import binhoArgumentParser
 from binho.util.interactive import binhoShellMagics
 
-def main(): # pylint: disable=too-many-statements
+
+def main():  # pylint: disable=too-many-statements
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Convenience shell for working with Binho host adapters."
-    )
+    parser = binhoArgumentParser(description="Convenience shell for working with Binho host adapters.")
     parser.add_argument(
         "-e",
         "--exec",
@@ -36,11 +35,7 @@ def main(): # pylint: disable=too-many-statements
         dest="prelude",
     )
     parser.add_argument(
-        "-f",
-        "--file",
-        metavar="file",
-        type=str,
-        help="Executes the relevant file before starting the given shell.",
+        "-f", "--file", metavar="file", type=str, help="Executes the relevant file before starting the given shell.",
     )
     parser.add_argument(
         "-M",
@@ -101,27 +96,15 @@ def main(): # pylint: disable=too-many-statements
     # Break into IPython for the shell.
     if not args.code:
         print("Spawning an IPython shell for easy access to your Binho host adapter.")
-        print(
-            "Like normal python, you can use help(object) to get help for that object.\n"
-        )
+        print("Like normal python, you can use help(object) to get help for that object.\n")
 
-        print(
-            "Try help(binho.gpio) to see the documentation for the Binho host adapter GPIO;"
-        )
-        print(
-            "try dir(binho) to see a list of properties on the Binho Host Adapter object, and"
-        )
-        print(
-            "try binho.available_interfaces() and binho.available_programmers() to see"
-        )
+        print("Try help(binho.gpio) to see the documentation for the Binho host adapter GPIO;")
+        print("try dir(binho) to see a list of properties on the Binho Host Adapter object, and")
+        print("try binho.available_interfaces() and binho.available_programmers() to see")
         print("the interfaces you can work with, and the programmers you can create.\n")
 
         singleton_text = "singleton " if args.singleton else ""
-        print(
-            "A Binho host adapter {}object has been created for you as 'binho'. Have fun!\n".format(
-                singleton_text
-            )
-        )
+        print("A Binho host adapter {}object has been created for you as 'binho'. Have fun!\n".format(singleton_text))
 
     # Create a new shell, and give it access to our created Binho object.
     shell = TerminalInteractiveShell()
@@ -134,7 +117,7 @@ def main(): # pylint: disable=too-many-statements
     dac = binho.dac
     adc = binho.adc
     oneWire = binho.oneWire
-    #uart = binho.uart
+    # uart = binho.uart
     gpio = binho.gpio
     # shell.push(('i2c', 'spi', 'adc', 'uart', 'gpio',))
     shell.push(("i2c", "spi", "gpio", "dac", "adc", "oneWire"))
@@ -157,9 +140,7 @@ def main(): # pylint: disable=too-many-statements
     # If we're using autoreload, enable that.
     if args.autoreload:
         shell.run_cell("%autoreload 2")
-        print(
-            "Heads up: you've enabled autoreload. Things make break in unexpected ways as your code changes."
-        )
+        print("Heads up: you've enabled autoreload. Things make break in unexpected ways as your code changes.")
         print("You can fix this by adjusting your expectations regarding breakage.\n")
 
     # Handle any inline execution requested.
@@ -190,6 +171,7 @@ def main(): # pylint: disable=too-many-statements
 
     # close the connection to the device
     binho.close()
+
 
 if __name__ == "__main__":
     main()

@@ -25,7 +25,6 @@ class binhoNova(binhoDevice):
     PRODUCT_NAME = "Binho Nova"
     FIRMWARE_UPDATE_URL = "https://cdn.binho.io/fw/nova/"
 
-
     # The Binho Nova has one LED.
     SUPPORTED_LEDS = 1
 
@@ -125,15 +124,15 @@ class binhoNova(binhoDevice):
             # if self.supports_api('i2c'):
             # print('supports_api i2c success')
             self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0]) # pylint: disable=no-member
+            self._add_interface("i2c", self.i2c_busses[0])  # pylint: disable=no-member
 
             # if self.supports_api('spi') and self.supports_api('gpio'):
             #    chip_select = self.gpio.get_pin('J1_P37')
             self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0]) # pylint: disable=no-member
+            self._add_interface("spi", self.spi_busses[0])  # pylint: disable=no-member
 
             self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0]) # pylint: disable=no-member
+            self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
 
             # if self.supports_api('uart'):
             # self._add_interface('uart', UART(self))

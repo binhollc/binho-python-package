@@ -14,9 +14,7 @@ from binho.errors import DeviceNotFoundError
 def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="utility for reading from Binho host adapter's ADC"
-    )
+    parser = binhoArgumentParser(description="utility for reading from Binho host adapter's ADC")
     parser.add_argument(
         "-f",
         "--format",
@@ -27,16 +25,9 @@ def main():
         help="Format to output in.\nVoltage string, or raw fraction returned by the ADC.",
     )
     parser.add_argument(
-        "-s",
-        "--samples",
-        dest="sample_count",
-        type=int,
-        default=1,
-        help="The number of samples to read. (default: 1)",
+        "-s", "--samples", dest="sample_count", type=int, default=1, help="The number of samples to read. (default: 1)",
     )
-    parser.add_argument(
-        "-n", "--iopin", default=0, help="Use the given IO pin number for the ADC input"
-    )
+    parser.add_argument("-n", "--iopin", default=0, help="Use the given IO pin number for the ADC input")
 
     args = parser.parse_args()
 
@@ -64,11 +55,7 @@ def main():
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except serial.SerialException:
         print(
@@ -81,10 +68,7 @@ def main():
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -121,15 +105,11 @@ def main():
             if args.format == "voltage":
 
                 sample = device.adc.readInputVoltage(adcPin)
-                log_function(
-                    "[{}] ADC channel {} reads {} Volts".format(x + 1, adcPin, sample)
-                )
+                log_function("[{}] ADC channel {} reads {} Volts".format(x + 1, adcPin, sample))
 
             else:
                 sample = device.adc.readInputRaw(adcPin)
-                log_function(
-                    "[{}] ADC channel {} reads {}".format(x + 1, adcPin, sample)
-                )
+                log_function("[{}] ADC channel {} reads {}".format(x + 1, adcPin, sample))
 
             samples.append(sample)
 
@@ -159,7 +139,7 @@ def main():
         # close the connection to the host adapter
         device.close()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         # Catch any exception that was raised and display it
         binho_error_hander()
 

@@ -40,16 +40,14 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.",
-        file=sys.stderr,
+        "Please close the connection in the other application and try again.", file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport),
-        file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -59,16 +57,10 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print(
-        "Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-        )
-    )
-
+    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'SPI'
     binho.operationMode = "SPI"
-
 
     # Let's explore which pins are available for use as CS pins
     # when we're in SPI mode
@@ -95,10 +87,7 @@ try:
     print("Default SPI bus configuration:")
     print(
         "Mode: {}, Clk Freq: {} Hz, Bit Order: {}, Bits per Transfer: {}".format(
-            binho.spi.mode,
-            binho.spi.frequency,
-            binho.spi.bitOrder,
-            binho.spi.bitsPerTransfer,
+            binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
     print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
@@ -106,9 +95,7 @@ try:
 
     # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
     # This function accepts a number of parameters, not all shown or demo'd here
-    spiFlash = binho.create_programmer(
-        "spiFlash", chip_select_pin=csPin, autodetect=True, mode=0
-    )
+    spiFlash = binho.create_programmer("spiFlash", chip_select_pin=csPin, autodetect=True, mode=0)
 
     # Let's see how much we can learn about the device without any prior knowledge
     # We can do this by first reading the Flash JEDEC ID and checking if it
@@ -118,10 +105,7 @@ try:
     # some manufacturers have released App Notes with SDPF information for their Flash ICs.
     print(
         "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} Kbit".format(
-            hex(spiFlash.jedecID),
-            spiFlash.manufacturer,
-            spiFlash.mem_partNumber,
-            spiFlash.capacity / 1024,
+            hex(spiFlash.jedecID), spiFlash.manufacturer, spiFlash.mem_partNumber, spiFlash.capacity / 1024,
         )
     )
 
@@ -142,8 +126,7 @@ try:
 
     else:
 
-        print('Flash IC does not support SFDP! Giving up!')
-
+        print("Flash IC does not support SFDP! Giving up!")
 
 
 # It's generally bad practice to indiscriminately catch all exceptions, however the

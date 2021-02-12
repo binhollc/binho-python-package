@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-
 from __future__ import print_function
 
 import errno
 import sys
 
-import binho # pylint: disable=unused-import
-from binho import binhoHostAdapter # pylint: disable=unused-import
+import binho  # pylint: disable=unused-import
+from binho import binhoHostAdapter  # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
@@ -14,9 +13,7 @@ from binho.errors import DeviceNotFoundError
 def main():
 
     # Set up a simple argument parser.
-    parser = binhoArgumentParser(
-        description="Utility for experimenting with Binho host adapters on-board DAC"
-    )
+    parser = binhoArgumentParser(description="Utility for experimenting with Binho host adapters on-board DAC")
     parser.add_argument(
         "-f",
         "--format",
@@ -59,19 +56,12 @@ def main():
             sys.exit(errno.ENODEV)
 
         else:
-            log_function(
-                "{} found on {}. (Device ID: {})".format(
-                    device.productName, device.commPort, device.deviceID
-                )
-            )
+            log_function("{} found on {}. (Device ID: {})".format(device.productName, device.commPort, device.deviceID))
 
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(
-                    args.serial
-                ),
-                file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)

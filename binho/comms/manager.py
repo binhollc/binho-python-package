@@ -15,9 +15,7 @@ class CommandFailureError(CommsError):
 class binhoDeviceManager:
     @classmethod
     def _checkForDeviceID(cls, serialPort):
-        comport = serial.Serial(
-            serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05
-        )
+        comport = serial.Serial(serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
         command = "+ID ?\n"
         comport.write(command.encode("utf-8"))
         receivedData = comport.readline().strip().decode("utf-8")
