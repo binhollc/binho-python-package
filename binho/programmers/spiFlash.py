@@ -51,7 +51,7 @@ class SPIFlash(binhoProgrammer):
         0xEF3012: "W25X20L",
         0xEF3011: "W25X10L",
         0xEF4015: "W25Q16DV",
-        0xEF4018: "W25Q16DV",
+        0xEF4018: "W25Q128FV",
         0xC22515: "MX25L1635E",
         0xC22017: "MX25L6405D",
         0xC22016: "MX25L3205D",
@@ -173,11 +173,12 @@ class SPIFlash(binhoProgrammer):
         paramRegisters = []
 
         for i in range(20):
+
             value = (
-                (tableData[i + 3] << 24)
-                + (tableData[i + 2] << 16)
-                + (tableData[i + 1] << 8)
-                + tableData[i]
+                (tableData[i*4 + 3] << 24)
+                + (tableData[i*4 + 2] << 16)
+                + (tableData[i*4 + 1] << 8)
+                + tableData[i*4]
             )
 
             paramRegisters.append(register(value, 32))
@@ -570,7 +571,7 @@ class SPIFlash(binhoProgrammer):
 
         rxData = self.board.spi.transfer(txData, len(txData), chip_select=self.csPin)
 
-        return rxData[1]
+        return rxData[0]
 
     def writeStatusRegister(self, value, statusRegister=1):
 

@@ -117,7 +117,7 @@ try:
     # and is freely available after creating a free login on the above website. Additionally,
     # some manufacturers have released App Notes with SDPF information for their Flash ICs.
     print(
-        "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} KB".format(
+        "JEDEC_ID: {}, Manufacturer: {}, Part Number: {}, Capacity: {} Kbit".format(
             hex(spiFlash.jedecID),
             spiFlash.manufacturer,
             spiFlash.mem_partNumber,
@@ -130,6 +130,10 @@ try:
     print()
 
     # if the device supports SFDP, print out the parameter table
+    # Note that the values printed are the raw values read out from the Flash
+    # Reference the SFDP specification document linked above to understand how
+    # to interpret the values into meaningful data.
+
     if deviceSupportForSFDP:
 
         print("Discovered parameters:")

@@ -81,6 +81,7 @@ __Basic Examples:__
 __Advanced Examples:__
 - [I2C EEPROM Demo](binho/examples/10_i2c_eeprom_demo.py)
 - [SPI Flash Demo](binho/examples/20_spi_flash_demo.py)
+- [SPI Flash SFDP](binho/examples/21_spi_flash_sfdp.py)
 - *more coming soon*
 
 ### Command Line API
@@ -129,7 +130,7 @@ Each command has their own unique arguments, but all commands except 'info' supp
         This command can be used to read from and write to common I2C EEPROM devices.
 - __`binho spi`__  
         This command can be used to perform SPI transfers.
-- __`binho spiflash`__  
+- __`binho spiflash`__ [Coming Soon!]  
         This command can be used to read from and write to common SPI Flash devices.
 - __`binho 1wire`__  
         This command can be used to communicate with 1Wire devices.

@@ -15,23 +15,6 @@ from serial import SerialException
 from binho.errors import DeviceNotFoundError
 from binho.utils import binho_error_hander
 
-
-"""
-This programmer can configure itself using Microchip part numbers to identify the device we wish to address.
-In most cases, we will want to create the programmer like this:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128')
-Then read some bytes:
-     read_bytes = p.read_bytes(0x000, 0x3FFF)
-or maybe write some bytes:
-    p.write_bytes(0x000, b'\xde\xad\xbe\xef')
-Occasionally, we might need to pass an argument to specify the address bits that have been set on the EEPROM:
-    p = gf.create_programmer('microchipEEPROM', device='24LC128', slave_address=0b010)
-Or to configure the EEPROM ourselves, by specifying the capacity and the page size, with a few other options:
-    p = gf.create_programmer(capacity, page_size, bitmask="AAA", slave_address=0, write_cycle_length=0.005)
-By default, the first I2C bus will be used. The bus keyword argument can be used in to pass in a different I2C bus \
-    object.
-"""
-
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
 targetComport = "COM3"

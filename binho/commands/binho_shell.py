@@ -89,7 +89,7 @@ def main(): # pylint: disable=too-many-statements
         )
         sys.exit(errno.ENODEV)
 
-    elif device.inDAPLinkMode:
+    elif binho.inDAPLinkMode:
             print(
                 "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
                     device.productName, device.commPort
