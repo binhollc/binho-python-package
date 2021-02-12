@@ -1,4 +1,3 @@
-# FIXME: remove dependencies
 import os
 import enum
 import threading
@@ -7,15 +6,7 @@ import signal
 import sys
 import serial
 
-#from ..errors import DeviceNotFoundError
-
-#from .manager import binhoDeviceManager
-
-# from .drivers.OneWire import OneWire
-
-
 SERIAL_TIMEOUT = 0.5
-
 
 class SerialPortManager(threading.Thread):
 

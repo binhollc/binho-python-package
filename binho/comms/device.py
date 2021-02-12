@@ -143,7 +143,7 @@ class binhoAPI():
 
             subclass_devices = subclass.all_accepted_devices(**device_identifiers)
 
-            # FIXME: It's possible that two classes may choose to both advertise support
+            # NOTE: It's possible that two classes may choose to both advertise support
             # for the same device, in which case we'd wind up with duplicats here. We could
             # try to filter out duplicates using e.g. USB bus/device, but that assumes
             # things are USB connected.
@@ -170,8 +170,6 @@ class binhoAPI():
         devices = []
 
         # Grab the list of all devices that we theoretically could use.
-        # FIXME: use the comms backend for this!
-        # identifiers = cls.populate_default_identifiers(device_identifiers, find_all=True)
         manager = binhoDeviceManager()
         availablePorts = manager.listAvailablePorts()
         identifiers = {}

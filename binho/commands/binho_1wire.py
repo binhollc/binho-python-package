@@ -5,7 +5,6 @@ from __future__ import print_function
 import errno
 import sys
 import ast
-import time
 
 import binho # pylint: disable=unused-import
 from binho import binhoHostAdapter # pylint: disable=unused-import

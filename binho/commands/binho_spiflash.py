@@ -2,12 +2,9 @@
 
 from __future__ import print_function
 
-import os
 import errno
 import sys
-import time
 
-from intelhex import IntelHex
 import binho # pylint: disable=unused-import
 from binho import binhoHostAdapter # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
@@ -138,11 +135,10 @@ def main(): # pylint: disable=too-many-locals
 
         # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
         # This function accepts a number of parameters, not all shown or demo'd here
-        spiFlash = device.create_programmer(
-            "spiFlash", chip_select_pin=csPin, autodetect=True, mode=args.mode,
-            clocK_frequency=args.frequency
-        )
-
+        # spiFlash = device.create_programmer(
+        #    "spiFlash", chip_select_pin=csPin, autodetect=True, mode=args.mode,
+        #    clocK_frequency=args.frequency
+        # )
 
         print('This command is still under construction. Please come back again later!')
         sys.exit(1)

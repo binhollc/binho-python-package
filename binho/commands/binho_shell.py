@@ -90,13 +90,13 @@ def main(): # pylint: disable=too-many-statements
         sys.exit(errno.ENODEV)
 
     elif binho.inDAPLinkMode:
-            print(
-                "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
-                    device.productName, device.commPort
-                )
+        print(
+            "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                binho.productName, binho.commPort
             )
-            print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
-            sys.exit(errno.ENODEV)
+        )
+        print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+        sys.exit(errno.ENODEV)
 
     # Break into IPython for the shell.
     if not args.code:

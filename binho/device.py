@@ -12,21 +12,9 @@ from .accessory import binhoAccessory
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO
 
-from .programmers import *
-# from .interfaces.uart import UART
-
-# from .interfaces.pattern_generator import PatternGenerator
-# from .interfaces.sdir import SDIRTransceiver
+from .programmers import * # pylint: disable=wildcard-import, unused-wildcard-import
 
 from . import programmers as ProgrammerModules
-
-# from .programmers.m0 import M0Coprocessor
-# from .programmers.firmware import DeviceFirmwareManager
-
-# from .glitchkit import *
-
-
-# from .debug.lpc43xx import LPC43xxTarget
 
 # Quirk constant that helps us identify libusb's pipe errors, which bubble
 # up as generic USBErrors with errno 32 on affected platforms.
