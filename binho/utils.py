@@ -224,7 +224,8 @@ class binhoDFUManager:
     @staticmethod
     def getBootloaderInfo(drive):
 
-        btldr_info = drive.mountpoint + "\\INFO.TXT"
+        # btldr_info = drive.mountpoint + "\\INFO.TXT"
+        btldr_info = os.path.join(drive.mountpoint, 'INFO.TXT')
 
         if os.path.isfile(btldr_info):
             with open(btldr_info, "r") as file:
@@ -243,7 +244,9 @@ class binhoDFUManager:
 
         btldr_version = "unknown"
 
-        btldr_info = drive.mountpoint + "\\INFO.TXT"
+        # btldr_info = drive.mountpoint + "\\INFO.TXT"
+        btldr_info = os.path.join(drive.mountpoint, 'INFO.TXT')
+
         if os.path.isfile(btldr_info):
             with open(btldr_info, "r") as file:
                 # pylint: disable=unused-variable
@@ -364,7 +367,9 @@ class binhoDFUManager:
         try:
             r = requests.get(url)
 
-            with open(assetsDir + "/" + firmwareFilename, "wb") as f:
+            fwPath = os.path.join(assetsDir, firmwareFilename)
+
+            with open(fwPath, "wb") as f:
                 f.write(r.content)
 
             return True
@@ -380,10 +385,11 @@ class binhoDFUManager:
 
         assetsDir = binho_assets_directory()
 
-        firmwareFilename = assetsDir + "/" + figFileName
+        firmwareFilename = os.path.join(assetsDir, figFileName)
+        firmwareDestination = os.path.join(btldr_drive.mountpoint, 'fw.uf2')
 
         if os.path.isfile(firmwareFilename):
-            shutil.copy2(firmwareFilename, btldr_drive.mountpoint + "\\fw.uf2")
+            shutil.copy2(firmwareFilename, firmwareDestination)
         else:
             return False
 
