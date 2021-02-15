@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import os
 
+from .version import __version__
+
 # Alias objects to make them easier to import.
 from .binhoHostAdapter import binhoHostAdapter
 from .binhoHostAdapter import binhoHostAdapterSingleton as binhoSingleton

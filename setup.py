@@ -21,14 +21,9 @@ setup_req = []
 setup_options = {}
 
 # Deduce version, if possible.
-if os.path.isfile("../VERSION"):
-    setup_options["version"] = read("../VERSION").strip()
-else:
-    setup_options["version_config"] = {
-        "version_format": "{tag}.dev+git.{sha}",
-        "starting_version": "2020.10.06",
-    }
-    setup_req.append("even-better-setuptools-git-version")
+if os.path.isfile("binho/version.py"):
+    exec(open('binho/version.py').read())
+    setup_options["version"] = __version__
 
 setup(
     name="binho",
