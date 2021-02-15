@@ -65,7 +65,7 @@ setup(
     ],
     data_files=[("/binho/assets", [])],
     description="Python package for Binho USB host adapter products",
-    long_description_content_type=‘text/markdown’,
+    long_description_content_type="text/markdown",
     long_description=read("README.md"),
     packages=find_packages(),
     include_package_data=True,
