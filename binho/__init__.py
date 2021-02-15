@@ -7,6 +7,7 @@ from .binhoHostAdapter import binhoHostAdapter
 from .binhoHostAdapter import binhoHostAdapterSingleton as binhoSingleton
 from .binhoHostAdapter import binhoDevice
 
+# FIXME introduce a pylint error to test, this should show up
 
 class _binhoHostAdapterSingletonWrapper:
 
