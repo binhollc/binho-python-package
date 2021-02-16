@@ -58,6 +58,7 @@ setup(
         "future",
         "intelhex",
         "pyserial==3.3",
+        "psutil",
         "hidapi",
     ],
     data_files=[("/binho/assets", [])],
