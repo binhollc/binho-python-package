@@ -7,6 +7,7 @@ from __future__ import print_function
 from decimal import Decimal
 
 import sys
+import platform
 import ast
 import time
 import errno
@@ -161,11 +162,9 @@ class binhoDFUManager:
         device.reset_to_bootloader()
         time.sleep(5)
 
-        newDrives = binhoDFUManager.getNewDrives()
+        newDrive = binhoDFUManager.getNewDrives()
 
-        binhoDFUManager.getBootloaderInfo(newDrives[0])
-
-        return newDrives[0]
+        return newDrive
 
     @classmethod
     def switchToNormal(cls, device, release=None):
@@ -214,12 +213,16 @@ class binhoDFUManager:
 
         snapshot = psutil.disk_partitions()
 
-        rmDrives = [x for x in snapshot if x.opts == "rw,removable"]
+        if platform.system() == 'Windows':
+            rmDrives = [x for x in snapshot if x.opts == "rw,removable"]
+        else:
+            rmDrives = snapshot
 
         for drive in rmDrives:
-            binhoDFUManager.getBootloaderInfo(drive)
+            if binhoDFUManager.getBootloaderInfo(drive):
+                return drive
 
-        return rmDrives
+        return None
 
     @staticmethod
     def getBootloaderInfo(drive):
@@ -238,6 +241,8 @@ class binhoDFUManager:
 
                 if boardID.startswith("Board-ID: "):
                     binhoDFUManager.bootloaderInfo["boardID"] = boardID[10:]
+                    return True
+        return False
 
     @staticmethod
     def getBootloaderVersion(drive):
