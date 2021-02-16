@@ -160,7 +160,7 @@ class binhoDFUManager:
         binhoDFUManager.takeDrivesSnapshot()
 
         device.reset_to_bootloader()
-        time.sleep(5)
+        time.sleep(8)
 
         newDrive = binhoDFUManager.getNewDrives()
 
