@@ -56,10 +56,7 @@ setup(
     install_requires=[
         per_version_requirements,
         "future",
-        "tqdm",
-        "tabulate",
         "intelhex",
-        "prompt_toolkit<2.1.0",
         "pyserial==3.3",
         "hidapi",
     ],
