@@ -214,7 +214,7 @@ class binhoDFUManager:
         snapshot = psutil.disk_partitions()
 
         if platform.system() == 'Windows':
-            rmDrives = [x for x in snapshot if x.opts == "rw,removable"]
+            rmDrives = [x for x in snapshot if ("rw" in x.opts and "removable" in x.opts)]
         else:
             rmDrives = snapshot
 
