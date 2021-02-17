@@ -7,12 +7,14 @@ from __future__ import print_function
 from decimal import Decimal
 
 import sys
+import platform
 import ast
 import time
 import errno
 import argparse
 import linecache
 import os
+import tempfile
 import urllib.request
 import json
 import shutil
@@ -159,27 +161,24 @@ class binhoDFUManager:
         binhoDFUManager.takeDrivesSnapshot()
 
         device.reset_to_bootloader()
-        time.sleep(5)
+        time.sleep(8)
 
-        newDrives = binhoDFUManager.getNewDrives()
+        newDrive = binhoDFUManager.getNewDrives()
 
-        binhoDFUManager.getBootloaderInfo(newDrives[0])
-
-        return newDrives[0]
+        return newDrive
 
     @classmethod
     def switchToNormal(cls, device, release=None):
 
         fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, release)
-        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
 
         if fw_image_url:
 
-            binhoDFUManager.downloadFirmwareFile(fw_image_url)
+            figFilePath = binhoDFUManager.downloadFirmwareFile(fw_image_url)
 
             bootloaderDrive = binhoDFUManager.switchToBootloader(device)
 
-            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
+            binhoDFUManager.loadFirmwareFile(figFilePath, bootloaderDrive)
 
             return True
 
@@ -189,14 +188,13 @@ class binhoDFUManager:
     def switchToDAPLink(cls, device):
 
         fw_image_url = binhoDFUManager.getFirmwareImageUrl(device.FIRMWARE_UPDATE_URL, daplink=True)
-        fw_image_filename = binhoDFUManager.getFirmwareFilename(fw_image_url)
 
         if fw_image_url:
-            binhoDFUManager.downloadFirmwareFile(fw_image_url)
+            figFilePath = binhoDFUManager.downloadFirmwareFile(fw_image_url)
 
             bootloaderDrive = binhoDFUManager.switchToBootloader(device)
 
-            binhoDFUManager.loadFirmwareFile(fw_image_filename, bootloaderDrive)
+            binhoDFUManager.loadFirmwareFile(figFilePath, bootloaderDrive)
 
             return True
 
@@ -214,12 +212,16 @@ class binhoDFUManager:
 
         snapshot = psutil.disk_partitions()
 
-        rmDrives = [x for x in snapshot if x.opts == "rw,removable"]
+        if platform.system() == 'Windows':
+            rmDrives = [x for x in snapshot if ("rw" in x.opts and "removable" in x.opts)]
+        else:
+            rmDrives = snapshot
 
         for drive in rmDrives:
-            binhoDFUManager.getBootloaderInfo(drive)
+            if binhoDFUManager.getBootloaderInfo(drive):
+                return drive
 
-        return rmDrives
+        return None
 
     @staticmethod
     def getBootloaderInfo(drive):
@@ -238,6 +240,8 @@ class binhoDFUManager:
 
                 if boardID.startswith("Board-ID: "):
                     binhoDFUManager.bootloaderInfo["boardID"] = boardID[10:]
+                    return True
+        return False
 
     @staticmethod
     def getBootloaderVersion(drive):
@@ -360,19 +364,17 @@ class binhoDFUManager:
     @classmethod
     def downloadFirmwareFile(cls, url, fail_silent=False):
 
-        assetsDir = binho_assets_directory()
-
-        firmwareFilename = url.split("/")[-1]
+        fd, path = tempfile.mkstemp()
 
         try:
             r = requests.get(url)
 
-            fwPath = os.path.join(assetsDir, firmwareFilename)
+            with os.fdopen(fd, 'wb') as tmp:
+                # do stuff with temp file
+                tmp.write(r.content)
 
-            with open(fwPath, "wb") as f:
-                f.write(r.content)
+            return path
 
-            return True
         except BaseException:
 
             if fail_silent:
@@ -381,17 +383,17 @@ class binhoDFUManager:
 
     # pylint: disable=unused-argument
     @classmethod
-    def loadFirmwareFile(cls, figFileName, btldr_drive, fail_silent=False):
+    def loadFirmwareFile(cls, figFilePath, btldr_drive, fail_silent=False):
 
-        assetsDir = binho_assets_directory()
-
-        firmwareFilename = os.path.join(assetsDir, figFileName)
         firmwareDestination = os.path.join(btldr_drive.mountpoint, 'fw.uf2')
 
-        if os.path.isfile(firmwareFilename):
-            shutil.copy2(firmwareFilename, firmwareDestination)
+        if os.path.isfile(figFilePath):
+            shutil.copy2(figFilePath, firmwareDestination)
         else:
             return False
+
+        # clean up fig file
+        os.remove(figFilePath)
 
         return True
 
@@ -631,26 +633,6 @@ class binhoArgumentParser(argparse.ArgumentParser):
         if len(ports) < 1:
             raise DeviceNotFoundError
         return binhoHostAdapter(port=ports[0])
-
-
-def binho_assets_directory():
-    """ Provide a quick function that helps us get at our assets directory. """
-
-    # Find the path to the module, and then find its assets folder.
-    module_path = os.path.dirname(__file__)
-    return os.path.join(module_path, "assets")
-
-
-def find_binho_asset(filename):
-    """ Returns the path to a given Binho asset, if it exists, or None if the Binho asset isn't provided."""
-
-    asset_path = os.path.join(binho_assets_directory(), filename)
-
-    if os.path.isfile(asset_path):
-        return asset_path
-
-    return None
-
 
 def binho_error_hander():
     # pylint: disable=unused-variable
