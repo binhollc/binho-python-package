@@ -80,7 +80,7 @@ def main():
             pinStr = "IO0"
 
         # get the desired pin
-        pin = device.gpio.getPin(pinStr)
+        pin = device.gpio_pins[pinStr]
 
         # set the pin mode
         if args.output:
