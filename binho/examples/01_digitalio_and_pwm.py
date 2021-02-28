@@ -12,6 +12,7 @@ import errno
 from serial import SerialException
 from binho.errors import DeviceNotFoundError
 from binho.utils import binho_error_hander
+from binho.interfaces.gpio import IOMode
 
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
@@ -77,90 +78,82 @@ try:
 
     print()
 
-    # let's grab the name of the first available pin
-    pinName = pins[0]
-
-    # using the getPin() function to get the pin will mark the pin as used
-    # meaning that it won't show up in getAvailablePins() list until it's
-    # released
-    ioPin = binho.gpio.getPin(pinName)
+    # Pins are available directly on the adapter object - using getPin and
+    # releasePin is deprecated.
+    ioPin = binho.IO0
 
     # each pin has helpful tracking info, like name and number
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
+    print("Pin Number: {}, Pin Name: {}".format(ioPin.pin_number, ioPin.pin_name))
 
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
+    # If desired, one can also get pins by name. The following is equivalent:
+    ioPin = binho.gpio_pins["IO0"]
+    print("Pin Number: {}, Pin Name: {}".format(ioPin.pin_number, ioPin.pin_name))
 
-    # you can also grab a pin by using it's name hardcoded
-    pinName = "IO1"
-    pinNumber = binho.gpio.getPinIndex(pinName)
-    ioPin = binho.gpio.getPin(pinNumber)
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
-
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
-
-    # and of course, you can also get a pin with it's pin number
-    pinNumber = binho.gpio.getPinIndex(2)
-    ioPin = binho.gpio.getPin(pinNumber)
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
-
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
+    # TODO: do we need to support getting pin by number?
 
     print()
 
-    # For the rest of this example, we'll be using IO0
-    pinNumber = binho.gpio.getPinIndex(0)
-    io0 = binho.gpio.getPin(pinNumber)
+    # For the rest of this example, we'll be using IO0 directly on the adapter.
 
     # set the pin to be a Digital INput
     # Options are 'DIN' (default), 'DOUT', 'AIN', 'AOUT', and 'PWM'
     # note that not all pins support all modes
     # we'll cover AIN and AOUT in the next example
-    io0.mode = "DIN"
-    print("Trying out {} mode".format(io0.mode))
+    binho.IO0.mode = "DIN"
+    print("Trying out {} mode on pin {}.".format(binho.IO0.mode, binho.IO0.pin_name))
+
+    # For a more explicit style, the IOMode enum can also be used:
+    binho.IO0.mode = IOMode.DIN
+    print(f"Still trying out {binho.IO0.mode} mode.")
 
     # use the value property to read the current state of the pin
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    print("The value is now is {}.".format(binho.IO0.value))
     print()
 
     # that's all you need to know for digital input
     # now let's set it to be a digital output
-    io0.mode = "DOUT"
-    print("Trying out {} mode".format(io0.mode))
+    binho.IO0.mode = "DOUT"
+    print("Trying out {} mode".format(binho.IO0.mode))
 
     # drive the pin high
-    io0.value = 1
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    binho.IO0.value = 1
+    print("The value is now is {}.".format(binho.IO0.value))
 
     # drive the pin low
-    io0.value = 0
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    binho.IO0.value = 0
+    print("The value is now is {}.".format(binho.IO0.value))
 
     # you can also use strings 'HIGH' and 'LOW' if you'd like
-    io0.value = "HIGH"
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    binho.IO0.value = "HIGH"
+    print("The value is now is {}.".format(binho.IO0.value))
 
-    io0.value = "LOW"
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    binho.IO0.value = "LOW"
+    print("The value is now is {}.".format(binho.IO0.value))
+    print()
+
+    # You can even use True and False, too.
+    binho.IO0.value = True
+    print("The value is now {}.".format(binho.IO0.value))
+
+    binho.IO0.value = False
+    print("The value is now {}.".format(binho.IO0.value))
     print()
 
     # Finally, lets try out PWM. Note that not all pins support PWM
-    io0.mode = "PWM"
-    print("Trying out {} mode".format(io0.mode))
+    binho.IO0.mode = "PWM"
+    print("Trying out {} mode".format(binho.IO0.mode))
 
     # set the pwm frequency to 10kHz (valid range is 750 - 80000)
-    io0.pwmFreq = 10000
+    binho.IO0.pwmFreq = 10000
 
     # now set the value of the pwm generator, valid range is 0 (off) - 1024
     # (fully high)
-    io0.value = 512
-    print("PWM output on {} is {} (pwmFreq = {}Hz).".format(io0.pinName, io0.value, io0.pwmFreq))
+    binho.IO0.value = 512
+    print("PWM output is now {} (pwmFreq = {}Hz).".format(binho.IO0.value, binho.IO0.pwmFreq))
 
     # for convenience, you can also set the duty cycle using percent
-    io0.value = "50%"
-    print("PWM output on {} is {} (pwmFreq = {}Hz).".format(io0.pinName, io0.value, io0.pwmFreq))
+    binho.IO0.value = "50%"
+    print("PWM output is now {} (pwmFreq = {}Hz).".format(binho.IO0.value, binho.IO0.pwmFreq))
 
     print("Finished!")
 

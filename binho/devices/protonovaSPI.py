@@ -89,7 +89,7 @@ class binhoProtonovaSPI(binhoDevice):
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
             # if self.supports_api("gpio"):
-            self._populate_gpio(self, gpio, self.GPIO_MAPPINGS)
+            self._populate_gpio(gpio, self.GPIO_MAPPINGS)
 
             # if self.supports_api("adc"):
             # self._populate_adc(self.adc, self.ADC_MAPPINGS)

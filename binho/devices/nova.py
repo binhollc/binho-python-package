@@ -1,5 +1,7 @@
+from typing import Dict
+
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIOProvider
+from ..interfaces.gpio import GPIO, GPIOPin
 from ..interfaces.dac import DAC
 from ..interfaces.adc import ADC
 
@@ -15,10 +17,11 @@ from ..interfaces.oneWireBus import OneWireBus
 class binhoNova(binhoDevice):
     """ Class representing Binho Nova Multi-Protocol USB Host Adapters. """
 
-    gpio = None
-    adc = None
-    dac = None
-    _operationMode = None
+    gpio: GPIO
+    adc: ADC
+    dac: DAC
+
+    gpio_pins: Dict[str, GPIOPin]
 
     # HANDLED_BOARD_IDS = [2]
     USB_VID_PID = "04D8:ED34"
@@ -59,27 +62,19 @@ class binhoNova(binhoDevice):
     @operationMode.setter
     def operationMode(self, mode):
 
-        self.apis.core.operationMode = mode
-
-        self.gpio.markPinAsUnused("IO0")
-        self.gpio.markPinAsUnused("IO1")
-        self.gpio.markPinAsUnused("IO2")
-        self.gpio.markPinAsUnused("IO3")
-        self.gpio.markPinAsUnused("IO4")
-
         if mode == "SPI":
 
             self.gpio.markPinAsUnused("IO0")
             self.gpio.markPinAsUnused("IO1")
-            self.gpio.markPinAsUsed("IO2")
-            self.gpio.markPinAsUsed("IO3")
-            self.gpio.markPinAsUsed("IO4")
+            self.gpio.markPinAsUsed("IO2", True)
+            self.gpio.markPinAsUsed("IO3", True)
+            self.gpio.markPinAsUsed("IO4", True)
 
         elif mode == "I2C":
 
-            self.gpio.markPinAsUsed("IO0")
+            self.gpio.markPinAsUsed("IO0", True)
             self.gpio.markPinAsUnused("IO1")
-            self.gpio.markPinAsUsed("IO2")
+            self.gpio.markPinAsUsed("IO2", True)
             self.gpio.markPinAsUnused("IO3")
             self.gpio.markPinAsUnused("IO4")
 
@@ -88,8 +83,18 @@ class binhoNova(binhoDevice):
             self.gpio.markPinAsUnused("IO0")
             self.gpio.markPinAsUnused("IO1")
             self.gpio.markPinAsUnused("IO2")
-            self.gpio.markPinAsUsed("IO3")
-            self.gpio.markPinAsUsed("IO4")
+            self.gpio.markPinAsUsed("IO3", True)
+            self.gpio.markPinAsUsed("IO4", True)
+
+        else:
+
+            self.gpio.markPinAsUnused("IO0")
+            self.gpio.markPinAsUnused("IO1")
+            self.gpio.markPinAsUnused("IO2")
+            self.gpio.markPinAsUnused("IO3")
+            self.gpio.markPinAsUnused("IO4")
+
+        self.apis.core.operationMode = mode
 
     def initialize_apis(self):
         """ Initialize a new Binho Nova connection. """
@@ -106,7 +111,7 @@ class binhoNova(binhoDevice):
             if self.inBootloaderMode or self.inDAPLinkMode:
                 return
 
-            self.gpio = GPIOProvider(self)
+            self.gpio = GPIO(self)
             self.adc = ADC(self)
             self.dac = DAC(self)
 
@@ -115,7 +120,13 @@ class binhoNova(binhoDevice):
 
             # Initialize the fixed peripherals that come on the board.
             # Populate the per-board GPIO.
-            self._populate_gpio(self, self.gpio, self.GPIO_MAPPINGS)
+            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
+            self.operationMode = "IO"
+            self.gpio_pins = dict()
+            for name, line in self.GPIO_MAPPINGS.items():
+                pin = GPIOPin(self.gpio, name, line)
+                setattr(self, name, pin)
+                self.gpio_pins[name] = pin
 
             self._populate_dac(self.dac, self.DAC_MAPPINGS)
 
@@ -140,4 +151,4 @@ class binhoNova(binhoDevice):
             # Add objects for each of our LEDs.
             self._populate_leds(self.SUPPORTED_LEDS)
 
-            self._operationMode = "IO"
+            self.operationMode = "IO"

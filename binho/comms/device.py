@@ -1,6 +1,9 @@
 # import usb
 import os
 import collections
+from dataclasses import dataclass
+from typing import Dict, Any
+
 import hid
 
 from ..errors import DeviceNotFoundError
@@ -10,8 +13,20 @@ from .comms import binhoComms
 from .drivers.core import binhoCoreDriver
 from .drivers.i2c import binhoI2CDriver
 from .drivers.spi import binhoSPIDriver
-from .drivers.io import binhoIODriver
+from .drivers.io import BinhoIODriver
 from .drivers.onewire import binho1WireDriver
+
+
+@dataclass
+class _BinhoAPIs:
+    core: binhoCoreDriver
+    i2c: binhoI2CDriver
+    spi: binhoSPIDriver
+    oneWire: binho1WireDriver
+    io: Dict[Any, BinhoIODriver]
+    swi: None = None
+    uart: None = None
+
 
 # pylint: disable=too-many-instance-attributes
 class binhoAPI:
@@ -22,6 +37,8 @@ class binhoAPI:
     # Default device identifiers.
     BOARD_VENDOR_ID = 0x1D50
     BOARD_PRODUCT_ID = 0x60E6
+
+    apis: _BinhoAPIs
 
     @classmethod
     def populate_default_identifiers(cls, device_identifiers, find_all=False):
@@ -48,15 +65,15 @@ class binhoAPI:
         self.serialPort = device_identifiers["port"]
         self.comms = binhoComms(device_identifiers["port"])
 
-        self.apis = collections.OrderedDict()
-
-        self.apis.core = binhoCoreDriver(self.comms)
-        self.apis.i2c = binhoI2CDriver(self.comms)
-        self.apis.spi = binhoSPIDriver(self.comms)
-        self.apis.oneWire = binho1WireDriver(self.comms)
-        self.apis.io = collections.OrderedDict()
-        self.apis.swi = None
-        self.apis.uart = None
+        self.apis = _BinhoAPIs(
+            core=binhoCoreDriver(self.comms),
+            i2c=binhoI2CDriver(self.comms),
+            spi=binhoSPIDriver(self.comms),
+            oneWire=binho1WireDriver(self.comms),
+            io=collections.OrderedDict(),
+            swi=None,
+            uart=None
+        )
 
         self.handler = None
         self.manager = None
@@ -316,7 +333,7 @@ class binhoAPI:
             return False
 
     def addIOPinAPI(self, name, ioPinNumber):  # pylint: disable=unused-argument
-        self.apis.io[ioPinNumber] = binhoIODriver(self.comms, ioPinNumber)
+        self.apis.io[ioPinNumber] = BinhoIODriver(self.comms, ioPinNumber)
 
     def supports_api(self, class_name):
         """ Returns true iff the board supports the given API class. """
