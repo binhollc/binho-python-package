@@ -1,3 +1,4 @@
+from ..errors import CapabilityError
 from ..interface import binhoInterface
 
 
@@ -22,7 +23,7 @@ class I2CDevice(binhoInterface):
         # Note: this will have to change if we decide to support 10-bit I2C
         # addresses.
         if address > 127 or address < 0:
-            raise ValueError("Tried to attach a device to an unsupported I2C address.")
+            raise CapabilityError("Tried to attach a device to an unsupported I2C address.")
 
         # Store our device parameters.
         self.bus = bus

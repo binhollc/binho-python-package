@@ -1,3 +1,4 @@
+from ..errors import CapabilityError
 from ..interface import binhoInterface
 
 
@@ -14,7 +15,7 @@ class ADC(binhoInterface):
 
         # Sanity check:
         if adc_num not in (0, 1):
-            raise ValueError("Specified an unavailable ADC! (Valid values are 0 and 1).")
+            raise CapabilityError("Specified an unavailable ADC! (Valid values are 0 and 1).")
 
         self.device = device
         self.api = self.device.apis.io
@@ -34,12 +35,12 @@ class ADC(binhoInterface):
             if ioPin in self.PIN_MAPPINGS:
                 pin = self.PIN_MAPPINGS[ioPin]
             else:
-                raise ValueError("Pin {} is not connected to ADC!".format(ioPin))
+                raise CapabilityError("Pin {} is not connected to ADC!".format(ioPin))
         else:
             if len(self.PIN_MAPPINGS) > 0:
                 pin = next(iter(self.PIN_MAPPINGS.values()))
             else:
-                raise ValueError("No pins are registered to the ADC!")
+                raise CapabilityError("No pins are registered to the ADC!")
 
         self.api[pin].mode = "AIN"
         voltage = float("%.3f" % (self.api[pin].value / self.maxCounts * self.maxVoltage))
@@ -52,12 +53,12 @@ class ADC(binhoInterface):
             if ioPin in self.PIN_MAPPINGS:
                 pin = self.PIN_MAPPINGS[ioPin]
             else:
-                raise ValueError("Pin {} is not connected to ADC!".format(ioPin))
+                raise CapabilityError("Pin {} is not connected to ADC!".format(ioPin))
         else:
             if len(self.PIN_MAPPINGS) > 0:
                 pin = next(iter(self.PIN_MAPPINGS.values()))
             else:
-                raise ValueError("No pins are registered to the ADC!")
+                raise CapabilityError("No pins are registered to the ADC!")
 
         self.api[pin].mode = "AIN"
 
@@ -68,4 +69,4 @@ class ADC(binhoInterface):
         if len(self.PIN_MAPPINGS) > 0:
             return next(iter(self.PIN_MAPPINGS))
 
-        raise ValueError("No pins are registered to the ADC!")
+        raise CapabilityError("No pins are registered to the ADC!")

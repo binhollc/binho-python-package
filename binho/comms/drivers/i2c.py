@@ -1,3 +1,6 @@
+from binho.errors import CapabilityError, DeviceError
+
+
 class binhoI2CDriver:
     def __init__(self, usb, i2cIndex=0):
 
@@ -11,7 +14,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " CLK"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
             )
 
@@ -24,7 +27,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -47,13 +50,13 @@ class binhoI2CDriver:
         elif pull in (False, 0):
             val = 0
         else:
-            raise AttributeError("usePullups can be only be set to a value of True (1) or False (0), not " + str(pull))
+            raise CapabilityError("usePullups can be only be set to a value of True (1) or False (0), not " + str(pull))
 
         self.usb.sendCommand("I2C" + str(self.i2cIndex) + " PULL " + str(val))
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -64,7 +67,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " ADDR"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
             )
 
@@ -73,7 +76,7 @@ class binhoI2CDriver:
         if "7BIT" in result:
             return 7
 
-        raise RuntimeError(
+        raise DeviceError(
             f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
         )
 
@@ -85,11 +88,11 @@ class binhoI2CDriver:
             result = self.usb.readResponse()
 
             if not result.startswith("-OK"):
-                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return True
 
-        raise AttributeError("AddressBits can be only be set to a value of 7 or 8, not " + str(bits))
+        raise CapabilityError("AddressBits can be only be set to a value of 7 or 8, not " + str(bits))
 
     def scanAddress(self, address, i2cIndex=0):
 
@@ -114,7 +117,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -124,7 +127,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -134,7 +137,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' RXD"'
             )
 
@@ -146,7 +149,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' RXD"'
             )
 
@@ -188,12 +191,12 @@ class binhoI2CDriver:
 
         if numReadBytes == 0:
             if not result.startswith("-OK"):
-                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return bytearray()
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " RXD "):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-I2C ' + str(self.i2cIndex) + ' RXD ..."'
             )
 
@@ -205,7 +208,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
         return True
 
     def end(self, repeat=False):
@@ -218,7 +221,7 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 

@@ -1,3 +1,6 @@
+from binho.errors import DeviceError
+
+
 class binhoSPIDriver:
     def __init__(self, usb, spiIndex=0):
 
@@ -11,7 +14,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " CLK"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-SPI' + str(self.spiIndex) + ' CLK"'
             )
 
@@ -24,7 +27,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -35,7 +38,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " ORDER"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-SPI' + str(self.spiIndex) + ' ORDER"'
             )
 
@@ -48,7 +51,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -59,7 +62,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " MODE"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-SPI' + str(self.spiIndex) + ' MODE"'
             )
 
@@ -72,7 +75,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -83,7 +86,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " TXBITS"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-SPI' + str(self.spiIndex) + ' TXBITS"'
             )
 
@@ -96,7 +99,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -106,7 +109,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
 
@@ -116,7 +119,7 @@ class binhoSPIDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-SPI" + str(self.spiIndex) + " RXD"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Error Binho responded with {result}, not the expected "-SPI' + str(self.spiIndex) + ' RXD"'
             )
 
@@ -149,12 +152,12 @@ class binhoSPIDriver:
 
         if not read:
             if not result.startswith("-OK"):
-                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return bytearray()
 
         if not result.startswith("-SPI0 RXD "):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-SPI0 RXD ..."')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-SPI0 RXD ..."')
 
         return bytearray.fromhex(result[9:])
 
@@ -165,6 +168,6 @@ class binhoSPIDriver:
 
         if not result.startswith("-OK"):
             if not suppressError:
-                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True

@@ -3,6 +3,8 @@ from enum import Enum
 from typing import Any, Optional, Mapping, Dict, List, Union, Set
 
 from ..comms.device import binhoAPI
+from ..errors import CapabilityError, DriverCapabilityError, \
+    DeviceError
 from ..interface import binhoInterface
 
 # TODOs:
@@ -120,7 +122,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
 
         # If this class doesn't allow pin registration, raise an error.
         if not self.ALLOW_EXTERNAL_REGISTRATION:
-            raise NotImplementedError("This GPIO collection does not allow registration of new pins.")
+            raise DriverCapabilityError("This GPIO collection does not allow registration of new pins.")
 
         # Otherwise, delegate to our internal registration method.
         self._registerGPIO(name, line, used)
@@ -168,7 +170,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         :rtype: None
         """
         if name not in self.pin_mappings:
-            raise ValueError("Unknown GPIO pin {}".format(name))
+            raise CapabilityError("Unknown GPIO pin {}".format(name))
 
         try:
             self.available_pins.remove(name)
@@ -176,7 +178,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
             if _hw and name in self._hw_used_pins:
                 pass
             else:
-                raise RuntimeError(f"GPIO pin {name} is already in use!") from e
+                raise CapabilityError(f"GPIO pin {name} is already in use!") from e
 
         if _hw:
             self._hw_used_pins.add(name)
@@ -191,7 +193,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         :rtype: None
         """
         if name not in self.pin_mappings:
-            raise ValueError("Unknown GPIO pin {}".format(name))
+            raise CapabilityError("Unknown GPIO pin {}".format(name))
 
         self.available_pins.add(name)
         try:
@@ -245,7 +247,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
             return self.active_gpio[name]
 
         # If we couldn't create the GPIO pin, fail out.
-        raise ValueError("No available GPIO pin {}".format(name))
+        raise CapabilityError("No available GPIO pin {}".format(name))
 
     def releasePin(self, gpio_pin: 'GPIOPin') -> None:
         """
@@ -254,7 +256,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         """
 
         if gpio_pin.name not in self.active_gpio:
-            raise ValueError("Trying to release a pin we don't own!")
+            raise CapabilityError(f"Can't release non-owned GPIO pin {gpio_pin.name}.")
 
         # Mark the pin as an input, placing it into High-Z mode.
         # TODO: Disable any pull-ups present on the pin.
@@ -414,7 +416,7 @@ class GPIO(GPIOProvider):
         try:
             return IOMode(mode)
         except ValueError:
-            raise RuntimeError(
+            raise DeviceError(
                 f"Binho reports IO mode {mode}, which is not a valid IOMode."
             )
 

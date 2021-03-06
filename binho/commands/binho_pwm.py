@@ -7,7 +7,7 @@ import sys
 
 import serial
 from binho.utils import log_silent, log_verbose, binhoArgumentParser
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, CapabilityError
 
 
 def main():
@@ -89,7 +89,7 @@ def main():
         # however, will need to do some plumbing to make that work, don't want it to delay the
         # initial release of this library
         if pinStr == "IO1":
-            raise ValueError("PWM Functionality is not supported on IO1 - please choose another pin!")
+            raise CapabilityError("PWM Functionality is not supported on IO1 - please choose another pin!")
 
         # get the desired pin
         pin = device.gpio.getPin(pinStr)
@@ -103,14 +103,14 @@ def main():
 
                 targetFreq = int(args.frequency)
                 if targetFreq < 750 or targetFreq > 80000:
-                    raise ValueError(
+                    raise CapabilityError(
                         "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency)
                     )
 
                 pin.pwmFreq = targetFreq
                 log_function("Setting PWM Frequency to {} Hz".format(args.frequency))
             else:
-                raise ValueError("PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency))
+                raise CapabilityError("PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency))
 
         if args.value.isnumeric():
 
@@ -124,7 +124,7 @@ def main():
                 )
 
             else:
-                raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
         elif "%" in args.value:
 
@@ -144,15 +144,15 @@ def main():
                     )
 
                 else:
-                    raise ValueError(
+                    raise CapabilityError(
                         "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}%".format(dutyCycle)
                     )
 
             else:
-                raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
         else:
-            raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+            raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
     finally:
         # close the connection to the host adapter

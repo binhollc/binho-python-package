@@ -5,7 +5,7 @@ from __future__ import print_function
 import errno
 import sys
 from binho.utils import log_silent, log_verbose, binhoArgumentParser
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, CapabilityError
 
 
 def main():
@@ -93,7 +93,7 @@ def main():
                 elif int(args.output) == 1:
                     pin.value = 1
                 else:
-                    raise ValueError("Output can only be set to 0 or 1, not {}".format(args.output))
+                    raise CapabilityError("Output can only be set to 0 or 1, not {}".format(args.output))
 
                 log_function("Configured {} as a digital output = {} ".format(pinStr, int(args.output)))
 
@@ -108,7 +108,7 @@ def main():
                     "Configured {} as a digital output and drove the signal {} ".format(pinStr, args.output.upper())
                 )
             else:
-                raise ValueError("Output can only be set to LOW or HIGH, not {}".format(args.output))
+                raise CapabilityError("Output can only be set to LOW or HIGH, not {}".format(args.output))
 
         else:
 

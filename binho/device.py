@@ -164,8 +164,8 @@ class binhoDevice(binhoAPI):
             # Finally, return the created programmer.
             return programmer
 
-        except KeyError:
-            raise KeyError("no available programmer named {}".format(name)) from LookupError
+        except KeyError as e:
+            raise DriverCapabilityError("no available programmer named {}".format(name)) from e
 
     def __dir__(self):
         """ Generate a cleaned-up dir listing for the relevant board. """

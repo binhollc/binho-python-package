@@ -107,7 +107,7 @@ try:
 
     else:
 
-        raise Exception("No I2C Devices found, please connect a device to run the rest of the example.")
+        raise RuntimeError("No I2C Devices found, please connect a device to run the rest of the example.")
 
     # We know there's a device on the bus if we made it this far
     # so let's try to do a simple read from the device

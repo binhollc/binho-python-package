@@ -134,7 +134,7 @@ class binhoAPI:
                 return board
 
         # If we couldn't find a board, raise an error.
-        raise DeviceNotFoundError()
+        raise DeviceNotFoundError
 
     @classmethod
     def autodetect_all(cls, device_identifiers):

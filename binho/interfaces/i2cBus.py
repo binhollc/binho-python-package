@@ -1,3 +1,4 @@
+from ..errors import CapabilityError
 from ..interface import binhoInterface
 
 
@@ -99,13 +100,13 @@ class I2CBus(binhoInterface):
         """
 
         if (not isinstance(receive_length, int)) or receive_length < 0:
-            raise ValueError("invalid receive length!")
+            raise CapabilityError("invalid receive length!")
 
         if receive_length > self.buffer_size:
-            raise ValueError("Tried to receive more than the size of the receive buffer.")
+            raise CapabilityError("Tried to receive more than the size of the receive buffer.")
 
         if address > 127 or address < 0:
-            raise ValueError("Tried to transmit to an invalid I2C address!")
+            raise CapabilityError("Tried to transmit to an invalid I2C address!")
 
         return self.api.writeToReadFrom(hex(address), True, receive_length, 0, None)
 
@@ -119,7 +120,7 @@ class I2CBus(binhoInterface):
             data -- The data to be sent to the given device.
         """
         if address > 127 or address < 0:
-            raise ValueError("Tried to transmit to an invalid I2C address!")
+            raise CapabilityError("Tried to transmit to an invalid I2C address!")
         self.api.writeToReadFrom(hex(address), True, 0, len(data), bytes(data))
 
     def transfer(self, address, data, receive_length):

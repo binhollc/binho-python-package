@@ -1,5 +1,7 @@
 from typing import Any
 
+from binho.errors import DeviceError
+
 
 class BinhoIODriver:
     def __init__(self, usb, io_number):
@@ -14,7 +16,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.io_number) + " MODE"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' MODE".'
             )
 
@@ -27,7 +29,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
+            raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
 
     @property
     def pwm_frequency(self) -> int:
@@ -36,7 +38,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.io_number) + " PWMFREQ"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' PWMFREQ".'
             )
 
@@ -49,7 +51,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
+            raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
 
     @property
     def interrupt_source(self) -> str:
@@ -58,7 +60,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.io_number) + " INT"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' INT".'
             )
 
@@ -71,7 +73,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
+            raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
 
     @property
     def value(self) -> int:
@@ -80,7 +82,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-IO" + str(self.io_number) + " VALUE"):
-            raise RuntimeError(
+            raise DeviceError(
                 f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' VALUE".'
             )
 
@@ -97,7 +99,7 @@ class BinhoIODriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            raise RuntimeError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
+            raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
 
     @property
     def interrupt_flag(self) -> bool:

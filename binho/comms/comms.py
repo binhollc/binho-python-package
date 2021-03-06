@@ -6,6 +6,8 @@ import signal
 import sys
 import serial
 
+from binho.errors import DeviceError
+
 SERIAL_TIMEOUT = 0.5
 
 
@@ -112,11 +114,6 @@ class SignalHandler:
 
         self.manager.join()
 
-
-class binhoException(Exception):
-    pass
-
-
 class oneWireCmd(enum.Enum):
     """Enum for exchangeBytes1WIRE"""
 
@@ -187,7 +184,7 @@ class binhoComms:
         if ret_str == "-NG":
             return False
 
-        raise binhoException(f"Invalid command response: {ret_str}")
+        raise DeviceError(f"Invalid command response: {ret_str}")
 
     # Communication Management
 

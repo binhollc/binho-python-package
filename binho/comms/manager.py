@@ -3,15 +3,6 @@ from __future__ import absolute_import
 import serial
 from serial.tools.list_ports import comports
 
-
-class CommsError(IOError):
-    """ Generic class for communications errors. """
-
-
-class CommandFailureError(CommsError):
-    """ Generic class for command failures."""
-
-
 class binhoDeviceManager:
     @classmethod
     def _checkForDeviceID(cls, serialPort):

@@ -280,11 +280,11 @@ class binhoDFUManager:
                 binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
                 binhoDFUManager.cachedManifestUrl = manifestURL
                 return binhoDFUManager.cachedManifestData[paramName]
-        except BaseException:
+        except Exception as e:
             if fail_silent:
                 return None
 
-            raise RuntimeError("Unable to connect to Binho server and retrieve the data!") from BaseException
+            raise RuntimeError("Unable to connect to Binho server and retrieve the data!") from e
 
     @classmethod
     def getLatestFirmwareVersion(cls, base_url, fail_silent=False):
@@ -375,11 +375,10 @@ class binhoDFUManager:
 
             return path
 
-        except BaseException:
-
+        except Exception as e:
             if fail_silent:
                 return False
-            raise RuntimeError("Failed to download firmware file online!") from BaseException
+            raise RuntimeError("Failed to download firmware file online!") from e
 
     # pylint: disable=unused-argument
     @classmethod

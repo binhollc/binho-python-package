@@ -14,6 +14,8 @@ import fcntl
 import atexit
 
 # Python 2/3 compatible method for using raw_input, and unicode-aware chr.
+from binho.errors import DriverCapabilityError
+
 try:
     raw_input
 except NameError:
@@ -164,4 +166,4 @@ def Console():
     if os.name == "nt":
         return NTConsole()
 
-    raise NotImplementedError("Console support not implemented for OS '{}'.".format(os.name))
+    raise DriverCapabilityError("Console support not implemented for OS '{}'.".format(os.name))

@@ -157,9 +157,6 @@ print("verification result: {}".format(verifyResult))
 # it does not try to continue execution under any circumstances
 # except Exception:
 
-# Catch any exception that was raised and display it
-# binho_error_hander()
-
 # finally:
 
 # close the connection to the host adapter
