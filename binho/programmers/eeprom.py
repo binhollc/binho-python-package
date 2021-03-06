@@ -382,7 +382,7 @@ class EEPROMDevice(binhoProgrammer):
             # Either to the end of the block, or to the end address
             while addr <= max_addr:
                 bytes_to_read = (max_addr - addr) + 1
-                read_data, status = device.read(min(bytes_to_read, buff_size))  # pylint: disable=unused-variable
+                read_data = device.read(min(bytes_to_read, buff_size))
                 buff = buff + bytes(read_data)
                 addr = addr + len(read_data)
 

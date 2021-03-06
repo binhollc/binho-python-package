@@ -45,14 +45,16 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.", file=sys.stderr,
+        "Please close the connection in the other application and try again.",
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport),
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -102,14 +104,19 @@ try:
     # with a 'SKIP' command, a 'SELECT' command, or 'NONE' (default), for no
     # command at all.
 
-    # Let's read 4 bytes from the targeted oneWire device found in the search we already performed. This command returns
-    # a tuple so that we can check the status to know if the rxData is valid
-    rxData, result = binho.oneWire.read(4)
+    # Let's read 4 bytes from the targeted oneWire device found in the search we
+    # already performed. This command returns the received data upon success,
+    # and will raise an exception upon failure.
+    rxData = []
 
-    if result:
-        print(rxData)
-    else:
+    try:
+        rxData = binho.oneWire.read(4)
+
+    except BaseException:
         print("1Wire Read Transaction failed!")
+
+    else:
+        print(rxData)
 
     print()
 
@@ -123,25 +130,25 @@ try:
     print()
 
     # as mentioned above, we can also tell the host adapter to begin the
-    # transaction with a 'SKIP' commmand
-    rxData, status = binho.oneWire.read(4, "SKIP")
+    # transaction with a 'SKIP' command
+    rxData = binho.oneWire.read(4, "SKIP")
 
     # we can also use the write command in a similar fashion
     writeData = [0xDE, 0xAD, 0xBE, 0xEF]
-    status = binho.oneWire.write(writeData, command="SKIP")
 
-    if status:
+    try:
+        binho.oneWire.write(writeData, command="SKIP")
 
+    except BaseException:
+        print("1Wire Write Transaction failed!")
+
+    else:
         sentBytes = "Wrote {} byte(s):".format(len(writeData))
 
         for byte in writeData:
             sentBytes += "\t " + "0x{:02x}".format(byte)
 
         print(sentBytes)
-
-    else:
-
-        print("1Wire Write Transaction failed!")
 
     print()
 
@@ -154,43 +161,58 @@ try:
     # that's why the transfer() function is so handy for EEPROMs
     writeData = [0xF0, 0x00, 0x00]
     readCount = 4
-    rxData, status = binho.oneWire.transfer(writeData, readCount, command="SKIP")
+    rxData = []
 
-    if status:
+    try:
+        rxData = binho.oneWire.transfer(writeData, readCount, command="SKIP")
+
+    except BaseException:
+        print("1. Read Failed!")
+
+    else:
         rcvdBytes = "Read from EEPROM - Resp: {} byte(s):\t".format(len(rxData))
+
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
         print(rcvdBytes)
-    else:
-        print("1. Read Failed!")
 
     # Now let's write some data to the scratchpad
     eepromCommand = [0x0F, 0x00, 0x00]
     scratchpadData = [0xDE, 0xAD, 0xBE, 0xEF]
-    rxData, status = binho.oneWire.transfer(eepromCommand + scratchpadData, 0, command="SKIP")
+    rxData = []
 
-    if status:
+    try:
+        rxData = binho.oneWire.transfer(eepromCommand + scratchpadData, 0, command="SKIP")
+
+    except BaseException:
+        print("2. Write to Scratchpad Failed!")
+
+    else:
         rcvdBytes = "Write To Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
+
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
         print(rcvdBytes)
-    else:
-        print("2. Write to ScratchPad Failed!")
 
     # Read back from the scratchpad
     eepromCommand = [0xAA]
-    rxData, status = binho.oneWire.transfer(eepromCommand, 7, command="SKIP")
+    rxData = []
 
-    if status:
+    try:
+        rxData = binho.oneWire.transfer(eepromCommand, 7, command="SKIP")
+
+    except BaseException:
+        print("3. Read from Scratchpad Failed!")
+
+    else:
         rcvdBytes = "Read From Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
+
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
         print(rcvdBytes)
-    else:
-        print("3. Read from ScratcPad Failed!")
 
     # We need to retransmit this checksum to confirm the data in the scratchpad is correct. See device Datasheet for
     # the details / explanation
@@ -198,30 +220,40 @@ try:
 
     # Send the Copy Scratchpad command to commit the data to the EEPROM
     eepromCommand = [0x55]
-    rxData, status = binho.oneWire.transfer(eepromCommand + list(commitConf), 7, command="SKIP")
+    rxData = []
 
-    if status:
+    try:
+        rxData = binho.oneWire.transfer(eepromCommand + list(commitConf), 7, command="SKIP")
+
+    except BaseException:
+        print("4. Send Copy Scratchpad Command Failed!")
+
+    else:
         rcvdBytes = "Copy Scratchpad - Resp: {} byte(s):\t".format(len(rxData))
+
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
         print(rcvdBytes)
-    else:
-        print("4. Send Copy ScratcPad Command Failed!")
 
     # Finally read back the newly written data from the EEPROM
     writeData = [0xF0, 0x00, 0x00]
     readCount = 4
-    rxData, status = binho.oneWire.transfer(writeData, readCount, command="SKIP")
+    rxData = []
 
-    if status:
+    try:
+        rxData = binho.oneWire.transfer(writeData, readCount, command="SKIP")
+
+    except BaseException:
+        print("5. Read Back From EEPROM Failed!")
+
+    else:
         rcvdBytes = "Read from EEPROM - Resp: {} byte(s):\t".format(len(rxData))
+
         for byte in rxData:
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
 
         print(rcvdBytes)
-    else:
-        print("5. Read Back From EEPROM Failed!")
 
     print()
     print("Finished!")

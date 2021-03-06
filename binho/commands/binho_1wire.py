@@ -104,18 +104,20 @@ def transfer(device, skip, data, receive_length, log_function):
     if skip:
         command = "SKIP"
 
-    received_data, status = onewire_device.transfer(data, receive_length, command)
+    try:
+        received_data = onewire_device.transfer(data, receive_length, command)
+    except BaseException:
+        log_function("1Wire transfer status: fail")
+        return
 
-    log_function("1Wire transfer status: %s" % status)
-
-    if status == "success":
-        log_function("")
-        log_function("Wrote {} byte(s):".format(len(data)))
-        log_function("")
-        sentBytes = ""
-        for byte in data:
-            sentBytes += "\t " + "0x{:02x}".format(byte)
-        log_function(sentBytes)
+    log_function("1Wire transfer status: success")
+    log_function("")
+    log_function("Wrote {} byte(s):".format(len(data)))
+    log_function("")
+    sentBytes = ""
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
 
     if received_data:
         log_function("")
@@ -137,9 +139,13 @@ def read(device, skip, receive_length, log_function):
     if skip:
         command = "SKIP"
 
-    received_data, status = onewire_device.read(receive_length, command)
+    try:
+        received_data = onewire_device.read(receive_length, command)
+    except BaseException:
+        log_function("1Wire read status: fail")
+        return
 
-    log_function("1Wire read status: %s" % status)
+    log_function("1Wire read status: success")
 
     if received_data:
         log_function("")
@@ -161,18 +167,20 @@ def write(device, skip, data, log_function):
     if skip:
         command = "SKIP"
 
-    status = onewire_device.write(data, command)
+    try:
+        onewire_device.write(data, command)
+    except BaseException:
+        log_function("1Wire write status: fail")
+        return
 
-    log_function("1Wire write status: %s" % status)
-
-    if status == "success":
-        log_function("")
-        log_function("Wrote {} byte(s):".format(len(data)))
-        log_function("")
-        sentBytes = ""
-        for byte in data:
-            sentBytes += "\t " + "0x{:02x}".format(byte)
-        log_function(sentBytes)
+    log_function("1Wire write status: success")
+    log_function("")
+    log_function("Wrote {} byte(s):".format(len(data)))
+    log_function("")
+    sentBytes = ""
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
 
 
 if __name__ == "__main__":
