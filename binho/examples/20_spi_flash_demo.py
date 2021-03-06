@@ -76,8 +76,7 @@ try:
     # Let's grab the first available pin (IO0) to use as cs
     # look at the digitalIO example for more info about working with digital
     # IO pins
-    csPinName = pins[0]
-    csPin = binho.gpio.getPin(csPinName)
+    csPin = binho.IO0
 
     # Additionally, most CS pins are active low, however if you want the CS pin
     # to operate as an active high signal, you can mark it as inverted
@@ -92,7 +91,7 @@ try:
         )
     )
 
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object
