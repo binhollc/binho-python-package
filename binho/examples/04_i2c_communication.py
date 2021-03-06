@@ -10,8 +10,7 @@ from binho import binhoHostAdapter
 # These imports help us handle errors gracefully
 import errno
 from serial import SerialException
-from binho.errors import DeviceNotFoundError
-
+from binho.errors import DeviceNotFoundError, BinhoException
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
@@ -121,7 +120,7 @@ try:
         rxData = binho.i2c.read(targetDeviceAddress, 2)
         print(rxData)
 
-    except BaseException:
+    except BinhoException:
         print("I2C Read Transaction failed!")
 
     print()
@@ -144,7 +143,7 @@ try:
     try:
         binho.i2c.write(targetDeviceAddress, writeData)
 
-    except BaseException:
+    except BinhoException:
         print("I2C Write transaction failed!")
 
     else:
@@ -170,7 +169,7 @@ try:
     try:
         rxData = binho.i2c.transfer(targetDeviceAddress, writeData, bytesToRead)
 
-    except BaseException:
+    except BinhoException:
         print("I2C Transfer Transaction failed!")
 
     else:
@@ -200,7 +199,7 @@ try:
     try:
         rxData = binho.i2c.transfer(targetDeviceAddress, [regNumber], registersToRead)
         print("The value of register {} is {}".format(regNumber, rxData[0]))
-    except BaseException:
+    except BinhoException:
         print("ReadRegister failed!")
 
     # WriteRegister -- presumes that registers are 8bits wide
@@ -210,7 +209,7 @@ try:
     try:
         rxData = binho.i2c.transfer(targetDeviceAddress, [regNumber, regValue], 0)
         print("Wrote {} to register {}.".format(regValue, regNumber))
-    except BaseException:
+    except BinhoException:
         print("WriteRegister failed!")
 
     print("Finished!")

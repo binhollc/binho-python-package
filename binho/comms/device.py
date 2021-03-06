@@ -294,6 +294,9 @@ class binhoAPI:
     def initialize_apis(self):
         """Hook-point for sub-boards to initialize their APIs after
         we have comms up and running and auto-enumeration is complete.
+
+        :raises Exception: Will raise some exception if initialization did not
+            succeed.
         """
 
         # Open up the commport.
@@ -301,36 +304,25 @@ class binhoAPI:
 
         try:
             # see if it's in DAPLink mode
-            self.deviceID  # pylint: disable=pointless-statement
+            _ = self.deviceID
             self._inDAPLinkMode = False
             self._inBootloader = False
-            return True
 
-        except BaseException:
+        except Exception:  # noqa
+            h = hid.device()
+            h.open(
+                int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
+            )
 
-            try:
+            self._hid_serial_number = "0x" + h.get_serial_number_string()
 
-                h = hid.device()
-                h.open(
-                    int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
-                )
+            if h.get_product_string() == "CMSIS-DAP":
+                self._inDAPLinkMode = True
+                self._inBootloader = False
 
-                self._hid_serial_number = "0x" + h.get_serial_number_string()
-
-                if h.get_product_string() == "CMSIS-DAP":
-                    self._inDAPLinkMode = True
-                    self._inBootloader = False
-
-                else:
-                    self._inDAPLinkMode = False
-                    self._inBootloader = True
-
-                return True
-
-            except BaseException:
-                pass
-
-            return False
+            else:
+                self._inDAPLinkMode = False
+                self._inBootloader = True
 
     def addIOPinAPI(self, name, ioPinNumber):  # pylint: disable=unused-argument
         self.apis.io[ioPinNumber] = BinhoIODriver(self.comms, ioPinNumber)

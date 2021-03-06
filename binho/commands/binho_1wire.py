@@ -10,7 +10,7 @@ import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.oneWireDevice import OneWireDevice
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, BinhoException
 
 
 def main():
@@ -106,7 +106,7 @@ def transfer(device, skip, data, receive_length, log_function):
 
     try:
         received_data = onewire_device.transfer(data, receive_length, command)
-    except BaseException:
+    except BinhoException:
         log_function("1Wire transfer status: fail")
         return
 
@@ -141,7 +141,7 @@ def read(device, skip, receive_length, log_function):
 
     try:
         received_data = onewire_device.read(receive_length, command)
-    except BaseException:
+    except BinhoException:
         log_function("1Wire read status: fail")
         return
 
@@ -169,7 +169,7 @@ def write(device, skip, data, log_function):
 
     try:
         onewire_device.write(data, command)
-    except BaseException:
+    except BinhoException:
         log_function("1Wire write status: fail")
         return
 

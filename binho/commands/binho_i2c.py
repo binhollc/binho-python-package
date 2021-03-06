@@ -11,7 +11,7 @@ from binho import binhoHostAdapter  # pylint: disable=unused-import
 from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.interfaces.i2cBus import I2CBus
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, BinhoException
 
 
 def main():
@@ -133,7 +133,7 @@ def transmit(device, address, data, receive_length, log_function):
 
     try:
         received_data = i2c_device.transfer(data, receive_length)
-    except BaseException:
+    except BinhoException:
         log_function("I2C transmit success: False")
         return
 
@@ -158,7 +158,7 @@ def read(device, address, receive_length, log_function):
 
     try:
         received_data = i2c_device.read(receive_length)
-    except BaseException:
+    except BinhoException:
         log_function("I2C read success: False")
         return
 
@@ -187,7 +187,7 @@ def write(device, address, data, log_function):
 
     try:
         i2c_device.write(data)
-    except BaseException:
+    except BinhoException:
         log_function("I2C write success: False")
     else:
         log_function("I2C write success: True")

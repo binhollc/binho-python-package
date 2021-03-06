@@ -10,8 +10,7 @@ from binho import binhoHostAdapter
 # These imports help us handle errors gracefully
 import errno
 from serial import SerialException
-from binho.errors import DeviceNotFoundError
-
+from binho.errors import DeviceNotFoundError, BinhoException
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
@@ -90,13 +89,13 @@ try:
 
         print("Search discovered device with address = {}".format(full_addr))
 
-    except BaseException:
+    except BinhoException:
 
         print("No 1Wire device was found attached to {}. Please check your setup and try again!".format(ioPin))
         sys.exit(1)
 
     # You can continue searching over and over again until all devices have been found. The search loads the
-    # address of the desired device into the internal address buffer. Subsequent communcations will be targeted at
+    # address of the desired device into the internal address buffer. Subsequent communications will be targeted at
     # this device.
 
     # The oneWire object provides functions for read, write, and transfer (write then read in the same transaction)
@@ -112,7 +111,7 @@ try:
     try:
         rxData = binho.oneWire.read(4)
 
-    except BaseException:
+    except BinhoException:
         print("1Wire Read Transaction failed!")
 
     else:
@@ -139,7 +138,7 @@ try:
     try:
         binho.oneWire.write(writeData, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("1Wire Write Transaction failed!")
 
     else:
@@ -166,7 +165,7 @@ try:
     try:
         rxData = binho.oneWire.transfer(writeData, readCount, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("1. Read Failed!")
 
     else:
@@ -185,7 +184,7 @@ try:
     try:
         rxData = binho.oneWire.transfer(eepromCommand + scratchpadData, 0, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("2. Write to Scratchpad Failed!")
 
     else:
@@ -203,7 +202,7 @@ try:
     try:
         rxData = binho.oneWire.transfer(eepromCommand, 7, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("3. Read from Scratchpad Failed!")
 
     else:
@@ -225,7 +224,7 @@ try:
     try:
         rxData = binho.oneWire.transfer(eepromCommand + list(commitConf), 7, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("4. Send Copy Scratchpad Command Failed!")
 
     else:
@@ -244,7 +243,7 @@ try:
     try:
         rxData = binho.oneWire.transfer(writeData, readCount, command="SKIP")
 
-    except BaseException:
+    except BinhoException:
         print("5. Read Back From EEPROM Failed!")
 
     else:

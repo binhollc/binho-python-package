@@ -100,55 +100,53 @@ class binhoNova(binhoDevice):
         """ Initialize a new Binho Nova connection. """
 
         # Set up the core connection.
-        initSuccess = super().initialize_apis()
+        super().initialize_apis()
 
-        if initSuccess:
+        # Set product name
+        self.setProductName(self.PRODUCT_NAME)
 
-            # Set product name
-            self.setProductName(self.PRODUCT_NAME)
+        # If the device is in bootloader or DAPLink mode, we don't want to continue
+        if self.inBootloaderMode or self.inDAPLinkMode:
+            return
 
-            # If the device is in bootloader or DAPLink mode, we don't want to continue
-            if self.inBootloaderMode or self.inDAPLinkMode:
-                return
+        self.gpio = GPIO(self)
+        self.adc = ADC(self)
+        self.dac = DAC(self)
 
-            self.gpio = GPIO(self)
-            self.adc = ADC(self)
-            self.dac = DAC(self)
+        # Create our simple peripherals.
+        self._populate_simple_interfaces()
 
-            # Create our simple peripherals.
-            self._populate_simple_interfaces()
+        # Initialize the fixed peripherals that come on the board.
+        # Populate the per-board GPIO.
+        self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
+        self.operationMode = "IO"
+        self.gpio_pins = dict()
+        for name, line in self.GPIO_MAPPINGS.items():
+            pin = GPIOPin(self.gpio, name, line)
+            setattr(self, name, pin)
+            self.gpio_pins[name] = pin
 
-            # Initialize the fixed peripherals that come on the board.
-            # Populate the per-board GPIO.
-            self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
-            self.operationMode = "IO"
-            self.gpio_pins = dict()
-            for name, line in self.GPIO_MAPPINGS.items():
-                pin = GPIOPin(self.gpio, name, line)
-                setattr(self, name, pin)
-                self.gpio_pins[name] = pin
+        self._populate_dac(self.dac, self.DAC_MAPPINGS)
 
-            self._populate_dac(self.dac, self.DAC_MAPPINGS)
+        self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
-            self._populate_adc(self.adc, self.ADC_MAPPINGS)
+        # if self.supports_api('i2c'):
+        # print('supports_api i2c success')
+        self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
+        self._add_interface("i2c", self.i2c_busses[0])  # pylint: disable=no-member
 
-            # if self.supports_api('i2c'):
-            # print('supports_api i2c success')
-            self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0])  # pylint: disable=no-member
+        # if self.supports_api('spi') and self.supports_api('gpio'):
+        #    chip_select = self.gpio.get_pin('J1_P37')
+        self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
+        self._add_interface("spi", self.spi_busses[0])  # pylint: disable=no-member
 
-            # if self.supports_api('spi') and self.supports_api('gpio'):
-            #    chip_select = self.gpio.get_pin('J1_P37')
-            self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0])  # pylint: disable=no-member
+        self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
+        self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
 
-            self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
+        # if self.supports_api('uart'):
+        # self._add_interface('uart', UART(self))
 
-            # if self.supports_api('uart'):
-            # self._add_interface('uart', UART(self))
+        # Add objects for each of our LEDs.
+        self._populate_leds(self.SUPPORTED_LEDS)
 
-            # Add objects for each of our LEDs.
-            self._populate_leds(self.SUPPORTED_LEDS)
-
-            self.operationMode = "IO"
+        self.operationMode = "IO"

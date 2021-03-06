@@ -30,47 +30,45 @@ class SerialPortManager(threading.Thread):
         self.exception = None
         self.daemon = True
 
-    def run(self):
+    def _transceive(self, comport: serial.Serial) -> None:
+        if self.inBridgeMode:
 
-        try:
-            comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
-        except BaseException:
-            self.stopper.set()
+            if comport.in_waiting > 0:
+                receivedData = comport.read().decode("utf-8")
+                self.rxdQueue.put(receivedData)
 
-        while not self.stopper.is_set():  # pylint: disable=too-many-nested-blocks
+            if not self.txdQueue.empty():
+                serialData = self.txdQueue.get()
+                comport.write(serialData.encode("utf-8"))
+        else:
 
-            try:
-                if self.inBridgeMode:
+            if comport.in_waiting > 0:
+                receivedData = comport.readline().strip().decode("utf-8")
 
-                    if comport.in_waiting > 0:
-                        receivedData = comport.read().decode("utf-8")
+                if len(receivedData) > 0:
+
+                    if receivedData[0] == "!":
+                        self.intQueue.put(receivedData)
+                    elif receivedData[0] == "-":
                         self.rxdQueue.put(receivedData)
 
-                    if not self.txdQueue.empty():
-                        serialData = self.txdQueue.get()
-                        comport.write(serialData.encode("utf-8"))
-                else:
+            if not self.txdQueue.empty():
+                serialCommand = self.txdQueue.get() + "\n"
+                comport.write(serialCommand.encode("utf-8"))
 
-                    if comport.in_waiting > 0:
-                        receivedData = comport.readline().strip().decode("utf-8")
-
-                        if len(receivedData) > 0:
-
-                            if receivedData[0] == "!":
-                                self.intQueue.put(receivedData)
-                            elif receivedData[0] == "-":
-                                self.rxdQueue.put(receivedData)
-
-                    if not self.txdQueue.empty():
-                        serialCommand = self.txdQueue.get() + "\n"
-                        comport.write(serialCommand.encode("utf-8"))
-
-            except Exception as e:  # pylint: disable=broad-except
-                self.stopper.set()
-                self.exception = e
-                # print('Comm Error!')
-
-        comport.close()
+    def run(self):
+        comport = None
+        try:
+            comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
+            while not self.stopper.is_set():  # pylint: disable=too-many-nested-blocks
+                self._transceive(comport)
+        except Exception as e:  # pylint: disable=broad-except
+            self.stopper.set()
+            self.exception = e
+            # print('Comm Error!')
+        finally:
+            if comport is not None:
+                comport.close()
 
     def get_exception(self):
         return self.exception
@@ -141,7 +139,7 @@ class binhoComms:
         if self.handler is not None:
             try:
                 self.handler.sendStop()
-            except BaseException:
+            except Exception:  # noqa
                 pass
 
     # Private functions
