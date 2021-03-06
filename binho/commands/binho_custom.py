@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import sys
 import errno
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 # this file is meant to serve as a template which can be used to create your own custom commands
@@ -85,10 +85,6 @@ def main():
         # pylint: enable=unused-variable
 
         log_function("Taking {} samples...".format(args.sample_count))
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
 
     finally:
         # close the connection to the host adapter

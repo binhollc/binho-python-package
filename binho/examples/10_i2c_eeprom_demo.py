@@ -13,7 +13,6 @@ from binho import binhoHostAdapter
 import errno
 from serial import SerialException
 from binho.errors import DeviceNotFoundError
-from binho.utils import binho_error_hander
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport

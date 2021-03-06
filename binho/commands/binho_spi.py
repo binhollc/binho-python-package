@@ -8,7 +8,7 @@ import ast
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.spiBus import SPIBus
 from binho.errors import DeviceNotFoundError
 
@@ -122,11 +122,6 @@ def main():
 
             # close the connection to the host adapter
             device.close()
-
-    except Exception:  # pylint: disable=broad-except
-
-        # Catch any exception that was raised and display it
-        binho_error_hander()
 
     finally:
 

@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import errno
 import sys
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
@@ -119,13 +119,7 @@ def main():
             elif value == 1:
                 log_function("{} is 1 (HIGH)".format(pinStr))
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

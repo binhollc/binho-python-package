@@ -7,7 +7,7 @@ import sys
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
@@ -117,10 +117,6 @@ def main():  # pylint: disable=too-many-locals
 
         print("This command is still under construction. Please come back again later!")
         sys.exit(1)
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
 
     finally:
 

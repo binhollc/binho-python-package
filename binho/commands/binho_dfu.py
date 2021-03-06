@@ -8,7 +8,6 @@ import sys
 from binho.utils import (
     log_silent,
     log_verbose,
-    binho_error_hander,
     binhoDFUManager,
     binhoArgumentParser,
 )
@@ -150,12 +149,7 @@ def main():
                     binhoDFUManager.switchToNormal(device, args.release)
                     log_function("Firmware Update Complete!")
 
-            device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

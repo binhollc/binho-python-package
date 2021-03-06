@@ -8,7 +8,7 @@ import ast
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.interfaces.i2cBus import I2CBus
 from binho.errors import DeviceNotFoundError
@@ -113,13 +113,7 @@ def main():
                 )
                 log_function("You can type 'binho i2c --help' for more information.")
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

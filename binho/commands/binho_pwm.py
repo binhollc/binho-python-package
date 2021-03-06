@@ -6,7 +6,7 @@ import errno
 import sys
 
 import serial
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
@@ -154,13 +154,7 @@ def main():
         else:
             raise ValueError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

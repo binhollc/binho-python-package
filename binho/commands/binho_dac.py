@@ -6,7 +6,7 @@ import sys
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.errors import DeviceNotFoundError
 
 
@@ -84,13 +84,7 @@ def main():
             device.dac.setOutputRaw(int(args.value))
             log_function("DAC channel {} set to {}".format(pinNumber, int(args.value)))
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 
