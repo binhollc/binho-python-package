@@ -10,6 +10,8 @@ from binho.errors import DeviceNotFoundError
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
+from binho.utils import binho_error_hander
+
 targetComport = "COM3"
 targetDeviceID = "0x1c4780b050515950362e3120ff141c2a"
 
@@ -75,8 +77,7 @@ try:
     # Let's grab the first available pin (IO0) to use as cs
     # look at the digitalIO example for more info about working with digital
     # IO pins
-    csPinName = pins[0]
-    csPin = binho.gpio.getPin(csPinName)
+    csPin = binho.IO0
 
     # Additionally, most CS pins are active low, however if you want the CS pin
     # to operate as an active high signal, you can mark it as inverted
@@ -90,7 +91,7 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # Now that we've got the SPI CS pin configuration, let's go ahead and create the programmer object

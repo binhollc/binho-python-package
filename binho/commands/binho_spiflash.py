@@ -93,7 +93,7 @@ def main():  # pylint: disable=too-many-locals
             else:
                 chipSelectStr = args.chipselect
 
-            csPin = device.gpio.getPin(chipSelectStr)
+            csPin = device.gpio_pins[chipSelectStr]
         else:
             csPin = None
 

@@ -92,7 +92,7 @@ def main():
             raise ValueError("PWM Functionality is not supported on IO1 - please choose another pin!")
 
         # get the desired pin
-        pin = device.gpio.getPin(pinStr)
+        pin = device.gpio_pins[pinStr]
 
         # set the pin mode
         pin.mode = "PWM"

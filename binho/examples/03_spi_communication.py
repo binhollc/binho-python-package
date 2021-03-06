@@ -81,8 +81,7 @@ try:
     # Let's grab the first available pin (IO0) to use as cs
     # look at the digitalIO example for more info about working with digital
     # IO pins
-    csPinName = pins[0]
-    csPin = binho.gpio.getPin(csPinName)
+    csPin = binho.IO1
 
     # in some occasions, no CS pin is need, so you can set the pin to None
     # csPin = None
@@ -98,7 +97,7 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # Now that the CSpin is all sorted out, let's get our SPI bus running
@@ -124,7 +123,7 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # we're ready to communicate on the bus, lets create a list of 4 bytes to

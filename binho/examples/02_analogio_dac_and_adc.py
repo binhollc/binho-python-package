@@ -77,42 +77,23 @@ try:
 
     print()
 
-    # let's grab the name of the first available pin
-    pinName = pins[0]
-
-    # using the getPin() function to get the pin will mark the pin as used
-    # meaning that it won't show up in getAvailablePins() list until it's
-    # released
-    ioPin = binho.gpio.getPin(pinName)
+    # Pins are available directly on the adapter object - using getPin and
+    # releasePin is deprecated.
+    ioPin = binho.IO1
 
     # each pin has helpful tracking info, like name and number
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
+    print("Pin Number: {}, Pin Name: {}".format(ioPin.pin_number, ioPin.pin_name))
 
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
+    # If desired, one can also get pins by name. The following is equivalent:
+    ioPin = binho.gpio_pins["IO1"]
+    print("Pin Number: {}, Pin Name: {}".format(ioPin.pin_number, ioPin.pin_name))
 
-    # you can also grab a pin by using it's name hardcoded
-    pinName = "IO1"
-    pinNumber = binho.gpio.getPinIndex(pinName)
-    ioPin = binho.gpio.getPin(pinNumber)
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
-
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
-
-    # and of course, you can also get a pin with it's pin number
-    pinNumber = binho.gpio.getPinIndex(2)
-    ioPin = binho.gpio.getPin(pinNumber)
-    print("Pin Number: {}, Pin Name: {}".format(ioPin.pinNumber, ioPin.pinName))
-
-    # let's release the pin so we can reuse it again later
-    binho.gpio.releasePin(ioPin)
+    # TODO: do we need to support getting pin by number?
 
     print()
 
     # For the rest of this example, we'll be using IO1 for Analog output
-    pinNumber = binho.gpio.getPinIndex(1)
-    io1 = binho.gpio.getPin(pinNumber)
+    io1 = binho.IO1
 
     # set the pin to be a Analog OUTput
     # Options are 'DIN' (default), 'DOUT', 'AIN', 'AOUT', and 'PWM'
@@ -123,19 +104,18 @@ try:
 
     # use the value property to set the output voltage, valid range of 0 - 1024
     io1.value = 512
-    print("The value of {} is {}.".format(io1.pinName, io1.value))
+    print("The value of {} is {}.".format(io1.pin_name, io1.value))
 
     # I'm going to hang on to the IO1 pin to generate an analog signal that we can measure
     # and we'll use IO0 to measure the signal. You should connect IO1 and IO0 to perform
     # this example
-    pinNumber = binho.gpio.getPinIndex(0)
-    io0 = binho.gpio.getPin(pinNumber)
+    io0 = binho.IO0
 
     io0.mode = "AIN"
     print("Trying out {} mode".format(io0.mode))
 
     # taking an analog reading is as simple as reading the io0.value property
-    print("The value of {} is {}.".format(io0.pinName, io0.value))
+    print("The value of {} is {}.".format(io0.pin_name, io0.value))
 
     # However, there's an even easier way which abstracts all the low level stuff away
     # and provides some additional helper functions. this is achieved by using the
@@ -150,11 +130,11 @@ try:
     # raw counts or desired voltage
     counts = 512
     binho.dac.setOutputRaw(counts)
-    print("DAC channel {} set to {}".format(pinNumber, counts))
+    print("DAC channel {} set to {}".format(dacPin, counts))
 
     voltage = 1.25
     binho.dac.setOutputVoltage(voltage)
-    print("DAC channel {} set to {} Volts".format(pinNumber, voltage))
+    print("DAC channel {} set to {} Volts".format(dacPin, voltage))
 
     # just like the dac object, there's also an adc object to make analog readings
     # more convenient too
