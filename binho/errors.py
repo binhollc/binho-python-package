@@ -11,10 +11,6 @@ class DeviceNotFoundError(BinhoException, IOError):
     """ Error indicating no Binho host adapter device was found. """
 
 
-class DeviceInBootloaderError(BinhoException, IOError):
-    """ Error indicating a Binho host adapter device was found but it's in bootloader mode. """
-
-
 class DeviceBusyError(BinhoException, IOError):
     """ Error indicating the Binho host adapter is too busy to service the given request. """
 
