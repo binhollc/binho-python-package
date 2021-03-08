@@ -80,11 +80,7 @@ try:
         sys.exit(errno.ENODEV)
 
     else:
-        print("Connected to a {} (deviceID: {}) on {}".format(
-                binho.productName, binho.deviceID, binho.commPort
-            )
-        )
-
+        print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the LED to any color based on RGB values (0 - 255)
     red = 255

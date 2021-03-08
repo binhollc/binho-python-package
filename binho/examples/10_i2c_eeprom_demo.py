@@ -81,10 +81,7 @@ try:
         sys.exit(errno.ENODEV)
 
     else:
-        print("Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-            )
-        )
+        print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # We'll use the IntelHex package to work with .bin/hex files
     # https://github.com/python-intelhex/intelhex
@@ -124,7 +121,7 @@ try:
     # It's possible to use the programmer to read and write bytes
 
     # Reading 1024 bytes starting from address 0x00
-    print('Reading 1024 bytes starting at address 0x00')
+    print("Reading 1024 bytes starting at address 0x00")
     start_address = 0x00
     bytes_to_read = 1024
     data = programmer.readBytes(start_address, start_address + bytes_to_read)
@@ -135,14 +132,14 @@ try:
         print()
 
     # Writing 4 bytes starting at address 0x10
-    print('Writing 4 bytes at address 0x10:')
+    print("Writing 4 bytes at address 0x10:")
     writeData = [0xDE, 0xAD, 0xBE, 0xEF]
     start_address = 0x10
     programmer.writeBytes(start_address, writeData)
-    print('[{}]'.format(', '.join(hex(x) for x in writeData)))
+    print("[{}]".format(", ".join(hex(x) for x in writeData)))
     print()
 
-    print('Reading back the 4 bytes we just wrote:')
+    print("Reading back the 4 bytes we just wrote:")
     bytes_to_read = 4
     readData = programmer.readBytes(start_address, start_address + bytes_to_read)
     print(readData)
@@ -152,46 +149,46 @@ try:
     # and verify functionality
 
     # Here's how easy it is to erase the memory, and then verify that it's blank
-    print('Erasing the EEPROM...this may take 10s of seconds')
+    print("Erasing the EEPROM...this may take 10s of seconds")
     programmer.erase()
-    print('Erase Completed!')
-    print('Now performing a blank check...')
+    print("Erase Completed!")
+    print("Now performing a blank check...")
     isBlank = programmer.blankCheck()
     print("isBlank = {}".format(isBlank))
 
-    print('Reading the entire EEPROM')
+    print("Reading the entire EEPROM")
     data = programmer.read()
 
-    print('Creating a .bin and .hex file with the data read from the EEPROM')
+    print("Creating a .bin and .hex file with the data read from the EEPROM")
     ih.frombytes(data)
 
-    print('Min Addr: {}, Max Addr: {}'.format(str(ih.minaddr()), str(ih.maxaddr())))
-    print('Now saving the file to disk just to demo how easy it is')
-    ih.tofile("testFileErased-00.hex", format='hex')
-    ih.tofile("testFileErased-00.bin", format='bin')
+    print("Min Addr: {}, Max Addr: {}".format(str(ih.minaddr()), str(ih.maxaddr())))
+    print("Now saving the file to disk just to demo how easy it is")
+    ih.tofile("testFileErased-00.hex", format="hex")
+    ih.tofile("testFileErased-00.bin", format="bin")
 
     # Reading / Writing / Verifying EEPROMs from bin or hex files is also very
     # easy:
-    print('Manually modifying the data file')
+    print("Manually modifying the data file")
     dataFile = "testFile.bin"
     ih[0] = 0xDE
     ih[1] = 0xAD
     ih[2] = 0xBE
     ih[3] = 0xEF
 
-    print('Now writing the modified file to EEPROM')
-    ih.tofile("testFileBeef.bin", format='bin')
+    print("Now writing the modified file to EEPROM")
+    ih.tofile("testFileBeef.bin", format="bin")
     programmer.writeFromFile("testFileBeef.bin", fileformat="bin")
-    print('And verifying it... Does it Match???')
+    print("And verifying it... Does it Match???")
     verifyResult = programmer.verifyFile("testFileBeef.bin", fileformat="bin")
     print(verifyResult)
 
-    print('All Done!')
+    print("All Done!")
 
     # Here's some other nifty things that can be done
     # ih.fromfile("testFile2-bad.bin", format="bin")
     # verData = ih.tobinarray()
-    #verifyResult = programmer.verify(verData)
+    # verifyResult = programmer.verify(verData)
     # print("verification result: {}".format(verifyResult))
 
     # print("4. Verify File - binary")

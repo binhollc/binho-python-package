@@ -79,10 +79,7 @@ try:
         sys.exit(errno.ENODEV)
 
     else:
-        print("Connected to a {} (deviceID: {}) on {}".format(
-            binho.productName, binho.deviceID, binho.commPort
-            )
-        )
+        print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to '1WIRE'
     binho.operationMode = "1WIRE"
