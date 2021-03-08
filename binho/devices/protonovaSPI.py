@@ -1,5 +1,7 @@
+from typing import Dict
+
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIOProvider
+from ..interfaces.gpio import GPIOProvider, GPIOPin
 
 # from ..interfaces.dac import DAC
 # from ..interfaces.adc import ADC
@@ -17,6 +19,8 @@ from ..interfaces.oneWireBus import OneWireBus
 
 class binhoProtonovaSPI(binhoDevice):
     """ Class representing Binho Nova Multi-Protocol USB Host Adapters. """
+
+    gpio_pins: Dict[str, GPIOPin]
 
     # HANDLED_BOARD_IDS = [2]
     USB_VID_PID = "04D8:EAEA"
@@ -73,51 +77,55 @@ class binhoProtonovaSPI(binhoDevice):
         """ Initialize a new Binho Protonova connection. """
 
         # Set up the core connection.
-        initSuccess = super().initialize_apis()
+        super().initialize_apis()
 
-        if initSuccess:
-            gpio = GPIOProvider(self)
-            # adc = ADC(self)
-            # dac = DAC(self)
+        gpio = GPIOProvider(self)
+        # adc = ADC(self)
+        # dac = DAC(self)
 
-            # Set product name
-            self.setProductName(self.PRODUCT_NAME)
+        # Set product name
+        self.setProductName(self.PRODUCT_NAME)
 
-            # Create our simple peripherals.
-            self._populate_simple_interfaces()
+        # Create our simple peripherals.
+        self._populate_simple_interfaces()
 
-            # Initialize the fixed peripherals that come on the board.
-            # Populate the per-board GPIO.
-            # if self.supports_api("gpio"):
-            self._populate_gpio(self, gpio, self.GPIO_MAPPINGS)
+        # Initialize the fixed peripherals that come on the board.
+        # Populate the per-board GPIO.
+        # if self.supports_api("gpio"):
+        self._populate_gpio(gpio, self.GPIO_MAPPINGS)
+        self.gpio_pins = dict()
+        for name, line in self.GPIO_MAPPINGS.items():
+            pin = GPIOPin(gpio, name, line)
+            setattr(self, name, pin)
+            self.gpio_pins[name] = pin
 
-            # if self.supports_api("adc"):
-            # self._populate_adc(self.adc, self.ADC_MAPPINGS)
+        # if self.supports_api("adc"):
+        # self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
-            # if self.supports_api('i2c'):
-            # print('supports_api i2c success')
-            self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", [I2CBus(self, "I2C0")])
+        # if self.supports_api('i2c'):
+        # print('supports_api i2c success')
+        self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
+        self._add_interface("i2c", [I2CBus(self, "I2C0")])
 
-            # if self.supports_api('spi') and self.supports_api('gpio'):
-            #    chip_select = self.gpio.get_pin('J1_P37')
-            self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", [SPIBus(self, 0, "SPI0")])
+        # if self.supports_api('spi') and self.supports_api('gpio'):
+        #    chip_select = self.gpio.get_pin('J1_P37')
+        self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
+        self._add_interface("spi", [SPIBus(self, 0, "SPI0")])
 
-            self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", [OneWireBus(self, "1WIRE0")])
+        self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
+        self._add_interface("oneWire", [OneWireBus(self, "1WIRE0")])
 
-            # if self.supports_api('uart'):
-            # self._add_interface('uart', UART(self))
+        # if self.supports_api('uart'):
+        # self._add_interface('uart', UART(self))
 
-            # if self.supports_api("jtag"):
-            #    try:
-            #        self._add_interface('jtag', JTAGChain(self))
-            #    except:
-            #        pass
+        # if self.supports_api("jtag"):
+        #    try:
+        #        self._add_interface('jtag', JTAGChain(self))
+        #    except:
+        #        pass
 
-            # if self.supports_api('sdir'):
-            #    self._add_interface('sdir', SDIRTransceiver(self))
+        # if self.supports_api('sdir'):
+        #    self._add_interface('sdir', SDIRTransceiver(self))
 
-            # Add objects for each of our LEDs.
-            self._populate_leds(self.SUPPORTED_LEDS)
+        # Add objects for each of our LEDs.
+        self._populate_leds(self.SUPPORTED_LEDS)

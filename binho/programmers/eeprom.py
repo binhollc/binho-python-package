@@ -3,6 +3,7 @@ import time
 from math import floor
 from intelhex import IntelHex
 
+from binho.errors import DriverCapabilityError, CapabilityError, DeviceError
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.programmer import binhoProgrammer
 
@@ -163,7 +164,7 @@ def EEPROM(bus, part_number, slave_address=0):
         part_number              -- The Microchip part number
     """
     if part_number not in EEPROM_MODELS:
-        raise ValueError("Unknown model of EEPROM.")
+        raise DriverCapabilityError("Unknown model of EEPROM.")
     config = EEPROM_MODELS[part_number]
     eeprom = EEPROMDevice(
         bus,
@@ -259,7 +260,7 @@ class EEPROMDevice(binhoProgrammer):
             self.address_bits = 16
         else:
             raise (
-                ValueError(
+                CapabilityError(
                     "Specified capacity and number of block address bits would result in a block size that would take \
                      more than 16 bits to address."
                 )
@@ -312,14 +313,11 @@ class EEPROMDevice(binhoProgrammer):
 
     def verifyFile(self, file, fileformat="bin"):
 
-        try:
-            ih = IntelHex()
-            ih.loadfile(file, fileformat)
-            bytesToVerify = ih.tobinarray()
+        ih = IntelHex()
+        ih.loadfile(file, fileformat)
+        bytesToVerify = ih.tobinarray()
 
-            return self.verify(bytesToVerify)
-        except BaseException:
-            raise RuntimeError("Failed to write from File") from BaseException
+        return self.verify(bytesToVerify)
 
     def read(self):
 
@@ -338,7 +336,7 @@ class EEPROMDevice(binhoProgrammer):
             ih.tofile(file, format=fileformat)
             result = True
         else:
-            raise RuntimeError("Invalid Format. readToFile() does not support format={}".format(format))
+            raise DriverCapabilityError("Invalid Format. readToFile() does not support format={}".format(format))
 
         return result
 
@@ -354,11 +352,11 @@ class EEPROMDevice(binhoProgrammer):
             A bytestring
         """
         if start_address < 0 or start_address >= self.capacity:
-            raise ValueError("Invalid start address.")
+            raise CapabilityError("Invalid start address.")
         if end_address < 0 or end_address >= self.capacity:
-            raise ValueError("Invalid end address.")
+            raise CapabilityError("Invalid end address.")
         if end_address < start_address:
-            raise ValueError("End address must come after start.")
+            raise CapabilityError("End address must come after start.")
 
         # What size chunks can we read from the chip?
         buff_size = self.bus.buffer_size
@@ -382,7 +380,7 @@ class EEPROMDevice(binhoProgrammer):
             # Either to the end of the block, or to the end address
             while addr <= max_addr:
                 bytes_to_read = (max_addr - addr) + 1
-                read_data, status = device.read(min(bytes_to_read, buff_size))  # pylint: disable=unused-variable
+                read_data = device.read(min(bytes_to_read, buff_size))
                 buff = buff + bytes(read_data)
                 addr = addr + len(read_data)
 
@@ -403,14 +401,11 @@ class EEPROMDevice(binhoProgrammer):
 
     def writeFromFile(self, file, fileformat="bin"):
 
-        try:
-            ih = IntelHex()
-            ih.loadfile(file, fileformat)
-            bytesToWrite = ih.tobinarray()
+        ih = IntelHex()
+        ih.loadfile(file, fileformat)
+        bytesToWrite = ih.tobinarray()
 
-            return self.write(bytesToWrite)
-        except BaseException:
-            raise RuntimeError("Failed to write from File") from BaseException
+        return self.write(bytesToWrite)
 
     def writeBytes(self, word_address, data, write_cycle_length=0.005, attempts=0):  # pylint: disable=unused-argument
         """
@@ -466,4 +461,4 @@ class EEPROMDevice(binhoProgrammer):
             else:
                 retries = retries - 1
                 if retries == 0:
-                    raise RuntimeError("Could not write to EEPROM.")
+                    raise DeviceError("Could not write to EEPROM.")

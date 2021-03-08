@@ -13,7 +13,6 @@ from binho import binhoHostAdapter
 import errno
 from serial import SerialException
 from binho.errors import DeviceNotFoundError
-from binho.utils import binho_error_hander
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
@@ -157,9 +156,6 @@ print("verification result: {}".format(verifyResult))
 # binho_error_handler() simply prints out all the debug info as the script terminates
 # it does not try to continue execution under any circumstances
 # except Exception:
-
-# Catch any exception that was raised and display it
-# binho_error_hander()
 
 # finally:
 

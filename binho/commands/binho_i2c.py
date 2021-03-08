@@ -8,10 +8,10 @@ import ast
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.i2cDevice import I2CDevice
 from binho.interfaces.i2cBus import I2CBus
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, BinhoException
 
 
 def main():
@@ -113,13 +113,7 @@ def main():
                 )
                 log_function("You can type 'binho i2c --help' for more information.")
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 
@@ -132,12 +126,16 @@ def transmit(device, address, data, receive_length, log_function):
     i2c_device = I2CDevice(device.i2c, address)
 
     log_function("Writing to address %s" % hex(address))
-    received_data, i2c_status = i2c_device.transfer(data, receive_length)
-
     sentBytes = "W:"
     for byte in data:
         sentBytes += "\t " + "0x{:02x}".format(byte)
     log_function(sentBytes)
+
+    try:
+        received_data = i2c_device.transfer(data, receive_length)
+    except BinhoException:
+        log_function("I2C transmit success: False")
+        return
 
     if received_data:
 
@@ -148,7 +146,7 @@ def transmit(device, address, data, receive_length, log_function):
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
         log_function(rcvdBytes)
 
-    log_function("I2C transmit success: %s" % i2c_status)
+    log_function("I2C transmit success: True")
 
 
 def read(device, address, receive_length, log_function):
@@ -158,7 +156,11 @@ def read(device, address, receive_length, log_function):
 
     i2c_device = I2CDevice(device.i2c, address)
 
-    received_data, i2c_status = i2c_device.read(receive_length)
+    try:
+        received_data = i2c_device.read(receive_length)
+    except BinhoException:
+        log_function("I2C read success: False")
+        return
 
     if received_data:
         log_function("Reading {} bytes from address {}:".format(len(received_data), hex(address)))
@@ -168,7 +170,7 @@ def read(device, address, receive_length, log_function):
             rcvdBytes += "\t " + "0x{:02x}".format(byte)
         log_function(rcvdBytes)
 
-    log_function("I2C read success: %s" % i2c_status)
+    log_function("I2C read success: True")
 
 
 def write(device, address, data, log_function):
@@ -177,14 +179,18 @@ def write(device, address, data, log_function):
     """
     i2c_device = I2CDevice(device.i2c, address)
     log_function("Writing {} bytes to address {}:".format(len(data), hex(address)))
-    i2c_status = i2c_device.write(data)
 
     sentBytes = "W:"
     for byte in data:
         sentBytes += "\t " + "0x{:02x}".format(byte)
     log_function(sentBytes)
 
-    log_function("I2C write success: %s" % i2c_status)
+    try:
+        i2c_device.write(data)
+    except BinhoException:
+        log_function("I2C write success: False")
+    else:
+        log_function("I2C write success: True")
 
 
 def scan(device, pullup, frequencies):

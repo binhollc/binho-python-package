@@ -1,3 +1,4 @@
+from ..errors import DeviceError
 from ..programmer import binhoProgrammer
 from ..util.register import register
 
@@ -658,10 +659,10 @@ class SPIFlash(binhoProgrammer):
 
                     else:
                         if not allow_fallback:
-                            raise RuntimeError(
+                            raise DeviceError(
                                 "Could not read SFDP on connected device & Fallback is disabled! Giving Up!"
                             )
 
             else:
                 if not allow_fallback:
-                    raise RuntimeError("Could not read SFDP on connected device & Fallback is disabled! Giving Up!")
+                    raise DeviceError("Could not read SFDP on connected device & Fallback is disabled! Giving Up!")

@@ -9,7 +9,7 @@ from pyocd.core.helpers import ConnectHelper
 from pyocd.flash.file_programmer import FileProgrammer
 from pyocd.flash.eraser import FlashEraser
 
-from binho.utils import log_silent, log_verbose, binho_error_hander
+from binho.utils import log_silent, log_verbose
 from binho.errors import DeviceNotFoundError
 from binho.utils import binhoArgumentParser
 
@@ -128,11 +128,6 @@ def main():
             "Problem communicating with the target MCU. Please make sure SWDIO, SWCLK, and GND are properly "
             " connected and the MCU is powered up."
         )
-
-    except Exception:  # pylint: disable=broad-except
-
-        # Catch any exception that was raised and display it
-        binho_error_hander()
 
     finally:
 

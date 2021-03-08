@@ -1,4 +1,5 @@
 #
+from binho.errors import DriverCapabilityError
 
 
 class binhoAccessory:
@@ -41,4 +42,4 @@ class binhoAccessory:
             if target_name == subclass_name.lower():
                 return subclass(board, *args, **kwargs)
 
-        raise ValueError("No known driver for accessory '{}'.".format(name))
+        raise DriverCapabilityError("No known driver for accessory '{}'.".format(name))

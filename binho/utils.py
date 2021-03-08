@@ -280,11 +280,11 @@ class binhoDFUManager:
                 binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
                 binhoDFUManager.cachedManifestUrl = manifestURL
                 return binhoDFUManager.cachedManifestData[paramName]
-        except BaseException:
+        except Exception as e:
             if fail_silent:
                 return None
 
-            raise RuntimeError("Unable to connect to Binho server and retrieve the data!") from BaseException
+            raise RuntimeError("Unable to connect to Binho server and retrieve the data!") from e
 
     @classmethod
     def getLatestFirmwareVersion(cls, base_url, fail_silent=False):
@@ -375,11 +375,10 @@ class binhoDFUManager:
 
             return path
 
-        except BaseException:
-
+        except Exception as e:
             if fail_silent:
                 return False
-            raise RuntimeError("Failed to download firmware file online!") from BaseException
+            raise RuntimeError("Failed to download firmware file online!") from e
 
     # pylint: disable=unused-argument
     @classmethod
@@ -633,19 +632,3 @@ class binhoArgumentParser(argparse.ArgumentParser):
         if len(ports) < 1:
             raise DeviceNotFoundError
         return binhoHostAdapter(port=ports[0])
-
-def binho_error_hander():
-    # pylint: disable=unused-variable
-    exc_type, exc_obj, tb = sys.exc_info()
-    # pylint: enable=unused-variable
-    f = tb.tb_frame
-    lineno = tb.tb_lineno
-    filename = f.f_code.co_filename
-    linecache.checkcache(filename)
-    line = linecache.getline(filename, lineno, f.f_globals)
-
-    print()
-    print("Exception: {}".format(exc_type.__name__))
-    print("Exception in {}, on line {}:".format(filename, lineno))
-    print('"{}"'.format(line.strip()))
-    print("{}".format(exc_obj))

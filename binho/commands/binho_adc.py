@@ -7,8 +7,8 @@ import errno
 import statistics
 import serial
 
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
-from binho.errors import DeviceNotFoundError
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
+from binho.errors import DeviceNotFoundError, CapabilityError
 
 
 def main():
@@ -90,7 +90,7 @@ def main():
             adcPin = device.adc.getDefaultADCPin()
 
         if args.sample_count == 0:
-            raise ValueError("Cannot take 0 samples! Samples must be >= 1.")
+            raise CapabilityError("Cannot take 0 samples! Samples must be >= 1.")
         if args.sample_count > 1:
             log_function("Taking {} samples...".format(args.sample_count))
         else:
@@ -136,13 +136,7 @@ def main():
                 )
             )
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

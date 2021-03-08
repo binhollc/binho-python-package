@@ -8,7 +8,6 @@ import time
 from binho.utils import (
     log_silent,
     log_verbose,
-    binho_error_hander,
     binhoDFUManager,
     binhoArgumentParser,
 )
@@ -86,12 +85,7 @@ def main():
                 binhoDFUManager.switchToDAPLink(device)
                 log_function("Completed!")
 
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 

@@ -8,9 +8,9 @@ import ast
 
 import binho  # pylint: disable=unused-import
 from binho import binhoHostAdapter  # pylint: disable=unused-import
-from binho.utils import log_silent, log_verbose, binho_error_hander, binhoArgumentParser
+from binho.utils import log_silent, log_verbose, binhoArgumentParser
 from binho.interfaces.oneWireDevice import OneWireDevice
-from binho.errors import DeviceNotFoundError
+from binho.errors import DeviceNotFoundError, BinhoException
 
 
 def main():
@@ -88,13 +88,7 @@ def main():
         elif args.read:
             read(device, args.skip, int(args.read), log_function)
 
-        # close the connection to the host adapter
-        device.close()
-
-    except Exception:  # pylint: disable=broad-except
-        # Catch any exception that was raised and display it
-        binho_error_hander()
-
+    finally:
         # close the connection to the host adapter
         device.close()
 
@@ -110,18 +104,20 @@ def transfer(device, skip, data, receive_length, log_function):
     if skip:
         command = "SKIP"
 
-    received_data, status = onewire_device.transfer(data, receive_length, command)
+    try:
+        received_data = onewire_device.transfer(data, receive_length, command)
+    except BinhoException:
+        log_function("1Wire transfer status: fail")
+        return
 
-    log_function("1Wire transfer status: %s" % status)
-
-    if status == "success":
-        log_function("")
-        log_function("Wrote {} byte(s):".format(len(data)))
-        log_function("")
-        sentBytes = ""
-        for byte in data:
-            sentBytes += "\t " + "0x{:02x}".format(byte)
-        log_function(sentBytes)
+    log_function("1Wire transfer status: success")
+    log_function("")
+    log_function("Wrote {} byte(s):".format(len(data)))
+    log_function("")
+    sentBytes = ""
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
 
     if received_data:
         log_function("")
@@ -143,9 +139,13 @@ def read(device, skip, receive_length, log_function):
     if skip:
         command = "SKIP"
 
-    received_data, status = onewire_device.read(receive_length, command)
+    try:
+        received_data = onewire_device.read(receive_length, command)
+    except BinhoException:
+        log_function("1Wire read status: fail")
+        return
 
-    log_function("1Wire read status: %s" % status)
+    log_function("1Wire read status: success")
 
     if received_data:
         log_function("")
@@ -167,18 +167,20 @@ def write(device, skip, data, log_function):
     if skip:
         command = "SKIP"
 
-    status = onewire_device.write(data, command)
+    try:
+        onewire_device.write(data, command)
+    except BinhoException:
+        log_function("1Wire write status: fail")
+        return
 
-    log_function("1Wire write status: %s" % status)
-
-    if status == "success":
-        log_function("")
-        log_function("Wrote {} byte(s):".format(len(data)))
-        log_function("")
-        sentBytes = ""
-        for byte in data:
-            sentBytes += "\t " + "0x{:02x}".format(byte)
-        log_function(sentBytes)
+    log_function("1Wire write status: success")
+    log_function("")
+    log_function("Wrote {} byte(s):".format(len(data)))
+    log_function("")
+    sentBytes = ""
+    for byte in data:
+        sentBytes += "\t " + "0x{:02x}".format(byte)
+    log_function(sentBytes)
 
 
 if __name__ == "__main__":

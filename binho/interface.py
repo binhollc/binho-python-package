@@ -1,9 +1,21 @@
+from binho.device import binhoAPI
+
+
 class binhoInterface:
     """
-    Generic base class for binho peripherals.
+    Generic base class for Binho peripherals.
+
+    :ivar device: The device containing this peripheral.
+    :type device: binhoAPI
     """
 
-    def __init__(self, device):
-        """ Default peripheral initializer -- just stores a reference to the relevant Binho device. """
+    device: binhoAPI
+
+    def __init__(self, device: binhoAPI):
+        """
+        Default peripheral initializer.
+
+        Just stores a reference to the relevant Binho device.
+        """
 
         self.device = device

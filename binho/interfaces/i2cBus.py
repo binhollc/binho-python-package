@@ -1,3 +1,4 @@
+from ..errors import CapabilityError
 from ..interface import binhoInterface
 
 
@@ -12,7 +13,12 @@ class I2CBus(binhoInterface):
     INTERFACE_SHORT_NAME = "i2c"
 
     def __init__(
-        self, board, name="i2c bus", buffer_size=1024, clock_frequency=400000, enable_pullups=False,
+        self,
+        board,
+        name="i2c bus",
+        buffer_size=1024,
+        clock_frequency=400000,
+        enable_pullups=False,
     ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new I2C bus.
@@ -94,22 +100,15 @@ class I2CBus(binhoInterface):
         """
 
         if (not isinstance(receive_length, int)) or receive_length < 0:
-            raise ValueError("invalid receive length!")
+            raise CapabilityError("invalid receive length!")
 
         if receive_length > self.buffer_size:
-            raise ValueError("Tried to receive more than the size of the receive buffer.")
+            raise CapabilityError("Tried to receive more than the size of the receive buffer.")
 
         if address > 127 or address < 0:
-            raise ValueError("Tried to transmit to an invalid I2C address!")
+            raise CapabilityError("Tried to transmit to an invalid I2C address!")
 
-        result = []
-        status = True
-        try:
-            result = self.api.writeToReadFrom(hex(address), True, receive_length, 0, None)
-        except BaseException:
-            status = False
-
-        return result, status
+        return self.api.writeToReadFrom(hex(address), True, receive_length, 0, None)
 
     def write(self, address, data):
         """
@@ -120,32 +119,12 @@ class I2CBus(binhoInterface):
                 special addresses, for now; but this behavior may change.
             data -- The data to be sent to the given device.
         """
-
         if address > 127 or address < 0:
-            raise ValueError("Tried to transmit to an invalid I2C address!")
-
-        data = bytes(data)
-
-        writeSuccess = True
-        try:
-            self.api.writeToReadFrom(hex(address), True, 0, len(data), data)
-        except BaseException:
-            writeSuccess = False
-
-        return writeSuccess
+            raise CapabilityError("Tried to transmit to an invalid I2C address!")
+        self.api.writeToReadFrom(hex(address), True, 0, len(data), bytes(data))
 
     def transfer(self, address, data, receive_length):
-
-        data = bytes(data)
-
-        result = []
-        status = True
-        try:
-            result = self.api.writeToReadFrom(hex(address), True, receive_length, len(data), data)
-        except BaseException:
-            status = False
-
-        return result, status
+        return self.api.writeToReadFrom(hex(address), True, receive_length, len(data), bytes(data))
 
     def scan(self):
 

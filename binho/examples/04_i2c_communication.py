@@ -10,9 +10,7 @@ from binho import binhoHostAdapter
 # These imports help us handle errors gracefully
 import errno
 from serial import SerialException
-from binho.errors import DeviceNotFoundError
-from binho.utils import binho_error_hander
-
+from binho.errors import DeviceNotFoundError, BinhoException
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
@@ -46,14 +44,16 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.", file=sys.stderr,
+        "Please close the connection in the other application and try again.",
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport),
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
@@ -106,18 +106,21 @@ try:
 
     else:
 
-        raise Exception("No I2C Devices found, please connect a device to run the rest of the example.")
+        raise RuntimeError("No I2C Devices found, please connect a device to run the rest of the example.")
 
     # We know there's a device on the bus if we made it this far
     # so let's try to do a simple read from the device
 
-    # Read 2 bytes from the target i2c device. This function returns a tuple so that we can
-    # see if the read was successful (ie, is the rxData valid)
-    rxData, result = binho.i2c.read(targetDeviceAddress, 2)
+    # Read 2 bytes from the target i2c device. This function returns the read
+    # data, and will raise an exception if the read did not succeed.
 
-    if result:
+    rxData = []
+
+    try:
+        rxData = binho.i2c.read(targetDeviceAddress, 2)
         print(rxData)
-    else:
+
+    except BinhoException:
         print("I2C Read Transaction failed!")
 
     print()
@@ -135,21 +138,21 @@ try:
     # we're just writing one byte, we need it to be in this format
     writeData = [0xAA]
 
-    # Perform the I2C write with this function. It returns True if the
-    # transaction succeeds, otherwise False
-    result = binho.i2c.write(targetDeviceAddress, writeData)
+    # Perform the I2C write with this function. It will raise an exception if
+    # the transaction does not succeed.
+    try:
+        binho.i2c.write(targetDeviceAddress, writeData)
 
-    if result:
+    except BinhoException:
+        print("I2C Write transaction failed!")
 
+    else:
         sentBytes = "Wrote {} byte(s):".format(len(writeData))
 
         for byte in writeData:
             sentBytes += "\t " + "0x{:02x}".format(byte)
 
         print(sentBytes)
-
-    else:
-        print("I2C Write transaction failed!")
 
     print()
 
@@ -159,12 +162,17 @@ try:
     writeData = [0x01]
     bytesToRead = 2
 
-    # Just like the i2c.read function, this also returns a tuple with data and
-    # status
-    rxData, result = binho.i2c.transfer(targetDeviceAddress, writeData, bytesToRead)
+    # Just like the i2c.read function, this will return data and raise an
+    # exception if the transaction fails.
+    rxData = []
 
-    if result:
+    try:
+        rxData = binho.i2c.transfer(targetDeviceAddress, writeData, bytesToRead)
 
+    except BinhoException:
+        print("I2C Transfer Transaction failed!")
+
+    else:
         print("I2C Transfer Succeeded: ")
         sentBytes = "Wrote {} byte(s):".format(len(writeData))
 
@@ -178,9 +186,6 @@ try:
         print(sentBytes)
         print(rcvdBytes)
 
-    else:
-        print("I2C Transfer Transaction failed!")
-
     print()
 
     # the i2c.transfer function is very general and can be used for many different purposes, but for clarity purposes,
@@ -191,34 +196,23 @@ try:
     regNumber = 0x01
     registersToRead = 1
 
-    rxData, result = binho.i2c.transfer(targetDeviceAddress, [regNumber], registersToRead)
-
-    if result:
+    try:
+        rxData = binho.i2c.transfer(targetDeviceAddress, [regNumber], registersToRead)
         print("The value of register {} is {}".format(regNumber, rxData[0]))
-    else:
+    except BinhoException:
         print("ReadRegister failed!")
 
     # WriteRegister -- presumes that registers are 8bits wide
     regNumber = 0x01
     regValue = 0xAA
 
-    rxData, result = binho.i2c.transfer(targetDeviceAddress, [regNumber, regValue], 0)
-
-    if result:
+    try:
+        rxData = binho.i2c.transfer(targetDeviceAddress, [regNumber, regValue], 0)
         print("Wrote {} to register {}.".format(regValue, regNumber))
-    else:
+    except BinhoException:
         print("WriteRegister failed!")
 
     print("Finished!")
-
-
-# It's generally bad practice to indiscriminately catch all exceptions, however the
-# binho_error_handler() simply prints out all the debug info as the script terminates
-# it does not try to continue execution under any circumstances
-except Exception:
-
-    # Catch any exception that was raised and display it
-    binho_error_hander()
 
 finally:
 

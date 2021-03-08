@@ -1,5 +1,7 @@
+from typing import Dict
+
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIOProvider
+from ..interfaces.gpio import GPIO, GPIOPin
 from ..interfaces.dac import DAC
 from ..interfaces.adc import ADC
 
@@ -15,10 +17,11 @@ from ..interfaces.oneWireBus import OneWireBus
 class binhoNova(binhoDevice):
     """ Class representing Binho Nova Multi-Protocol USB Host Adapters. """
 
-    gpio = None
-    adc = None
-    dac = None
-    _operationMode = None
+    gpio: GPIO
+    adc: ADC
+    dac: DAC
+
+    gpio_pins: Dict[str, GPIOPin]
 
     # HANDLED_BOARD_IDS = [2]
     USB_VID_PID = "04D8:ED34"
@@ -59,27 +62,19 @@ class binhoNova(binhoDevice):
     @operationMode.setter
     def operationMode(self, mode):
 
-        self.apis.core.operationMode = mode
-
-        self.gpio.markPinAsUnused("IO0")
-        self.gpio.markPinAsUnused("IO1")
-        self.gpio.markPinAsUnused("IO2")
-        self.gpio.markPinAsUnused("IO3")
-        self.gpio.markPinAsUnused("IO4")
-
         if mode == "SPI":
 
             self.gpio.markPinAsUnused("IO0")
             self.gpio.markPinAsUnused("IO1")
-            self.gpio.markPinAsUsed("IO2")
-            self.gpio.markPinAsUsed("IO3")
-            self.gpio.markPinAsUsed("IO4")
+            self.gpio.markPinAsUsed("IO2", True)
+            self.gpio.markPinAsUsed("IO3", True)
+            self.gpio.markPinAsUsed("IO4", True)
 
         elif mode == "I2C":
 
-            self.gpio.markPinAsUsed("IO0")
+            self.gpio.markPinAsUsed("IO0", True)
             self.gpio.markPinAsUnused("IO1")
-            self.gpio.markPinAsUsed("IO2")
+            self.gpio.markPinAsUsed("IO2", True)
             self.gpio.markPinAsUnused("IO3")
             self.gpio.markPinAsUnused("IO4")
 
@@ -88,56 +83,70 @@ class binhoNova(binhoDevice):
             self.gpio.markPinAsUnused("IO0")
             self.gpio.markPinAsUnused("IO1")
             self.gpio.markPinAsUnused("IO2")
-            self.gpio.markPinAsUsed("IO3")
-            self.gpio.markPinAsUsed("IO4")
+            self.gpio.markPinAsUsed("IO3", True)
+            self.gpio.markPinAsUsed("IO4", True)
+
+        else:
+
+            self.gpio.markPinAsUnused("IO0")
+            self.gpio.markPinAsUnused("IO1")
+            self.gpio.markPinAsUnused("IO2")
+            self.gpio.markPinAsUnused("IO3")
+            self.gpio.markPinAsUnused("IO4")
+
+        self.apis.core.operationMode = mode
 
     def initialize_apis(self):
         """ Initialize a new Binho Nova connection. """
 
         # Set up the core connection.
-        initSuccess = super().initialize_apis()
+        super().initialize_apis()
 
-        if initSuccess:
+        # Set product name
+        self.setProductName(self.PRODUCT_NAME)
 
-            # Set product name
-            self.setProductName(self.PRODUCT_NAME)
+        # If the device is in bootloader or DAPLink mode, we don't want to continue
+        if self.inBootloaderMode or self.inDAPLinkMode:
+            return
 
-            # If the device is in bootloader or DAPLink mode, we don't want to continue
-            if self.inBootloaderMode or self.inDAPLinkMode:
-                return
+        self.gpio = GPIO(self)
+        self.adc = ADC(self)
+        self.dac = DAC(self)
 
-            self.gpio = GPIOProvider(self)
-            self.adc = ADC(self)
-            self.dac = DAC(self)
+        # Create our simple peripherals.
+        self._populate_simple_interfaces()
 
-            # Create our simple peripherals.
-            self._populate_simple_interfaces()
+        # Initialize the fixed peripherals that come on the board.
+        # Populate the per-board GPIO.
+        self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
+        self.operationMode = "IO"
+        self.gpio_pins = dict()
+        for name, line in self.GPIO_MAPPINGS.items():
+            pin = GPIOPin(self.gpio, name, line)
+            setattr(self, name, pin)
+            self.gpio_pins[name] = pin
 
-            # Initialize the fixed peripherals that come on the board.
-            # Populate the per-board GPIO.
-            self._populate_gpio(self, self.gpio, self.GPIO_MAPPINGS)
+        self._populate_dac(self.dac, self.DAC_MAPPINGS)
 
-            self._populate_dac(self.dac, self.DAC_MAPPINGS)
+        self._populate_adc(self.adc, self.ADC_MAPPINGS)
 
-            self._populate_adc(self.adc, self.ADC_MAPPINGS)
+        # if self.supports_api('i2c'):
+        # print('supports_api i2c success')
+        self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
+        self._add_interface("i2c", self.i2c_busses[0])  # pylint: disable=no-member
 
-            # if self.supports_api('i2c'):
-            # print('supports_api i2c success')
-            self._add_interface("i2c_busses", [I2CBus(self, "I2C0")])
-            self._add_interface("i2c", self.i2c_busses[0])  # pylint: disable=no-member
+        # if self.supports_api('spi') and self.supports_api('gpio'):
+        #    chip_select = self.gpio.get_pin('J1_P37')
+        self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
+        self._add_interface("spi", self.spi_busses[0])  # pylint: disable=no-member
 
-            # if self.supports_api('spi') and self.supports_api('gpio'):
-            #    chip_select = self.gpio.get_pin('J1_P37')
-            self._add_interface("spi_busses", [SPIBus(self, 0, "SPI0")])
-            self._add_interface("spi", self.spi_busses[0])  # pylint: disable=no-member
+        self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
+        self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
 
-            self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
-            self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
+        # if self.supports_api('uart'):
+        # self._add_interface('uart', UART(self))
 
-            # if self.supports_api('uart'):
-            # self._add_interface('uart', UART(self))
+        # Add objects for each of our LEDs.
+        self._populate_leds(self.SUPPORTED_LEDS)
 
-            # Add objects for each of our LEDs.
-            self._populate_leds(self.SUPPORTED_LEDS)
-
-            self._operationMode = "IO"
+        self.operationMode = "IO"

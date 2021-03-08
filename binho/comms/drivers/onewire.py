@@ -1,3 +1,6 @@
+from binho.errors import CapabilityError, DeviceError
+
+
 class binho1WireDriver:
     def __init__(self, usb):
         self.usb = usb
@@ -13,7 +16,7 @@ class binho1WireDriver:
         :type pullup: bool
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
@@ -24,7 +27,7 @@ class binho1WireDriver:
             self.usb.sendCommand(f"1WIRE{oneWireIndex} BEGIN {pin}")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire Begin received NAK")
+            raise DeviceError("Error executing 1-Wire Begin received NAK")
 
     def reset(self, oneWireIndex=0):
         """
@@ -49,13 +52,13 @@ class binho1WireDriver:
         :type oneWireIndex: int
         :param powered: Leave 1-Wire power on after this command finsihes
         :type powered: bool
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
 
         if not 0 <= data <= 255:
-            raise RuntimeError(f"Data byte must be in range 0-255, not {data}")
+            raise CapabilityError(f"Data byte must be in range 0-255, not {data}")
 
         if powered:
             self.usb.sendCommand(f"1WIRE{oneWireIndex} WRITE {data} POWER")
@@ -63,14 +66,14 @@ class binho1WireDriver:
             self.usb.sendCommand(f"1WIRE{oneWireIndex} WRITE {data}")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire Write received NAK")
+            raise DeviceError("Error executing 1-Wire Write received NAK")
 
     def readByte(self, oneWireIndex=0):
         """
         Reads one byte over 1-Wire
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: Received byte
         :rtype: int
         """
@@ -78,7 +81,7 @@ class binho1WireDriver:
         result = self.usb.readResponse()
 
         if result == "-NG":
-            raise RuntimeError("Error executing 1-Wire Read received NAK")
+            raise DeviceError("Error executing 1-Wire Read received NAK")
 
         return int(result[15:], 16)
 
@@ -103,10 +106,10 @@ class binho1WireDriver:
         """
 
         if len(bytesToWrite) > 1024:
-            raise ValueError("WHR command can only write 1024 bytea at a time!")
+            raise CapabilityError("WHR command can only write 1024 bytes at a time!")
 
         if bytesToRead > 1024:
-            raise ValueError("WHR command can only read 1024 bytea at a time!")
+            raise CapabilityError("WHR command can only read 1024 bytes at a time!")
 
         self.usb.sendCommand(
             f"1WIRE{oneWireIndex} "
@@ -120,12 +123,12 @@ class binho1WireDriver:
 
         if bytesToRead == 0:
             if not result.startswith("-OK"):
-                raise RuntimeError(f'Error Binho responded with {result}, not the expected "-OK"')
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
             return bytearray()
 
         if not result.startswith("-1WIRE0 RXD "):
-            raise RuntimeError(f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-1WIRE0 RXD ..."')
 
         return bytearray.fromhex(result[12:])
 
@@ -134,49 +137,49 @@ class binho1WireDriver:
         Select the device that was found as a result of the most recent SEARCH command
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SELECT")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire Select received NAK")
+            raise DeviceError("Error executing 1-Wire Select received NAK")
 
     def skip(self, oneWireIndex=0):
         """
         Skip the device selection process, if there is one device on the bus
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SKIP")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire Skip received NAK")
+            raise DeviceError("Error executing 1-Wire Skip received NAK")
 
     def depower(self, oneWireIndex=0):
         """
         Power down the 1-WIRE bus
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} DEPOWER")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire depower received NAK")
+            raise DeviceError("Error executing 1-Wire depower received NAK")
 
     def getAddress(self, oneWireIndex=0):
         """
         Returns the address that was found by performing a 1-Wire search
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: Bytearray of the address
         :rtype: bytearray
         """
@@ -184,7 +187,7 @@ class binho1WireDriver:
         result = self.usb.readResponse()
 
         if result == "-NG":
-            raise RuntimeError("Error executing 1-Wire Read received NAK")
+            raise DeviceError("Error executing 1-Wire Read received NAK")
 
         return bytearray.fromhex(result[13:].replace("0x", ""))
 
@@ -197,7 +200,7 @@ class binho1WireDriver:
         :param normalSearch: Whether to perform a normal search (returning all devices)
                                 or only return alarming devices
         :type normalSearch: bool
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
@@ -207,21 +210,21 @@ class binho1WireDriver:
             self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH COND")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire search received NAK")
+            raise DeviceError("Error executing 1-Wire search received NAK")
 
     def resetSearch(self, oneWireIndex=0):
         """
         Resets 1-Wire search so a new one can occur
         :param oneWireIndex: The 1-Wire index, 0 on the binho nova
         :type oneWireIndex: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH RESET")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire search reset received NAK")
+            raise DeviceError("Error executing 1-Wire search reset received NAK")
 
     def targetSearch(self, target, oneWireIndex=0):
         """
@@ -230,14 +233,14 @@ class binho1WireDriver:
         :type oneWireIndex: int
         :param target: 1-byte long device family code for which to search
         :type target: int
-        :raises RuntimeError: if the command is unsuccessful
+        :raises DeviceError: if the command is unsuccessful
         :return: None
         :rtype: None
         """
         if not 0 <= target <= 255:
-            raise RuntimeError(f"Target byte must be in range 0-255, not {target}")
+            raise CapabilityError(f"Target byte must be in range 0-255, not {target}")
 
         self.usb.sendCommand(f"1WIRE{oneWireIndex} SEARCH {target}")
 
         if not self.usb.checkDeviceSuccess(self.usb.readResponse()):
-            raise RuntimeError("Error executing 1-Wire target search received NAK")
+            raise DeviceError("Error executing 1-Wire target search received NAK")

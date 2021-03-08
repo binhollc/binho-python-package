@@ -54,57 +54,23 @@ class OneWireBus(binhoInterface):
         Arguments:
             device -- The device object to attach to the given bus.
         """
-
         self.devices.append(device)
 
     def read(self, length=1, command="NONE"):
-        """
-        Attaches a given 1Wire device to this bus. Typically called
-        by the 1Wire device as it is constructed.
-        Arguments:
-            device -- The device object to attach to the given bus.
-        """
-
-        rxData = []
-        status = True
-        try:
-            rxData = self.api.exchangeBytes(command, [], length)
-        except BaseException:
-            status = False
-
-        return rxData, status
+        return self.api.exchangeBytes(command, [], length)
 
     def write(self, data, command="NONE"):
-
-        status = "success"
-
-        try:
-            self.api.exchangeBytes(command, data, 0)
-        except BaseException:
-            status = "fail"
-
-        return status
+        self.api.exchangeBytes(command, data, 0)
 
     def transfer(self, data, receive_length=0, command="NONE"):
         """
-        Sends (and typically receives) data over the SPI bus.
+        Sends (and typically receives) data over the 1Wire bus.
         Args:
             data                 -- the data to be sent to the given device.
             receive_length       -- the total amount of data to be read. If longer
                     than the data length, the transmit will automatically be extended
                     with zeroes.
-            chip_select          -- the GPIOPin object that will serve as the chip select
-                    for this transaction, None to use the bus's default, or False to not set CS.
-            deassert_chip_select -- if set, the chip-select line will be left low after
-                    communicating; this allows this transcation to be continued in the future
-            spi_mode             -- The SPI mode number [0-3] to use for the communication. Defaults to 0.
+            command              -- 1-wire command to use
+        Returns received data.
         """
-
-        result = []
-        status = "success"
-        try:
-            result = self.api.exchangeBytes(command, data, receive_length)
-        except BaseException:
-            status = "fail"
-
-        return result, status
+        return self.api.exchangeBytes(command, data, receive_length)

@@ -11,7 +11,6 @@ from binho import binhoHostAdapter
 import errno
 from serial import SerialException
 from binho.errors import DeviceNotFoundError
-from binho.utils import binho_error_hander
 
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
@@ -81,8 +80,7 @@ try:
     # Let's grab the first available pin (IO0) to use as cs
     # look at the digitalIO example for more info about working with digital
     # IO pins
-    csPinName = pins[0]
-    csPin = binho.gpio.getPin(csPinName)
+    csPin = binho.IO1
 
     # in some occasions, no CS pin is need, so you can set the pin to None
     # csPin = None
@@ -98,7 +96,7 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # Now that the CSpin is all sorted out, let's get our SPI bus running
@@ -124,7 +122,7 @@ try:
             binho.spi.mode, binho.spi.frequency, binho.spi.bitOrder, binho.spi.bitsPerTransfer,
         )
     )
-    print("CSPin: {}, Inverted: {}".format(csPin.pinName, str(invertCS)))
+    print("CSPin: {}, Inverted: {}".format(csPin.pin_name, str(invertCS)))
     print()
 
     # we're ready to communicate on the bus, lets create a list of 4 bytes to
@@ -151,15 +149,6 @@ try:
     print()
 
     print("Finished!")
-
-
-# It's generally bad practice to indiscriminately catch all exceptions, however the
-# binho_error_handler() simply prints out all the debug info as the script terminates
-# it does not try to continue execution under any circumstances
-except Exception:
-
-    # Catch any exception that was raised and display it
-    binho_error_hander()
 
 finally:
 

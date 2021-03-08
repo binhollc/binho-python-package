@@ -60,12 +60,12 @@ class binhoDevice(binhoAPI):
             self.leds[i] = LED(self, i)
 
     @staticmethod
-    def _populate_gpio(board, gpio, mapping):
+    def _populate_gpio(gpio, mapping):
         """ Adds GPIO pin definitions to the board's main GPIO object. """
 
         # Handle each GPIO mapping.
         for name, pin in mapping.items():
-            gpio.registerGPIO(board, name, pin)
+            gpio.registerGPIO(name, pin)
 
     @staticmethod
     def _populate_adc(adc, mapping):
@@ -164,8 +164,8 @@ class binhoDevice(binhoAPI):
             # Finally, return the created programmer.
             return programmer
 
-        except KeyError:
-            raise KeyError("no available programmer named {}".format(name)) from LookupError
+        except KeyError as e:
+            raise DriverCapabilityError("no available programmer named {}".format(name)) from e
 
     def __dir__(self):
         """ Generate a cleaned-up dir listing for the relevant board. """
