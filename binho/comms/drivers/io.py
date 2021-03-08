@@ -17,7 +17,9 @@ class BinhoIODriver:
 
         if not result.startswith("-IO" + str(self.io_number) + " MODE"):
             raise DeviceError(
-                f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' MODE".'
+                f'Binho responded to command {command} with {result}, not the expected "-IO'
+                + str(self.io_number)
+                + ' MODE".'
             )
 
         return result[10:]
@@ -39,7 +41,9 @@ class BinhoIODriver:
 
         if not result.startswith("-IO" + str(self.io_number) + " PWMFREQ"):
             raise DeviceError(
-                f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' PWMFREQ".'
+                f'Binho responded to command {command} with {result}, not the expected "-IO'
+                + str(self.io_number)
+                + ' PWMFREQ".'
             )
 
         return int(result[13:])
@@ -61,7 +65,9 @@ class BinhoIODriver:
 
         if not result.startswith("-IO" + str(self.io_number) + " INT"):
             raise DeviceError(
-                f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' INT".'
+                f'Binho responded to command {command} with {result}, not the expected "-IO'
+                + str(self.io_number)
+                + ' INT".'
             )
 
         return result[8:]
@@ -83,7 +89,9 @@ class BinhoIODriver:
 
         if not result.startswith("-IO" + str(self.io_number) + " VALUE"):
             raise DeviceError(
-                f'Binho responded to command {command} with {result}, not the expected "-IO' + str(self.io_number) + ' VALUE".'
+                f'Binho responded to command {command} with {result}, not the expected "-IO'
+                + str(self.io_number)
+                + ' VALUE".'
             )
 
         if "%" in result or "V" in result:

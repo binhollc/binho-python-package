@@ -13,12 +13,7 @@ class I2CBus(binhoInterface):
     INTERFACE_SHORT_NAME = "i2c"
 
     def __init__(
-        self,
-        board,
-        name="i2c bus",
-        buffer_size=1024,
-        clock_frequency=400000,
-        enable_pullups=False,
+        self, board, name="i2c bus", buffer_size=1024, clock_frequency=400000, enable_pullups=False,
     ):  # pylint: disable=too-many-arguments, unused-argument
         """
         Initialize a new I2C bus.

@@ -112,6 +112,7 @@ class SignalHandler:
 
         self.manager.join()
 
+
 class oneWireCmd(enum.Enum):
     """Enum for exchangeBytes1WIRE"""
 

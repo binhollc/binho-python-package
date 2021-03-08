@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import serial
 from serial.tools.list_ports import comports
 
+
 class binhoDeviceManager:
     @classmethod
     def _checkForDeviceID(cls, serialPort):

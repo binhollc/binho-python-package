@@ -72,7 +72,7 @@ class binhoAPI:
             oneWire=binho1WireDriver(self.comms),
             io=collections.OrderedDict(),
             swi=None,
-            uart=None
+            uart=None,
         )
 
         self.handler = None

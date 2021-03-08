@@ -110,7 +110,9 @@ def main():
                 pin.pwmFreq = targetFreq
                 log_function("Setting PWM Frequency to {} Hz".format(args.frequency))
             else:
-                raise CapabilityError("PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency))
+                raise CapabilityError(
+                    "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency)
+                )
 
         if args.value.isnumeric():
 
@@ -124,7 +126,9 @@ def main():
                 )
 
             else:
-                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError(
+                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+                )
 
         elif "%" in args.value:
 
@@ -149,10 +153,14 @@ def main():
                     )
 
             else:
-                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError(
+                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+                )
 
         else:
-            raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+            raise CapabilityError(
+                "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+            )
 
     finally:
         # close the connection to the host adapter

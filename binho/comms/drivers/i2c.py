@@ -76,9 +76,7 @@ class binhoI2CDriver:
         if "7BIT" in result:
             return 7
 
-        raise DeviceError(
-            f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"'
-        )
+        raise DeviceError(f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' CLK"')
 
     @addressBits.setter
     def addressBits(self, bits):
