@@ -276,7 +276,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
             line      -- A unique identifier for the given pin that has meaning to the subclass.
             direction -- Directions.IN (input) or Directions.OUT (output)
         """
-        pass
 
     @abstractmethod
     def setPinValue(self, line: Any, value: Any) -> None:
@@ -287,7 +286,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
             line  -- A unique identifier for the given pin that has meaning to the subclass.
             value -- The value to send to the device. Could be an integer or a string voltage or percentage.
         """
-        pass
 
     @abstractmethod
     def readPinValue(self, line: Any) -> int:
@@ -309,7 +307,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         Return:
             IOMode
         """
-        pass
 
     @abstractmethod
     def getPinIndex(self, line: Any) -> Optional[int]:
@@ -322,7 +319,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
     @abstractmethod
     def getPinIdentifier(self, line: Any) -> str:
         """Returns the 'pin name' for a given GPIO pin."""
-        pass
 
     @abstractmethod
     def getPWMFrequency(self, line: Any) -> int:
@@ -331,7 +327,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
 
         Subclasses may not implement this method if it is not applicable.
         """
-        pass
 
     def setPWMFrequency(self, line: Any, freq: int):
         """
@@ -339,7 +334,6 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
 
         Subclasses may not implement this method if it is not applicable.
         """
-        pass
 
 
 class GPIO(GPIOProvider):
@@ -416,7 +410,7 @@ class GPIO(GPIOProvider):
         try:
             return IOMode(mode)
         except ValueError:
-            raise DeviceError(
+            raise DeviceError(  # pylint: disable=raise-missing-from
                 f"Binho reports IO mode {mode}, which is not a valid IOMode."
             )
 
@@ -478,8 +472,7 @@ class GPIOPin:
         """
         if self._used:
             return self._parent.getPinMode(self._line)
-        else:
-            return None
+        return None
 
     @mode.setter
     def mode(self, mode: Optional[IOMode]) -> None:

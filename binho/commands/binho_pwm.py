@@ -15,11 +15,16 @@ def main():
     # Set up a simple argument parser.
     parser = binhoArgumentParser(description="utility for reading from Binho host adapter's ADC")
     parser.add_argument(
-        "-f", "--frequency", default=None, help="Set PWM frequency from 750Hz to 80000Hz",
+        "-f",
+        "--frequency",
+        default=None,
+        help="Set PWM frequency from 750Hz to 80000Hz",
     )
     parser.add_argument("-n", "--iopin", default=0, help="Provide the IO pin to use for the pwm output")
     parser.add_argument(
-        "value", metavar="[value]", help="The desired duty cycle or raw value to load into the pwm generator.",
+        "value",
+        metavar="[value]",
+        help="The desired duty cycle or raw value to load into the pwm generator.",
     )
 
     args = parser.parse_args()
@@ -61,7 +66,8 @@ def main():
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial),
+                file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
@@ -110,7 +116,9 @@ def main():
                 pin.pwmFreq = targetFreq
                 log_function("Setting PWM Frequency to {} Hz".format(args.frequency))
             else:
-                raise CapabilityError("PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency))
+                raise CapabilityError(
+                    "PWM Frequency must be a number from 750 to 80000 (Hz), not {}".format(args.frequency)
+                )
 
         if args.value.isnumeric():
 
@@ -124,7 +132,9 @@ def main():
                 )
 
             else:
-                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError(
+                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+                )
 
         elif "%" in args.value:
 
@@ -149,10 +159,14 @@ def main():
                     )
 
             else:
-                raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+                raise CapabilityError(
+                    "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+                )
 
         else:
-            raise CapabilityError("PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value))
+            raise CapabilityError(
+                "PWM value must be a number from 0 to 1023 (or 0% to 100%), not {}".format(args.value)
+            )
 
     finally:
         # close the connection to the host adapter

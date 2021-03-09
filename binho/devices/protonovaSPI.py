@@ -1,7 +1,7 @@
 from typing import Dict
 
 from ..device import binhoDevice
-from ..interfaces.gpio import GPIOProvider, GPIOPin
+from ..interfaces.gpio import GPIOPin
 
 # from ..interfaces.dac import DAC
 # from ..interfaces.adc import ADC
@@ -79,7 +79,8 @@ class binhoProtonovaSPI(binhoDevice):
         # Set up the core connection.
         super().initialize_apis()
 
-        gpio = GPIOProvider(self)
+        # TODO: Implement these?
+        # gpio = GPIO(self)
         # adc = ADC(self)
         # dac = DAC(self)
 
@@ -92,12 +93,12 @@ class binhoProtonovaSPI(binhoDevice):
         # Initialize the fixed peripherals that come on the board.
         # Populate the per-board GPIO.
         # if self.supports_api("gpio"):
-        self._populate_gpio(gpio, self.GPIO_MAPPINGS)
-        self.gpio_pins = dict()
-        for name, line in self.GPIO_MAPPINGS.items():
-            pin = GPIOPin(gpio, name, line)
-            setattr(self, name, pin)
-            self.gpio_pins[name] = pin
+        # self._populate_gpio(gpio, self.GPIO_MAPPINGS)
+        # self.gpio_pins = dict()
+        # for name, line in self.GPIO_MAPPINGS.items():
+        #     pin = GPIOPin(gpio, name, line)
+        #     setattr(self, name, pin)
+        #     self.gpio_pins[name] = pin
 
         # if self.supports_api("adc"):
         # self._populate_adc(self.adc, self.ADC_MAPPINGS)
