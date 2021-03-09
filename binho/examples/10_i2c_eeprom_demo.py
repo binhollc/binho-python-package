@@ -61,103 +61,144 @@ except DeviceNotFoundError:
 # Once we made it this for, the connection to the device is open.
 # wrap this with try/except to elegantly capture any errors and manage closing the
 # connection to the host adapter automatically
-# try:
 
-ih = IntelHex()
+try:
 
-# put the host adapter into I2C mode
-binho.operationMode = "I2C"
+    if binho.inBootloaderMode:
+        print(
+            "{} found on {}, but it cannot be used now because it's in DFU mode".format(
+                binho.productName, binho.commPort
+            )
+        )
+        sys.exit(errno.ENODEV)
 
-# First thing we need to do is create the programmer object
-# There are a number of common support devices which already have their parameters defined. You can use
-# them by passing the part number in as show below:
-programmer = binho.create_programmer("eeprom", device="24FC512")
+    elif binho.inDAPLinkMode:
+        print(
+            "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                binho.productName, binho.commPort
+            )
+        )
+        print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+        sys.exit(errno.ENODEV)
 
-# Alternatively, if the device is not built in, the EEPROM parameters needed can supplied as follows:
-# eepromCapacityBytes = 65536         # capacity of EEPROM in Bytes
-# eepromPageSizeBytes = 128           # EEPROM page size in Bytes
-# eepromAddressOffset = 000           # Address offset determined by pins A0-A3, if present on package. Defaults to
-#                                       0b000
-# eepromWriteCycleTime = 0.005        # Time to wait for a write cycle, in
-# seconds. Defaults to 5ms.
+    else:
+        print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
-# The last parameter requires a bit of an explanation -- the bitmask indicates the meaning of the the 3 lowest address
-#  bits
-# eepromAddressBitmask = 'AAA'
-# '0' or '1' = Bit is of fixed value
-# 'A' = Bit is part of pin selectable slave address
-# 'B' = Bit is part of block select address
-# 'x' = Bit is a "don't care"
+    # We'll use the IntelHex package to work with .bin/hex files
+    # https://github.com/python-intelhex/intelhex
+    ih = IntelHex()
 
-# And then pass all of those parameters in to create the programmer
-# programmer = binho.create_programmer('eeprom', eepromCapacityBytes, eepromPageSizeBytes, bitmask=eepromAddressBitmask,
-#              slave_address=eepromAddressOffset, write_cycle_length=eepromWriteCycleTime)
+    # put the host adapter into I2C mode
+    binho.operationMode = "I2C"
 
-# If you want to use the on-board pullup resistors, engage them now
-binho.i2c.useInternalPullUps = True
+    # First thing we need to do is create the programmer object
+    # There are a number of common support devices which already have their parameters defined. You can use
+    # them by passing the part number in as show below:
+    programmer = binho.create_programmer("eeprom", device="24FC512")
 
-# It's possible to use the programmer to read and write bytes
+    # Alternatively, if the device is not built in, the EEPROM parameters needed can supplied as follows:
+    # eepromCapacityBytes = 65536         # capacity of EEPROM in Bytes
+    # eepromPageSizeBytes = 128           # EEPROM page size in Bytes
+    # eepromAddressOffset = 000           # Address offset determined by pins A0-A3, if present on package. Defaults to
+    #                                       0b000
+    # eepromWriteCycleTime = 0.005        # Time to wait for a write cycle, in
+    # seconds. Defaults to 5ms.
 
-# Reading 1024 bytes starting from address 0x00
-data = programmer.readBytes(0x00, 1024)
+    # The last parameter requires a bit of an explanation -- the bitmask indicates the meaning of the the 3 lowest address
+    #  bits
+    # eepromAddressBitmask = 'AAA'
+    # '0' or '1' = Bit is of fixed value
+    # 'A' = Bit is part of pin selectable slave address
+    # 'B' = Bit is part of block select address
+    # 'x' = Bit is a "don't care"
 
-# Writing 4 bytes starting at address 0x10
-writeData = [0xDE, 0xAD, 0xBE, 0xEF]
-programmer.writeBytes(0x10, writeData)
+    # And then pass all of those parameters in to create the programmer
+    # programmer = binho.create_programmer('eeprom', eepromCapacityBytes, eepromPageSizeBytes, bitmask=eepromAddressBitmask,
+    #              slave_address=eepromAddressOffset, write_cycle_length=eepromWriteCycleTime)
 
+    # If you want to use the on-board pullup resistors, engage them now
+    binho.i2c.useInternalPullUps = True
 
-# However the key features of the programmer are for erase, read, write,
-# and verify functionality
+    # It's possible to use the programmer to read and write bytes
 
-# Here's how easy it is to erase the memory, and then verify that it's blank
-programmer.erase()
-isBlank = programmer.blankCheck()
-print("isBlank = {}".format(isBlank))
+    # Reading 1024 bytes starting from address 0x00
+    print("Reading 1024 bytes starting at address 0x00")
+    start_address = 0x00
+    bytes_to_read = 1024
+    data = programmer.readBytes(start_address, start_address + bytes_to_read)
 
-# Reading / Writing / Verifying EEPROMs from bin or hex files is also very
-# easy:
-dataFile = "testFile.bin"
-programmer.writeFromFile("testFile2.bin", format="bin")
-verifyResult = programmer.verifyFile("testFile2.bin", format="bin")
+    for i in range(1024 // 8):
+        for j in range(8):
+            print(hex(data[i * 8 + j]), end="\t")
+        print()
 
-print("3. Verify bytearray")
-ih.fromfile("testFile2-bad.bin", format="bin")
-verData = ih.tobinarray()
-verifyResult = programmer.verify(verData)
-print("verification result: {}".format(verifyResult))
+    # Writing 4 bytes starting at address 0x10
+    print("Writing 4 bytes at address 0x10:")
+    writeData = [0xDE, 0xAD, 0xBE, 0xEF]
+    start_address = 0x10
+    programmer.writeBytes(start_address, writeData)
+    print("[{}]".format(", ".join(hex(x) for x in writeData)))
+    print()
 
-print("4. Verify File - binary")
-verifyResult = programmer.verifyFile("testFile2-bad.bin", format="bin")
-print("verification result: {}".format(verifyResult))
+    print("Reading back the 4 bytes we just wrote:")
+    bytes_to_read = 4
+    readData = programmer.readBytes(start_address, start_address + bytes_to_read)
+    print(readData)
+    print()
 
-# programmer.writeFromFile('testFile2.bin', format='bin')
-# programmer.readToFile('testFile-erasedFF.bin', format='bin')
+    # However the key features of the programmer are for erase, read, write,
+    # and verify functionality
 
-# programmer.write(dataToWrite)
+    # Here's how easy it is to erase the memory, and then verify that it's blank
+    print("Erasing the EEPROM...this may take 10s of seconds")
+    programmer.erase()
+    print("Erase Completed!")
+    print("Now performing a blank check...")
+    isBlank = programmer.blankCheck()
+    print("isBlank = {}".format(isBlank))
 
+    print("Reading the entire EEPROM")
+    data = programmer.read()
 
-# Read All
-# data = programmer.read()
+    print("Creating a .bin and .hex file with the data read from the EEPROM")
+    ih.frombytes(data)
 
-# ih.frombytes(data)
+    print("Min Addr: {}, Max Addr: {}".format(str(ih.minaddr()), str(ih.maxaddr())))
+    print("Now saving the file to disk just to demo how easy it is")
+    ih.tofile("testFileErased-00.hex", format="hex")
+    ih.tofile("testFileErased-00.bin", format="bin")
 
-# print('Min Addr: {}, Max Addr: {}'.format(str(ih.minaddr), str(ih.maxaddr)))
-# ih.tofile("testFileErased-00.hex", format='hex')
-# ih.tofile("testFileErased-00.bin", format='bin')
+    # Reading / Writing / Verifying EEPROMs from bin or hex files is also very
+    # easy:
+    print("Manually modifying the data file")
+    dataFile = "testFile.bin"
+    ih[0] = 0xDE
+    ih[1] = 0xAD
+    ih[2] = 0xBE
+    ih[3] = 0xEF
 
-# writeData = [0xca, 0xfe, 0xbe, 0xef]
+    print("Now writing the modified file to EEPROM")
+    ih.tofile("testFileBeef.bin", format="bin")
+    programmer.writeFromFile("testFileBeef.bin", fileformat="bin")
+    print("And verifying it... Does it Match???")
+    verifyResult = programmer.verifyFile("testFileBeef.bin", fileformat="bin")
+    print(verifyResult)
 
-# programmer.write(writeData)
+    print("All Done!")
 
-# print("Read {} Bytes, {} Kbits".format(len(data), len(data) * 8))
+    # Here's some other nifty things that can be done
+    # ih.fromfile("testFile2-bad.bin", format="bin")
+    # verData = ih.tobinarray()
+    # verifyResult = programmer.verify(verData)
+    # print("verification result: {}".format(verifyResult))
 
+    # print("4. Verify File - binary")
+    # verifyResult = programmer.verifyFile("testFile2-bad.bin", format="bin")
+    # print("verification result: {}".format(verifyResult))
 
-# It's generally bad practice to indiscriminately catch all exceptions, however the
-# binho_error_handler() simply prints out all the debug info as the script terminates
-# it does not try to continue execution under any circumstances
-# except Exception:
+    # programmer.readToFile('testFile-erasedFF.bin', format='bin')
 
-# finally:
+finally:
 
-# close the connection to the host adapter
-binho.close()
+    # close the connection to the host adapter
+    binho.close()

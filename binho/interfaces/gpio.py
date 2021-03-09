@@ -3,8 +3,7 @@ from enum import Enum
 from typing import Any, Optional, Mapping, Dict, List, Union, Set
 
 from ..comms.device import binhoAPI
-from ..errors import CapabilityError, DriverCapabilityError, \
-    DeviceError
+from ..errors import CapabilityError, DriverCapabilityError, DeviceError
 from ..interface import binhoInterface
 
 # TODOs:
@@ -25,6 +24,7 @@ class IOMode(Enum):
     :cvar AOUT: Analog output.
     :cvar PWM: Pulse-width modulated output.
     """
+
     DIN = "DIN"
     DOUT = "DOUT"
     AIN = "AIN"
@@ -49,14 +49,10 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
     ALLOW_EXTERNAL_REGISTRATION: bool = True
 
     pin_mappings: Dict[str, Any]
-    active_gpio: Dict[str, 'GPIOPin']
+    active_gpio: Dict[str, "GPIOPin"]
     available_pins: Set[str]
 
-    def __init__(
-            self,
-            board: binhoAPI,
-            name_mappings: Optional[Mapping[str, str]] = None
-    ) -> None:
+    def __init__(self, board: binhoAPI, name_mappings: Optional[Mapping[str, str]] = None) -> None:
         """
         Sets up the basic fields for a GPIOProvider.
 
@@ -215,7 +211,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
 
         return sorted(available)
 
-    def getPin(self, name: str, unique: bool = False) -> 'GPIOPin':
+    def getPin(self, name: str, unique: bool = False) -> "GPIOPin":
         """
         Return a GPIOPin object by which a given pin can be controlled.
 
@@ -249,7 +245,7 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         # If we couldn't create the GPIO pin, fail out.
         raise CapabilityError("No available GPIO pin {}".format(name))
 
-    def releasePin(self, gpio_pin: 'GPIOPin') -> None:
+    def releasePin(self, gpio_pin: "GPIOPin") -> None:
         """
         Releases a GPIO pin back to the system for re-use, potentially
         not as a GPIO.
@@ -410,9 +406,7 @@ class GPIO(GPIOProvider):
         try:
             return IOMode(mode)
         except ValueError:
-            raise DeviceError(  # pylint: disable=raise-missing-from
-                f"Binho reports IO mode {mode}, which is not a valid IOMode."
-            )
+            raise DeviceError(f"Binho reports IO mode {mode}, which is not a valid IOMode.")  # pylint: disable=raise-missing-from
 
     def getPinIndex(self, line: Any) -> int:
         """ Returns the 'pin number' for a given GPIO pin."""

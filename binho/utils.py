@@ -211,7 +211,7 @@ class binhoDFUManager:
 
         snapshot = psutil.disk_partitions()
 
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             rmDrives = [x for x in snapshot if ("rw" in x.opts and "removable" in x.opts)]
         else:
             rmDrives = snapshot
@@ -226,7 +226,7 @@ class binhoDFUManager:
     def getBootloaderInfo(drive):
 
         # btldr_info = drive.mountpoint + "\\INFO.TXT"
-        btldr_info = os.path.join(drive.mountpoint, 'INFO.TXT')
+        btldr_info = os.path.join(drive.mountpoint, "INFO.TXT")
 
         if os.path.isfile(btldr_info):
             with open(btldr_info, "r") as file:
@@ -248,7 +248,7 @@ class binhoDFUManager:
         btldr_version = "unknown"
 
         # btldr_info = drive.mountpoint + "\\INFO.TXT"
-        btldr_info = os.path.join(drive.mountpoint, 'INFO.TXT')
+        btldr_info = os.path.join(drive.mountpoint, "INFO.TXT")
 
         if os.path.isfile(btldr_info):
             with open(btldr_info, "r") as file:
@@ -368,7 +368,7 @@ class binhoDFUManager:
         try:
             r = requests.get(url)
 
-            with os.fdopen(fd, 'wb') as tmp:
+            with os.fdopen(fd, "wb") as tmp:
                 # do stuff with temp file
                 tmp.write(r.content)
 
@@ -383,7 +383,7 @@ class binhoDFUManager:
     @classmethod
     def loadFirmwareFile(cls, figFilePath, btldr_drive, fail_silent=False):
 
-        firmwareDestination = os.path.join(btldr_drive.mountpoint, 'fw.uf2')
+        firmwareDestination = os.path.join(btldr_drive.mountpoint, "fw.uf2")
 
         if os.path.isfile(figFilePath):
             shutil.copy2(figFilePath, firmwareDestination)

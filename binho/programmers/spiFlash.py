@@ -154,12 +154,18 @@ class SPIFlash(binhoProgrammer):
 
     @property
     def supportsSFDP(self):
-        rxData = self.board.spi.transfer([0x5A], 9, chip_select=self.csPin)
-        isSupported = bool(rxData[5] == 0x53 and rxData[6] == 0x46 and rxData[7] == 0x44 and rxData[8] == 0x50)
 
-        if isSupported:
-            return True
-        return False
+        is_supported = False
+
+        try:
+
+            rxData = self.board.spi.transfer([0x5A], 9, chip_select=self.csPin)
+            is_supported = bool(rxData[5] == 0x53 and rxData[6] == 0x46 and rxData[7] == 0x44 and rxData[8] == 0x50)
+
+        finally:
+            if is_supported:
+                return True
+            return False
 
     def readSFPDParameterTable(self, baseAddress, length):
 

@@ -62,7 +62,25 @@ except DeviceNotFoundError:
 # connection to the host adapter automatically
 try:
 
-    print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
+    if binho.inBootloaderMode:
+        print(
+            "{} found on {}, but it cannot be used now because it's in DFU mode".format(
+                binho.productName, binho.commPort
+            )
+        )
+        sys.exit(errno.ENODEV)
+
+    elif binho.inDAPLinkMode:
+        print(
+            "{} found on {}, but it cannot be used now because it's in DAPlink mode".format(
+                binho.productName, binho.commPort
+            )
+        )
+        print("Tip: Exit DAPLink mode using 'binho daplink -q' command")
+        sys.exit(errno.ENODEV)
+
+    else:
+        print("Connected to a {} (deviceID: {}) on {}".format(binho.productName, binho.deviceID, binho.commPort))
 
     # set the host adapter operationMode to 'SPI'
     binho.operationMode = "SPI"
