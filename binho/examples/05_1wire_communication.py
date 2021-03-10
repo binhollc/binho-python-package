@@ -44,14 +44,16 @@ except SerialException:
         file=sys.stderr,
     )
     print(
-        "Please close the connection in the other application and try again.", file=sys.stderr,
+        "Please close the connection in the other application and try again.",
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 
 except DeviceNotFoundError:
 
     print(
-        "No Binho host adapter found on serial port '{}'.".format(targetComport), file=sys.stderr,
+        "No Binho host adapter found on serial port '{}'.".format(targetComport),
+        file=sys.stderr,
     )
     sys.exit(errno.ENODEV)
 

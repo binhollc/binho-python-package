@@ -8,6 +8,7 @@ from types import ModuleType
 
 from .comms.device import binhoAPI
 from .accessory import binhoAccessory
+from .errors import DriverCapabilityError
 
 from .interfaces.led import LED
 from .interfaces.gpio import GPIO

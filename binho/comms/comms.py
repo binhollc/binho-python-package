@@ -140,7 +140,7 @@ class binhoComms:
         if self.handler is not None:
             try:
                 self.handler.sendStop()
-            except Exception:  # noqa
+            except Exception:  # pylint: disable=broad-except
                 pass
 
     # Private functions

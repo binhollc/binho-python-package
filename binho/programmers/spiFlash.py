@@ -161,10 +161,10 @@ class SPIFlash(binhoProgrammer):
 
             rxData = self.board.spi.transfer([0x5A], 9, chip_select=self.csPin)
             is_supported = bool(rxData[5] == 0x53 and rxData[6] == 0x46 and rxData[7] == 0x44 and rxData[8] == 0x50)
+            return is_supported
 
-        finally:
-            if is_supported:
-                return True
+        except Exception:  # pylint: disable=broad-except
+
             return False
 
     def readSFPDParameterTable(self, baseAddress, length):

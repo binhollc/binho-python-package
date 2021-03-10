@@ -30,7 +30,7 @@ class binhoShellMagics(Magics):
 
         try:
             self.shell.run_magic("autoreload", silent=True)
-        except Exception:  # noqa
+        except Exception:  # pylint: disable=broad-except
             pass
 
     @line_magic

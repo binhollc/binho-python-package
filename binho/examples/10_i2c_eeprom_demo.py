@@ -61,6 +61,7 @@ except DeviceNotFoundError:
 # Once we made it this for, the connection to the device is open.
 # wrap this with try/except to elegantly capture any errors and manage closing the
 # connection to the host adapter automatically
+
 try:
 
     if binho.inBootloaderMode:

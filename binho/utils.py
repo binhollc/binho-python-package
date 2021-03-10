@@ -12,7 +12,6 @@ import ast
 import time
 import errno
 import argparse
-import linecache
 import os
 import tempfile
 import urllib.request

@@ -308,7 +308,7 @@ class binhoAPI:
             self._inDAPLinkMode = False
             self._inBootloader = False
 
-        except Exception:  # noqa
+        except Exception:  # pylint: disable=broad-except
             h = hid.device()
             h.open(
                 int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
@@ -329,7 +329,7 @@ class binhoAPI:
 
     def supports_api(self, class_name):
         """ Returns true iff the board supports the given API class. """
-        return class_name in self.apis
+        return hasattr(self.apis, class_name)
 
     @classmethod
     def version_warnings(cls):

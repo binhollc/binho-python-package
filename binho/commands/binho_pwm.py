@@ -15,11 +15,16 @@ def main():
     # Set up a simple argument parser.
     parser = binhoArgumentParser(description="utility for reading from Binho host adapter's ADC")
     parser.add_argument(
-        "-f", "--frequency", default=None, help="Set PWM frequency from 750Hz to 80000Hz",
+        "-f",
+        "--frequency",
+        default=None,
+        help="Set PWM frequency from 750Hz to 80000Hz",
     )
     parser.add_argument("-n", "--iopin", default=0, help="Provide the IO pin to use for the pwm output")
     parser.add_argument(
-        "value", metavar="[value]", help="The desired duty cycle or raw value to load into the pwm generator.",
+        "value",
+        metavar="[value]",
+        help="The desired duty cycle or raw value to load into the pwm generator.",
     )
 
     args = parser.parse_args()
@@ -61,7 +66,8 @@ def main():
     except DeviceNotFoundError:
         if args.serial:
             print(
-                "No Binho host adapter found matching Device ID '{}'.".format(args.serial), file=sys.stderr,
+                "No Binho host adapter found matching Device ID '{}'.".format(args.serial),
+                file=sys.stderr,
             )
         else:
             print("No Binho host adapter found!", file=sys.stderr)
