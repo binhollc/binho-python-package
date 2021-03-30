@@ -55,6 +55,9 @@ class I2CBus(binhoInterface):
         # set the clock frequency
         self.api.clockFrequency = clock_frequency
 
+        # create the class to simplify control in I2C Peripheral mode
+        self.peripheral = self.I2CPeripheral(self.api)
+
     def attach_device(self, device):
         """
         Attaches a given I2C device to this bus. Typically called
@@ -137,3 +140,111 @@ class I2CBus(binhoInterface):
                 responses.append(i)
 
         return responses
+
+    class I2CPeripheral:
+
+        def __init__(self, api):
+
+            self.api = api
+
+            self.registerBank = []
+
+            for x in range(256):
+                self.registerBank.append(self.I2CPeripheralRegister(self.api, x))
+
+            self.pointerRegister = self.I2CPeripheralRegister(self.api, 'PTR', supports_permissions=False)
+
+        @property
+        def is_active(self):
+            return self.api.inPeripheralModeI2C()
+
+        @property
+        def address(self):
+            return self.api.getPeripheralAddressI2C()
+
+        @property
+        def mode(self):
+            return self.api.getPeripheralModeI2C()
+
+        @property
+        def register_count(self):
+            return self.api.getPeripheralRegisterCountI2C()
+
+        @register_count.setter
+        def register_count(self, count):
+            if self.api.setPeripheralRegisterCountI2C(count):
+                self.registerBank = []
+                for x in range(count):
+                    self.registerBank.append(self.I2CPeripheralRegister(self.api, x))
+                return True
+            return False
+
+
+        def start(self, address, mode='USEPTR'):
+            if self.api.startPeripheralModeI2C(address):
+                return self.api.setPeripheralModeI2C(mode)
+
+            return False
+
+        class I2CPeripheralRegister:
+
+            def __init__(self, api, number, supports_permissions=True):
+
+                self.api = api
+                self.permissions = supports_permissions
+                self.register_number = number
+
+            def __repr__(self):
+                return str(hex(self.value))
+
+            def configure(self, value, readMask=0xFF, writeMask=0xFF):
+
+                if not self.api.setPeripheralRegisterValueI2C(self.register_number, value):
+                    return False
+
+                if self.permissions:
+
+                    if not self.api.setPeripheralRegisterReadMaskI2C(self.register_number, readMask):
+                        return False
+
+                    if not self.api.setPeripheralRegisterWriteMaskI2C(self.register_number, writeMask):
+                        return False
+
+                return True
+
+            @property
+            def value(self):
+                return self.api.getPeripheralRegisterValueI2C(self.register_number)
+
+            @value.setter
+            def value(self, value):
+                return self.api.setPeripheralRegisterValueI2C(self.register_number, value)
+
+            @property
+            def readMask(self):
+                if self.permissions:
+                    return self.api.getPeripheralRegisterReadMaskI2C(self.register_number)
+
+                return 0xFF
+
+            @readMask.setter
+            def readMask(self, readMask):
+                if self.permissions:
+                    return self.api.setPeripheralRegisterReadMaskI2C(self.register_number, readMask)
+
+                return False
+
+            @property
+            def writeMask(self):
+                if self.permissions:
+                    return self.api.getPeripheralRegisterWriteMaskI2C(self.register_number)
+
+                return 0xFF
+
+            @writeMask.setter
+            def writeMask(self, writeMask):
+                if self.permissions:
+                    return self.api.setPeripheralRegisterWriteMaskI2C(self.register_number, writeMask)
+
+                return False
+
