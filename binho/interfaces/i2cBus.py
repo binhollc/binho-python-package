@@ -247,4 +247,3 @@ class I2CBus(binhoInterface):
                     return self.api.setPeripheralRegisterWriteMaskI2C(self.register_number, writeMask)
 
                 return False
-
