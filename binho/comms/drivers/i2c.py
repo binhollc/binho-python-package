@@ -244,8 +244,8 @@ class binhoI2CDriver:
 
             if result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE 0x00"):
                 return False
-            else:
-                return True
+
+            return True
 
         return False
 
@@ -288,9 +288,10 @@ class binhoI2CDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):
-            if register == 'PTR' or 'ptr':
-                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK". This could be caused'
-                                  f' by setting the pointer register to an index beyond the number of configured registers.')
+            if register == 'PTR' or register == 'ptr':
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK". This could be caused' +
+                                  ' by setting the pointer register to an index beyond the number of configured ' +
+                                  'registers.')
             raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
@@ -388,7 +389,8 @@ class binhoI2CDriver:
 
             return True
 
-        raise CapabilityError("I2C Peripheral Register Count can only be set to a value between 1 and 256, not " + str(registerCount))
+        raise CapabilityError("I2C Peripheral Register Count can only be set to a value between 1 " +
+                              "and 256, not " + str(registerCount))
 
 
     def getPeripheralRegisterCountI2C(self):
@@ -398,7 +400,7 @@ class binhoI2CDriver:
 
         if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE REGCNT "):
             raise DeviceError(
-                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' SLAVE REGCNT ..."'
-            )
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) +
+                ' SLAVE REGCNT ..."' )
 
         return int(result[19:], 16)
