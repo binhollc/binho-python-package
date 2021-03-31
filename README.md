@@ -68,6 +68,7 @@ __Basic Examples:__
 
 __Advanced Examples:__
 - [I2C EEPROM Demo](binho/examples/10_i2c_eeprom_demo.py)
+- [I2C Peripheral Demo](binho/examples/11_i2c_peripheral_demo.py)
 - [SPI Flash Demo](binho/examples/20_spi_flash_demo.py)
 - [SPI Flash SFDP](binho/examples/21_spi_flash_sfdp.py)
 - *more coming soon*
@@ -119,14 +120,14 @@ This command can be used to read from and write to common SPI Flash devices.
 - __`binho 1wire`__ 
 This command can be used to communicate with 1Wire devices.
 
-##### DAPLink Subommands
+##### DAPLink Subcommands
 Binho Nova can be used to program and debug microcontrollers by operating in DAPLink mode.
 - __`binho daplink`__  
 Use this command to switch Nova into and out of DAPLink mode.
 - __`binho flasher`__  
 While in DAPLink mode, this command can be used to program bin/hex files into microcontrollers.
 
-##### Misc. Subommands
+##### Misc. Subcommands
 - __`binho shell`__  
 This command can be used to open up a connection to the device and begin an interactive shell.  
 - __`binho custom`__  
@@ -159,5 +160,5 @@ free to reach out if there's a particular feature you'd like to see added into t
 The architecture and functionality of this library was inspired by the work done by the original
 authors and the the numerous contributors to the [GreatFET library](https://github.com/greatscottgadgets/greatfet)
 
-A special thanks to [@ME-Mark-O](https://github.com/ME-Mark-O) and [@mlibtery1](https://github.com/mliberty1) for
-their feedback, suggestions, and contributions.
+A special thanks to [@ME-Mark-O](https://github.com/ME-Mark-O), [@mlibtery1](https://github.com/mliberty1), and
+[@pixelfelon](https://github.com/pixelfelon) for their feedback, suggestions, and contributions.

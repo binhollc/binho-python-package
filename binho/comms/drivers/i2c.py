@@ -225,106 +225,182 @@ class binhoI2CDriver:
 
         return True
 
-    def setSlaveAddressI2C(self, i2cIndex, address):
+    def startPeripheralModeI2C(self, address):
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE " + str(address))
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE " + str(address))
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
-    def getSlaveAddressI2C(self, i2cIndex):
+        return True
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE ?")
+    def inPeripheralModeI2C(self):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE ?")
         result = self.usb.readResponse()
 
-        return result
+        if result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE "):
 
-    def getSlaveRequestInterruptI2C(self, i2cIndex):
+            if result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE 0x00"):
+                return False
 
-        result = self.usb.interruptCheck("!I2C" + str(i2cIndex) + " SLAVE RQ")
+            return True
 
-        return result
+        return False
 
-    def clearSlaveRequestInterruptI2C(self, i2cIndex):
+    def getPeripheralAddressI2C(self):
 
-        self.usb.interruptClear("!I2C" + str(i2cIndex) + " SLAVE RQ")
-
-    def getSlaveReceiveInterruptI2C(self, i2cIndex):
-
-        result = self.usb.interruptCheck("!I2C" + str(i2cIndex) + " SLAVE RX")
-
-        return result
-
-    def clearSlaveReceiveInterruptI2C(self, i2cIndex):
-
-        self.usb.interruptClear("!I2C" + str(i2cIndex) + " SLAVE RX")
-
-    def setSlaveRegisterI2C(self, i2cIndex, register, value):
-
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " " + str(value))
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE ?")
         result = self.usb.readResponse()
 
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C ' + str(self.i2cIndex) + ' SLAVE ..."'
+            )
+
+        return int(result[11:], 16)
+
+    def getPeripheralRequestInterruptI2C(self):
+
+        result = self.usb.interruptCheck("!I2C" + str(self.i2cIndex) + " SLAVE RQ")
+
         return result
 
-    def getSlaveRegisterI2C(self, i2cIndex, register):
+    def clearPeripheralRequestInterruptI2C(self):
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REG " + str(register) + " ?")
+        self.usb.interruptClear("!I2C" + str(self.i2cIndex) + " SLAVE RQ")
+
+    def getPeripheralReceiveInterruptI2C(self):
+
+        result = self.usb.interruptCheck("!I2C" + str(self.i2cIndex) + " SLAVE RX")
+
+        return result
+
+    def clearPeripheralReceiveInterruptI2C(self):
+
+        self.usb.interruptClear("!I2C" + str(self.i2cIndex) + " SLAVE RX")
+
+    def setPeripheralRegisterValueI2C(self, register, value):
+
+        print("I2C" + str(self.i2cIndex) + " SLAVE REG " + str(register) + " " + str(hex(value)))
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE REG " + str(register) + " " + str(hex(value)))
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-OK"):
+            if register in ('PTR', 'ptr'):
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK". This could be caused' +
+                                  ' by setting the pointer register to an index beyond the number of configured ' +
+                                  'registers.')
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
-    def setSlaveReadMaskI2C(self, i2cIndex, register, value):
+        return True
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE READMASK " + str(register) + " " + str(value))
+    def getPeripheralRegisterValueI2C(self, register):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE REG " + str(register) + " ?")
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE REG "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) +
+                ' SLAVE REG ..."'
+            )
 
-    def getSlaveReadMaskI2C(self, i2cIndex, register):
+        return int(result[20:], 16)
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE READMASK " + str(register) + " ?")
+    def setPeripheralRegisterReadMaskI2C(self, register, value):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE READMASK " + str(register) + " " + str(value))
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
-    def setSlaveWriteMaskI2C(self, i2cIndex, register, value):
+        return True
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE WRITEMASK " + str(register) + " " + str(value))
+    def getPeripheralRegisterReadMaskI2C(self, register):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE READMASK " + str(register) + " ?")
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE READMASK "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C ' + str(self.i2cIndex) +
+                ' SLAVE READMASK ..."'
+            )
 
-    def getSlaveWriteMaskI2C(self, i2cIndex, register):
+        return int(result[26:], 16)
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE WRITEMASK " + str(register) + " ?")
+    def setPeripheralRegisterWriteMaskI2C(self, register, value):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE WRITEMASK " + str(register) + " " + str(value))
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
-    def setSlaveModeI2C(self, i2cIndex, mode):
+        return True
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE MODE " + str(mode))
+    def getPeripheralRegisterWriteMaskI2C(self, register):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE WRITEMASK " + str(register) + " ?")
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE WRITEMASK "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C ' + str(self.i2cIndex) +
+                ' SLAVE WRITEMASK ..."'
+            )
 
-    def getSlaveModeI2C(self, i2cIndex):
+        return int(result[27:], 16)
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE MODE " + "?")
+    def setPeripheralModeI2C(self, mode):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE MODE " + str(mode))
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
-    def setSlaveRegisterCount(self, i2cIndex, registerCount):
+        return True
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REGCNT " + str(registerCount))
+    def getPeripheralModeI2C(self):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE MODE " + "?")
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE MODE "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' SLAVE MODE ..."'
+            )
 
-    def getSlaveRegisterCount(self, i2cIndex):
+        return str(result[17:])
 
-        self.usb.sendCommand("I2C" + str(i2cIndex) + " SLAVE REGCNT " + "?")
+    def setPeripheralRegisterCountI2C(self, registerCount):
+
+        if 0 < registerCount <= 256:
+
+            self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE REGCNT " + str(registerCount))
+            result = self.usb.readResponse()
+
+            if not result.startswith("-OK"):
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
+
+            return True
+
+        raise CapabilityError("I2C Peripheral Register Count can only be set to a value between 1 " +
+                              "and 256, not " + str(registerCount))
+
+
+    def getPeripheralRegisterCountI2C(self):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE REGCNT " + "?")
         result = self.usb.readResponse()
 
-        return result
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE REGCNT "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) +
+                ' SLAVE REGCNT ..."' )
+
+        return int(result[19:], 16)
