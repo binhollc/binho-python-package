@@ -60,6 +60,7 @@ setup(
         "pyserial==3.3",
         "psutil",
         "hidapi",
+        "requests",
     ],
     data_files=[("/binho/assets", [])],
     description="Python package for Binho USB host adapter products",
