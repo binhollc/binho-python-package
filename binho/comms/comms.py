@@ -59,7 +59,7 @@ class SerialPortManager(threading.Thread):
     def run(self):
         comport = None
         try:
-            comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.025, write_timeout=0.05)
+            comport = serial.Serial(self.serialPort, baudrate=1000000, timeout=0.25, write_timeout=0.5)
             while not self.stopper.is_set():  # pylint: disable=too-many-nested-blocks
                 self._transceive(comport)
         except Exception as e:  # pylint: disable=broad-except
