@@ -225,7 +225,10 @@ class binhoI2CDriver:
 
         return True
 
-    def startPeripheralModeI2C(self, address):
+    def startPeripheralModeI2C(self, address, is_8bit = False):
+
+        if is_8bit:
+            address = address >> 1
 
         self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE " + str(address))
         result = self.usb.readResponse()
@@ -404,3 +407,30 @@ class binhoI2CDriver:
                 ' SLAVE REGCNT ..."' )
 
         return int(result[19:], 16)
+
+    def getRegisterBankI2C(self):
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE BANK " + "?")
+        result = self.usb.readResponse()
+
+        if not result.startswith("-I2C" + str(self.i2cIndex) + " SLAVE BANK "):
+            raise DeviceError(
+                f'Error Binho responded with {result}, not the expected "-I2C' + str(self.i2cIndex) + ' SLAVE BANK"'
+            )
+
+        return bytearray.fromhex(result[17:])
+
+    def setRegisterBankI2C(self, data):
+
+        payload = ""
+        for i in range(len(data)):
+            payload += "{:02x}".format(data[i])
+
+        self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE BANK " + str(payload))
+        result = self.usb.readResponse()
+
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
+
+        return True
+
