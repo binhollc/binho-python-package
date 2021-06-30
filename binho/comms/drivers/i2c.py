@@ -423,8 +423,8 @@ class binhoI2CDriver:
     def setRegisterBankI2C(self, data):
 
         payload = ""
-        for i in range(len(data)):
-            payload += "{:02x}".format(data[i])
+        for i, val in enumerate(data):
+            payload += "{:02x}".format(val)
 
         self.usb.sendCommand("I2C" + str(self.i2cIndex) + " SLAVE BANK " + str(payload))
         result = self.usb.readResponse()
@@ -433,4 +433,3 @@ class binhoI2CDriver:
             raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
 
         return True
-
