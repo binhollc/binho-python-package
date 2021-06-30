@@ -180,11 +180,17 @@ class I2CBus(binhoInterface):
             return False
 
 
-        def start(self, address, mode='USEPTR'):
-            if self.api.startPeripheralModeI2C(address):
+        def start(self, address, mode='USEPTR', is_8bit=False):
+            if self.api.startPeripheralModeI2C(address, is_8bit):
                 return self.api.setPeripheralModeI2C(mode)
 
             return False
+
+        def readBank(self):
+            return self.api.getRegisterBankI2C()
+
+        def writeBank(self, data):
+            return self.api.setRegisterBankI2C(data)
 
         class I2CPeripheralRegister:
 

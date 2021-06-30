@@ -226,7 +226,7 @@ def scan(device, pullup, frequencies):
     print("Discovered %s I2C devices" % len(addr_info))
     print()
 
-    for address in addr_info:
+    for address in addr_info: # pylint: disable=consider-using-dict-items
         for clkHz in addr_info[address]:
             print("%s @ %dkHz" % (hex(address), clkHz / 1000))
 

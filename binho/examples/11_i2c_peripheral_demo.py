@@ -95,7 +95,10 @@ try:
     print('I2C Peripheral Mode Active: {}'.format(binho.i2c.peripheral.is_active))
 
     # Now start peripheral mode by providing the address and mode (mode='USEPTR' is the default)
-    binho.i2c.peripheral.start(0x50)
+    # binho.i2c.peripheral.start(0x70)
+    # if you are more comfortable working with 8bit address, you can pass is_8bit=True as a
+    # parameter and specify an 8bit value for the device address.
+    binho.i2c.peripheral.start(0xE0, is_8bit=True)
     # The other mode is 'STARTZERO' -- see our support website for details
     # binho.i2c.peripheral.start(0x60, mode='STARTZERO')
 
@@ -147,6 +150,41 @@ try:
     # exceeds the number of emulated registers.
     binho.i2c.peripheral.pointerRegister.value = 6
     print("PTR value: {}".format(hex(binho.i2c.peripheral.pointerRegister.value)))
+
+    # To make things even faster, it's possible read/write the entire bank of registers
+    # using a single function call. This reduces the amount of USB communication to a
+    # single transaction for timing-critical applications.
+
+    # let's read the entire bank of registers. The number of bytes returned is based on
+    # the register_count configured above in line 116.
+    regBankData = binho.i2c.peripheral.readBank()
+    print(regBankData)
+
+    # We can parse it to display it elegantly as such
+    regBankvalues = ""
+    for i in range(len(regBankData)):
+        regBankvalues += "{:02x}".format(regBankData[i])
+
+    print("Bank Value: 0x{}".format(regBankvalues))
+
+    # we can modify the data and write it back to the device in a single transaction too.
+    # note that the number of bytes being written must MATCH the register_count.
+    regBankData[0] = 0xFF
+    regBankData[7] = 0x88
+    binho.i2c.peripheral.writeBank(regBankData)
+
+    # read it back to verify it
+    regBankData = binho.i2c.peripheral.readBank()
+    print(regBankData)
+
+    # and of course, we can create an entirely new bytearray and send it to the device
+    # note that the number of bytes being written must MATCH the register_count.
+    newBankData = [0xde, 0xad, 0xbe, 0xef, 0x01, 0x02, 0x03, 0x4]
+    binho.i2c.peripheral.writeBank(bytearray(newBankData))
+
+    # read it back to verify it
+    regBankData = binho.i2c.peripheral.readBank()
+    print(regBankData)
 
     # At this point, the Nova is behaving as configured on the I2C bus and will respond
     # accordingly to transactions with any I2C controller device that communicates with it
