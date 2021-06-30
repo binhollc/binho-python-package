@@ -311,7 +311,7 @@ class binhoAPI:
         except Exception:  # pylint: disable=broad-except
             h = hid.device()
             h.open(
-                int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16),
+                int(self.USB_VID_PID.split(":")[0], 16), int(self.USB_VID_PID.split(":")[1], 16), # pylint: disable=use-maxsplit-arg
             )
 
             self._hid_serial_number = "0x" + h.get_serial_number_string()
@@ -344,7 +344,7 @@ class binhoAPI:
         if self._inDAPLinkMode:
             h = hid.device()
             h.open(
-                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[0], 16), # pylint: disable=use-maxsplit-arg
                 int(self.USB_VID_PID.split(":")[1], 16),
                 self._hid_serial_number[2:],
             )
@@ -359,7 +359,7 @@ class binhoAPI:
         if self._inBootloader:
             h = hid.device()
             h.open(
-                int(self.USB_VID_PID.split(":")[0], 16),
+                int(self.USB_VID_PID.split(":")[0], 16), # pylint: disable=use-maxsplit-arg
                 int(self.USB_VID_PID.split(":")[1], 16),
                 self._hid_serial_number[2:],
             )
