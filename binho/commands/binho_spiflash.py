@@ -99,9 +99,9 @@ def main():  # pylint: disable=too-many-locals
 
         if csPin:
             if args.invertCS:
-                log_function("Using IO{} as an Active-High (inverted) ChipSelect signal".format(csPin.pinNumber))
+                log_function("Using IO{} as an Active-High (inverted) ChipSelect signal".format(csPin.pin_number))
             else:
-                log_function("Using IO{} as an Active-Low (standard) ChipSelect signal".format(csPin.pinNumber))
+                log_function("Using IO{} as an Active-Low (standard) ChipSelect signal".format(csPin.pin_number))
         else:
             log_function(
                 "No ChipSelect signal specified, will not be used for this transaction. Use -c to specify IO pin to\
