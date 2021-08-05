@@ -109,6 +109,15 @@ class BinhoIODriver:
         if not result.startswith("-OK"):
             raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
 
+    def toggle(self, duration):
+        command = f"IO{self.io_number} TOGGLE {duration}"
+        self.usb.sendCommand(command)
+        result = self.usb.readResponse()
+
+        if not result.startswith("-OK"):
+            raise DeviceError(f'Binho responded to command "{command}" with {result}, not the expected "-OK".')
+
+
     @property
     def interrupt_flag(self) -> bool:
         result = self.usb.interruptCheck("!I0" + str(self.io_number))
