@@ -583,7 +583,7 @@ class GPIOPin:
         :return: None.
         :rtype None
         """
-        if duration >= 0 and duration <= 256000:
+        if 0 <= duration <= 256000:
             self._parent.toggle(self._line, duration)
         else:
             raise CapabilityError("Toggle duration range is from 0 to 256000 microseconds!")
