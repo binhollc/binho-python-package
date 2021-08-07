@@ -37,6 +37,7 @@ def print_core_info(device):
         print("Found a {}".format(device.productName))
         print("  Port: {}".format(device.commPort))
         print("  Device ID: {}".format(device.deviceID))
+        print("  CMD Version: {}".format(device.commandVersion))
 
         if device.FIRMWARE_UPDATE_URL:
             latestVersion = binhoDFUManager.getLatestFirmwareVersion(device.FIRMWARE_UPDATE_URL, True)

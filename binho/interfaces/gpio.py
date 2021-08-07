@@ -331,6 +331,15 @@ class GPIOProvider(binhoInterface, metaclass=ABCMeta):
         Subclasses may not implement this method if it is not applicable.
         """
 
+    @abstractmethod
+    def toggle(self, line: Any, duration: int):
+        """
+        Toggle a given GPIO pin for a specified duration of microseconds
+
+        Subclasses may not implement this method if it is not applicable.
+        """
+
+
 
 class GPIO(GPIOProvider):
     """ Work with the GPIO directly present on the Binho host adapter. """
@@ -393,6 +402,11 @@ class GPIO(GPIOProvider):
     def setPWMFrequency(self, line: Any, freq: int) -> None:
         """Set the PWM frequency, in Hertz, for a given GPIO pin."""
         self.device.apis.io[line].pwm_frequency = freq
+
+    def toggle(self, line: Any, duration: int) -> None:
+        """Toggle a given GPIO pin for a specified duration of microseconds."""
+        self.device.apis.io[line].toggle(duration)
+
 
     def getPinMode(self, line: Any) -> str:
         """
@@ -555,6 +569,24 @@ class GPIOPin:
         :rtype None
         """
         self._parent.setPWMFrequency(self._line, freq)
+
+    def toggle(self, duration: int) -> None:
+        """
+        Toggle a given GPIO pin for a specified duration of microseconds.
+        Minimum duration is ~5microseconds, max duration is 256 milliseconds.
+
+        This property may raise an exception if called when this pin is not in
+        DOUT mode.
+
+        :param duration: The duration of the pulse in microseconds.
+        :type duration: int
+        :return: None.
+        :rtype None
+        """
+        if 0 <= duration <= 256000:
+            self._parent.toggle(self._line, duration)
+        else:
+            raise CapabilityError("Toggle duration range is from 0 to 256000 microseconds!")
 
     @property
     def pin_number(self) -> Optional[int]:
