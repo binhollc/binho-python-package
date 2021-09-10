@@ -174,7 +174,7 @@ class binhoSPIDriver:
     def configCS(self, pinNumber, polarity=0, pre_delay_us=0, post_delay_us=0):
 
         self.usb.sendCommand(
-            "SPI" + str(self.spiIndex) + " WHRCS " + str(pinNumber) + " " + 
+            "SPI" + str(self.spiIndex) + " WHRCS " + str(pinNumber) + " " +
             str(polarity) + " " + str(pre_delay_us) + " " + str(post_delay_us)
         )
         result = self.usb.readResponse()
