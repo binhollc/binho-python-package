@@ -147,7 +147,6 @@ class binhoSPIDriver:
         self.usb.sendCommand(
             "SPI" + str(self.spiIndex) + " WHR " + writeOnlyFlag + " " + str(numBytes) + " " + dataPacket
         )
-
         result = self.usb.readResponse()
 
         if not read:
@@ -164,6 +163,19 @@ class binhoSPIDriver:
     def end(self, suppressError=False):
 
         self.usb.sendCommand("SPI" + str(self.spiIndex) + " END")
+        result = self.usb.readResponse()
+
+        if not result.startswith("-OK"):
+            if not suppressError:
+                raise DeviceError(f'Error Binho responded with {result}, not the expected "-OK"')
+
+        return True
+
+    def configCS(self, pinNumber, polarity=0, pre_delay_us=0, post_delay_us=0):
+
+        self.usb.sendCommand(
+            "SPI" + str(self.spiIndex) + " WHRCS " + str(pinNumber) + " " + str(polarity) + " " + str(pre_delay_us) + " " + str(post_delay_us)
+        )
         result = self.usb.readResponse()
 
         if not result.startswith("-OK"):

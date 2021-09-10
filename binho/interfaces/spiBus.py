@@ -48,6 +48,8 @@ class SPIBus(binhoInterface):
         # Apply our frequency information.
         self.clock_frequency = clock_frequency
 
+        self._use_auto_cs = False
+
     def attach_device(self, device):
         """
         Attaches a given SPI device to this bus. Typically called
@@ -105,6 +107,19 @@ class SPIBus(binhoInterface):
         self.api.end(True)
         self.api.bitsPerTransfer = bits
 
+    def autoCSConfig(self, pinNumber, polarity=0, pre_delay_us=0, post_delay_us=0):
+
+        self._use_auto_cs = self.api.configCS(pinNumber, polarity, pre_delay_us, post_delay_us)
+
+        return self._use_auto_cs
+
+    def autoCSDisable(self):
+
+        if self.api.configCS("DISABLE"):
+            self._use_auto_cs = False
+
+        return True
+
     def transfer(
         self,
         data,
@@ -134,7 +149,8 @@ class SPIBus(binhoInterface):
 
         # If we weren't provided with a chip-select, use the bus's default.
         if chip_select is None:
-            chip_select = self._chip_select
+            if self._use_auto_cs == False:
+                chip_select = self._chip_select
 
         if receive_length is None:
             receive_length = len(data)
