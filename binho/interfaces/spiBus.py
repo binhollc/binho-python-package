@@ -149,7 +149,7 @@ class SPIBus(binhoInterface):
 
         # If we weren't provided with a chip-select, use the bus's default.
         if chip_select is None:
-            if self._use_auto_cs == False:
+            if self._use_auto_cs is False:
                 chip_select = self._chip_select
 
         if receive_length is None:
