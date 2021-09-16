@@ -15,6 +15,7 @@ from .drivers.i2c import binhoI2CDriver
 from .drivers.spi import binhoSPIDriver
 from .drivers.io import BinhoIODriver
 from .drivers.onewire import binho1WireDriver
+from .drivers.cmdbuf import binhoCmdBufferDriver
 
 
 @dataclass
@@ -24,6 +25,7 @@ class _BinhoAPIs:
     spi: binhoSPIDriver
     oneWire: binho1WireDriver
     io: Dict[Any, BinhoIODriver]
+    cmdbuf: binhoCmdBufferDriver
     swi: None = None
     uart: None = None
 
@@ -71,6 +73,7 @@ class binhoAPI:
             spi=binhoSPIDriver(self.comms),
             oneWire=binho1WireDriver(self.comms),
             io=collections.OrderedDict(),
+            cmdbuf=binhoCmdBufferDriver(self.comms),
             swi=None,
             uart=None,
         )

@@ -8,6 +8,7 @@ from ..interfaces.adc import ADC
 from ..interfaces.i2cBus import I2CBus
 from ..interfaces.spiBus import SPIBus
 from ..interfaces.oneWireBus import OneWireBus
+from ..interfaces.cmdBuffer import CommandBuffer
 
 # from ..programmers.firmware import DeviceFirmwareManager
 # from ..interfaces.pattern_generator import PatternGenerator
@@ -142,6 +143,8 @@ class binhoNova(binhoDevice):
 
         self._add_interface("oneWire_busses", [OneWireBus(self, "1WIRE0")])
         self._add_interface("oneWire", self.oneWire_busses[0])  # pylint: disable=no-member
+
+        self._add_interface("cmdbuf", CommandBuffer(self))  # pylint: disable=no-member
 
         # if self.supports_api('uart'):
         # self._add_interface('uart', UART(self))
