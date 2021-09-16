@@ -16,6 +16,10 @@ if sys.version_info < (3, 0):
 else:
     per_version_requirements.append("ipython")
 
+# Handle different platform requirements
+pyserial_version = "pyserial"
+if sys.platform == "win32" or sys.platform == "win64":
+    pyserial_version = "pyserial==3.3"
 
 setup_req = []
 setup_options = {}
@@ -57,8 +61,7 @@ setup(
         per_version_requirements,
         "future",
         "intelhex",
-        "pyserial==3.3; sys_platform == 'win32' or sys_platform == 'win64'",
-        "pyserial; sys_platform != 'win32' and sys_platform != 'win64'",
+        pyserial_version,
         "psutil",
         "hidapi",
         "requests",
