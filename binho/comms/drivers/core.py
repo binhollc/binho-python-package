@@ -47,7 +47,8 @@ class binhoCoreDriver:
         result = self.usb.readResponse()
 
         if not result.startswith("-CMDVER"):
-            raise DeviceError(f'Error Binho responded with {result}, not the expected "-CMDVER"')
+            # raise DeviceError(f'Error Binho responded with {result}, not the expected "-CMDVER"')
+            return "1"
 
         return result[8:]
 

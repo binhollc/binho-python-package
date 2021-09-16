@@ -120,7 +120,7 @@ class binhoNova(binhoDevice):
         # Populate the per-board GPIO.
         self._populate_gpio(self.gpio, self.GPIO_MAPPINGS)
         self.operationMode = "IO"
-        self.gpio_pins = dict()
+        self.gpio_pins = {}
         for name, line in self.GPIO_MAPPINGS.items():
             pin = GPIOPin(self.gpio, name, line)
             setattr(self, name, pin)
