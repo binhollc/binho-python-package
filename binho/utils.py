@@ -225,8 +225,6 @@ class binhoDFUManager:
     @staticmethod
     def getBootloaderInfo(drive):
 
-        # pylint: disable=W1514
-
         # btldr_info = drive.mountpoint + "\\INFO.TXT"
         btldr_info = os.path.join(drive.mountpoint, "INFO.TXT")
 
@@ -246,7 +244,6 @@ class binhoDFUManager:
 
     @staticmethod
     def getBootloaderVersion(drive):
-        # pylint: disable=W1514
 
         btldr_version = "unknown"
 
