@@ -19,6 +19,7 @@ import json
 import shutil
 import psutil
 import requests
+import ssl
 
 
 from . import _binhoHostAdapterSingletonWrapper
@@ -274,6 +275,8 @@ class binhoDFUManager:
 
             if binhoDFUManager.cachedManifestUrl == manifestURL:
                 return binhoDFUManager.cachedManifestData[paramName]
+
+            ssl._create_default_https_context = ssl._create_unverified_context
 
             with urllib.request.urlopen(manifestURL) as url:
                 binhoDFUManager.cachedManifestData = json.loads(url.read().decode())
