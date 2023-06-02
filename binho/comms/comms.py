@@ -2,7 +2,7 @@ import os
 import enum
 import threading
 import queue
-import signal
+# import signal
 import sys
 import serial
 
@@ -79,38 +79,38 @@ class SerialPortManager(threading.Thread):
     def stopUartBridge(self):
         self.inBridgeMode = False
 
+# TODO: implement a method for gracefully closing the serial port after handling a SIGINT signal (but in a parent class)
+# class SignalHandler:
+#     """
+#     The object that will handle signals and stop the worker threads.
+#     """
 
-class SignalHandler:
-    """
-    The object that will handle signals and stop the worker threads.
-    """
+#     #: The stop event that's shared by this handler and threads.
+#     stopper = None
 
-    #: The stop event that's shared by this handler and threads.
-    stopper = None
+#     #: The pool of worker threads
+#     workers = None
 
-    #: The pool of worker threads
-    workers = None
+#     def __init__(self, stopper, manager):
+#         self.stopper = stopper
+#         self.manager = manager
 
-    def __init__(self, stopper, manager):
-        self.stopper = stopper
-        self.manager = manager
+#     def __call__(self, signum, frame):
+#         """
+#         This will be called by the python signal module
+#         https://docs.python.org/3/library/signal.html#signal.signal
+#         """
+#         self.stopper.set()
 
-    def __call__(self, signum, frame):
-        """
-        This will be called by the python signal module
-        https://docs.python.org/3/library/signal.html#signal.signal
-        """
-        self.stopper.set()
+#         self.manager.join()
 
-        self.manager.join()
+#         sys.exit(0)
 
-        sys.exit(0)
+#     def sendStop(self):
 
-    def sendStop(self):
+#         self.stopper.set()
 
-        self.stopper.set()
-
-        self.manager.join()
+#         self.manager.join()
 
 
 class oneWireCmd(enum.Enum):
@@ -213,9 +213,9 @@ class binhoComms:
             self.serialPort, self._txdQueue, self._rxdQueue, self._intQueue, self._stopper,
         )
 
-        # create our signal handler and connect it
-        self.handler = SignalHandler(self._stopper, self.manager)
-        signal.signal(signal.SIGINT, self.handler)
+        # # create our signal handler and connect it
+        # self.handler = SignalHandler(self._stopper, self.manager)
+        # signal.signal(signal.SIGINT, self.handler)
 
         # start the threads!
         self.manager.daemon = True
