@@ -2,8 +2,6 @@ import os
 import enum
 import threading
 import queue
-# import signal
-import sys
 import serial
 
 from binho.errors import DeviceError
