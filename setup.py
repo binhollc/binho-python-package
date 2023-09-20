@@ -66,7 +66,7 @@ setup(
         "hidapi",
         "requests",
     ],
-    data_files=[("/binho/assets", [])],
+    data_files=[("binho/assets", [])],
     description="Python package for Binho USB host adapter products",
     long_description_content_type="text/markdown",
     long_description=read("README.md"),

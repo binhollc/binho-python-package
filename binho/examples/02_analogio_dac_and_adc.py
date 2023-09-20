@@ -15,15 +15,15 @@ from binho.errors import DeviceNotFoundError
 
 # Included for demonstrating the various ways to find and connect to Binho host adapters
 # be sure to change them to match you device ID / comport
-targetComport = "COM3"
-targetDeviceID = "0x1c4780b050515950362e3120ff141c2a"
+targetComport = "/dev/ttyACM0"
+# targetDeviceID = "0x1c4780b050515950362e3120ff141c2a"
 
 # Start by finding the desired host adapter and connecting to it
 # wrap this with try/except to elegantly capture any connection errors
 try:
 
     # grab the first device found the system finds
-    binho = binhoHostAdapter()
+    binho = binhoHostAdapter(port=targetComport)
 
     # When working with multiple host adapters connected to the same system
     # you can use any of the following methods to connect:
